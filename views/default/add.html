@@ -1,0 +1,302 @@
+{{block head}}
+<script>
+{{if 'init_author' in locals():}}
+var initAuthor = '{{=init_author}}';
+var initAuthorName = "{{=sanitize(init_author_name)}}";
+{{else:}}
+var initAuthor = '';
+var initAuthorName = '';
+{{pass}}
+{{if 'init_work' in locals():}}
+var initWork = '{{=init_work}}';
+var initWorkName = "{{=sanitize(init_work_name)}}";
+{{else:}}
+var initWork = '';
+var initWorkName = '';
+{{pass}}
+</script>
+{{end}}
+{{extend 'layout.html'}}
+
+<div class="row">
+	<div class="col-md-6 col-md-offset-2 col-sm-8 col-sm-offset-2 
+	col-xs-10 col-xs-offset-1">
+		<form class="form-horizontal add-form" role="form" autocomplete="off"
+		style="display:none;">
+			
+			<div class="form-group enter-quote">
+				<div class="col-md-9 col-md-offset-3">
+					<textarea class="form-control input-lg" rows="6" name="Text"
+					placeholder="Enter the quote..." id="QUOTE-Text"></textarea>
+				</div>
+			</div>
+			
+			<div class="author-lookup">
+				<div class="col-md-8 col-md-offset-3">
+					<div class="form-group">
+						<input type="search" class="form-control input-lg" 
+						id="QUOTE-author-lookup" placeholder="Author"></input>
+						<div class="results"></div>
+					</div>
+				</div>
+				<div class="col-md-1 searching text-center">
+				</div>
+			</div><!--/.author-lookup -->
+
+			<div class="col-md-8 col-md-offset-3 author-results">
+				<div class="row">
+					<h4>Search results <span class="searching pull-right"></span></h4>
+				</div>
+				<div class="row">
+					<div class="list-group">
+						<a class="list-group-item new-item" data-author-id="0"></a>
+					</div>
+				</div>
+			</div><!--/.author-results -->
+
+			<div class="add-author">
+				<div class="form-group">
+					<label for="AUTHOR_TR-DisplayName" class="col-md-3 control-label">
+						Name to display
+					</label>
+					<div class="col-md-9">
+						<input type="text" class="form-control" id="AUTHOR_TR-DisplayName"
+						placeholder="" autocomplete="off" name="DisplayName"></input>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="AUTHOR_TR-FirstName" class="col-md-3 control-label">
+						Full name
+					</label>
+					<div class="col-md-3">
+						<input type="text" class="form-control" id="AUTHOR_TR-FirstName"
+						placeholder="" autocomplete="off" name="FirstName"></input>
+					</div>
+					<div class="col-md-2">
+						<input type="text" class="form-control" id="AUTHOR_TR-MiddleName"
+						placeholder="" autocomplete="off" name="MiddleName"></input>
+					</div>
+					<div class="col-md-4">
+						<input type="text" class="form-control" id="AUTHOR_TR-LastName"
+						placeholder="" autocomplete="off" name="LastName"></input>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="AUTHOR_TR-AKA" class="col-md-3 control-label">
+							Also known as
+					</label>
+					<div class="col-md-8">
+							<input type="text" class="form-control" id="AUTHOR_TR-AKA"
+							placeholder="" autocomplete="off" name="AKA"></input>
+					</div>
+					<div class="col-md-1">
+						<button class="btn btn-info" type="button">
+							<i class="fa fa-plus"></i>
+						</button>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="AUTHOR_TR-Biography" class="col-md-3 control-label">
+							Biography
+					</label>
+					<div class="col-md-9">
+						<textarea class="form-control" id="AUTHOR_TR-Biography" rows="3"
+						placeholder="" name="Biography"></textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="AUTHOR_TR-WikipediaLink" class="col-md-3 control-label">
+							Wikipedia page
+					</label>
+					<div class="col-md-9">
+						<div class="input-group">
+							<input type="url" class="form-control" id="AUTHOR_TR-WikipediaLink"
+							placeholder=""
+							name="AuthorWikipediaLink"></input>
+							<span class="input-group-btn">
+								<button class="btn btn-info wiki-link" type="button">
+									<i class="fa fa-external-link"></i>
+								</button>
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="AUTHOR-YearBorn" class="col-md-3 col-sm-3 control-label">Dates</label>
+					<div class="col-md-2 col-sm-3">
+						<input type="text" class="form-control" id="AUTHOR-YearBorn"
+						placeholder="" name="YearBorn"></input>
+					</div>
+					<label for="AUTHOR-YearDied" class="col-md-1 col-sm-1 control-label"
+						style="text-align:center;">&mdash;</label>
+					<div class="col-md-2 col-sm-3">
+						<input type="text" class="form-control" id="AUTHOR-YearDied"
+						placeholder="" name="YearDied"></input>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-2 col-md-offset-3">
+						<button type="submit" class="btn btn-primary" id="author-submit">
+						Add author</button> 
+					</div>
+					<div class="col-md-2 col-md-offset-1">
+						<button type="button" class="btn btn-default" id="author-cancel">
+						Cancel</button> 
+					</div>
+				</div>
+			</div><!--/.add-author -->
+
+			<div class="work-lookup">
+				<div class="col-md-8 col-md-offset-3">
+					<div class="form-group">
+						<input type="search" class="form-control input-lg" 
+						id="QUOTE-work-lookup" placeholder="Source"></input>
+						<div class="results"></div>
+					</div>
+				</div>
+				<div class="col-md-1 searching text-center">
+				</div>
+			</div><!--/.lookup-work -->
+
+			<div class="col-md-8 col-md-offset-3 work-results">
+				<div class="row">
+					<h4>Search results<span class="searching pull-right"></span></h4>
+				</div>
+				<div class="row">
+					<div class="list-group">
+						<a class="list-group-item new-item" data-work-id="0"></a>
+					</div>
+				</div>
+			</div><!--/.author-results -->
+
+			<div class="add-work">
+				<div class="form-group">
+					<label for="WORK_TR-WorkName" class="col-md-3 control-label">
+						Name of work
+					</label>
+					<div class="col-md-9">
+						<input type="text" class="form-control" id="WORK_TR-WorkName"
+						placeholder="" autocomplete="off" name="WorkName">
+						</input>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="WORK_TR-WorkSubtitle" class="col-md-3 control-label">
+						Subtitle
+					</label>
+					<div class="col-md-9">
+						<input type="text" class="form-control" id="WORK_TR-WorkSubtitle"
+						placeholder="" name="WorkSubtitle"></input>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="WORK_TR-WorkDescription" class="col-md-3 control-label">
+						Description of work
+					</label>
+					<div class="col-md-9">
+						<textarea class="form-control" id="WORK_TR-WorkDescription"
+						placeholder="" rows="3"
+						name="WorkDescription"></textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="WORK_TR-WikipediaLink" class="col-md-3 control-label">
+							Wikipedia page
+					</label>
+					<div class="col-md-9">
+						<div class="input-group">
+							<input type="url" class="form-control" id="WORK_TR-WikipediaLink"
+							placeholder=""
+							name="WorkWikipediaLink"></input>
+							<span class="input-group-btn">
+								<button class="btn btn-info wiki-link" type="button">
+									<i class="fa fa-external-link"></i>
+								</button>
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="WORK-YearPublished" class="col-md-3 control-label">
+						Publication year</label>
+					<div class="col-md-2">
+						<input type="text" class="form-control" id="WORK-YearPublished"
+						placeholder="" name="YearPublished"></input>
+					</div>
+					<label for="WORK-YearWritten" class="col-md-5 control-label">
+						Year written (if different)</label>
+					<div class="col-md-2">
+						<input type="text" class="form-control" id="WORK-YearWritten"
+						placeholder="" name="YearWritten"></input>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-2 col-md-offset-3">
+						<button type="submit" class="btn btn-primary" id="work-submit">
+						Add work</button> 
+					</div>
+					<div class="col-md-2 col-md-offset-1">
+						<button type="button" class="btn btn-default" id="work-cancel">
+						Cancel</button> 
+					</div>
+				</div>
+			</div><!--/.add-work -->
+
+			<div class="add-quote">
+				<div class="form-group">					
+					<label for="QUOTE-QuoteLanguageID" class="col-md-3 control-label">Language</label>
+					<div class="col-md-4">
+						<select class="form-control" id="QUOTE-QuoteLanguageID"
+						 name="QuoteLanguageID">
+							{{for lang in langs:}}
+						  <option value="{{=lang['id']}}">
+						  	{{=lang['NativeName']}}
+						  </option>
+						  {{pass}}
+						</select>
+					</div>
+					<div class="col-md-4 col-md-offset-1 checkbox">
+					  <label>
+					    <input type="checkbox" id="QUOTE-IsOriginalLanguage"
+					     name="IsOriginalLanguage" checked>Original language</label>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-8 col-md-offset-3">
+						<textarea class="form-control" id="QUOTE-Note" rows="2"
+							placeholder="Context or additional information about this quote"
+							 name="Note"></textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-2 col-md-offset-3">
+						<button type="submit" class="btn btn-primary" id="quote-submit">
+						Add quote</button> 
+					</div>
+					<div class="col-md-2 col-md-offset-1">
+						<button type="button" class="btn btn-default disabled" 
+						id="quote-cancel">
+						Cancel</button> 
+					</div>
+				</div>
+			</div><!--/.add-quote -->
+
+		</form>
+	</div>
+</div>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+{{block tail}}
+<script src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
+<script src="{{=URL('static','js/add.js')}}"></script>
+{{end}}

@@ -1,0 +1,173 @@
+<!--[if HTML5]><![endif]-->
+<!DOCTYPE html>
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]><html class="ie ie6 ie-lte9 ie-lte8 ie-lte7 no-js" lang="{{=T.accepted_language or 'en'}}"> <![endif]-->
+<!--[if IE 7]><html class="ie ie7 ie-lte9 ie-lte8 ie-lte7 no-js" lang="{{=T.accepted_language or 'en'}}"> <![endif]-->
+<!--[if IE 8]><html class="ie ie8 ie-lte9 ie-lte8 no-js" lang="{{=T.accepted_language or 'en'}}"> <![endif]-->
+<!--[if IE 9]><html class="ie9 ie-lte9 no-js" lang="{{=T.accepted_language or 'en'}}"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js" lang="{{=T.accepted_language or 'en'}}"> <!--<![endif]-->
+<head>
+<title>{{=response.title or request.application}}</title>
+  <!--[if !HTML5]>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge{{=not request.is_local and ',chrome=1' or ''}}">
+  <![endif]-->
+  <!-- www.phpied.com/conditional-comments-block-downloads/ -->
+  <!-- Always force latest IE rendering engine
+       (even in intranet) & Chrome Frame
+       Remove this if you use the .htaccess -->
+	   
+  <meta charset="utf-8" />
+
+  <meta name="application-name" content="{{=request.application}}" />
+
+  <!-- Don't forget to set your site up: http://google.com/webmasters -->
+  <meta name="google-site-verification" content="" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="shortcut icon" href="{{=URL('static','images/favicon.ico')}}" type="image/x-icon">
+  <link rel="apple-touch-icon" href="{{=URL('static','images/favicon.ico')}}">
+
+  <script src="{{=URL('static','js/modernizr.custom.js')}}"></script>
+  <script>
+  var user = {{if auth.user:}}{{=auth.user.id}}{{else:}}0{{pass}};
+  </script>
+  <!-- include stylesheets -->
+  {{
+  response.files.insert(0,URL('static','css/bootstrap.css'))
+  response.files.insert(1,URL('static','css/custom.css'))
+  response.files.insert(2,URL('static','css/font-awesome-4.1.0/css/font-awesome.min.css'))
+  }}
+
+  {{include 'web2py_ajax.html'}}
+
+  {{block head}}{{end}}
+
+</head>
+
+<body>
+  <div class="flash alert centered alert-dismissable">{{=response.flash or ''}}</div>
+  <!-- Navbar ================================================== -->
+  <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="{{=URL('default', 'show')}}"><i class="fa fa-pencil-square-o fa-small"></i> Pindar</a>
+      </div>
+
+      <div class="collapse navbar-collapse" id="navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li>
+            <a href="{{=URL('default', 'show')}}">Quotes</a>
+          </li>
+          <li>
+            <a href="{{=URL('default', 'authors')}}">Authors</a>
+          </li>
+          <li>
+            <a href="{{=URL('default', 'works')}}">Works</a>
+          </li>
+          <li class="dropdown">
+            <a href="/Pindar/default/data/tables" class="dropdown-toggle" data-toggle="dropdown">Manage</a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="{{=URL('manage', 'quotes')}}">Quotes</a></li>
+              <li><a href="{{=URL('manage', 'authors')}}">Authors</a></li>
+              <li><a href="{{=URL('manage', 'works')}}">Works</a></li>
+              <li><a href="{{=URL('manage', 'connections')}}">Connections</a></li>
+              <li><a href="{{=URL('manage', 'languages')}}">Languages</a></li>
+              <li><a href="{{=URL('manage', 'users')}}">Users</a></li>
+              <li><a href="{{=URL('manage', 'flags')}}">Flags</a></li>
+              <li><a href="{{=URL('manage', 'ratings')}}">Ratings</a></li>
+              <li><a href="{{=URL('manage', 'comments')}}">Comments</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="{{=URL('default', 'add')}}"><i class="fa fa-plus"></i> Add Quote</a>
+          </li>
+        </ul>
+        <form class="navbar-form navbar-left" role="search">
+          <div class="form-group">
+            <div class="btn-group search-box">
+              <input type="search" class="form-control" 
+              placeholder="Search everything">
+              <span class="glyphicon glyphicon-remove" style="display:none;"></span>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="display:none;">Search</button>
+        </form>
+        <!-- to customize this, look at tools.py:1467 -->
+        <ul class="nav navbar-nav navbar-right">
+          {{='auth' in globals() and auth.navbar(mode="dropdown") or ''}}
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
+
+  <div class="container">
+    <!-- Masthead ================================================== 
+    <header class="mastheader row" id="header">
+      {{if response.title:}}
+        <div class="span12">
+            <div class="page-header">
+                <h1>
+                    {{=response.title}}
+                    <small>{{=response.subtitle or ''}}</small>
+                </h1>
+            </div>
+        </div>
+	{{pass}}
+    </header>-->
+
+    {{include}}
+
+    <!-- Footer ================================================== -->
+    <div class="row">
+        <footer class="footer col-md-12" id="footer">
+            <div class="footer-content">
+                {{block footer}} <!-- this is default footer -->
+                <!--<div class="copyright pull-left">{{=T('Copyright')}} &#169; {{=request.now.year}}</div>-->
+                {{end}}
+            </div>
+        </footer>
+    </div>
+
+  </div> <!-- /container -->
+
+  <!-- The javascript =============================================
+       (Placed at the end of the document so the pages load faster) -->
+  <script src="{{=URL('static','js/bootstrap.js')}}"></script>
+  <script src="{{=URL('static','js/web2py_bootstrap.js')}}"></script>
+  <script src="{{=URL('static','js/tools.js')}}"></script>
+  <script src="{{=URL('static','js/searchify.js')}}"></script>
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
+  <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.js"></script>
+  <!--[if lt IE 7 ]>
+      <script src="{{=URL('static','js/dd_belatedpng.js')}}"></script>
+      <script> DD_belatedPNG.fix('img, .png_bg'); //fix any <img> or .png_bg background-images </script>
+      <![endif]-->
+  {{if 'search' in locals():}}
+  <script>
+    $(document).ready(function(){
+      var input = $('#textQuery');
+      input.val('{{=search}}');
+      input.trigger('input');
+      input.focus();
+    });
+  </script>
+  {{pass}}
+  {{block tail}}{{end}}
+  {{if response.google_analytics_id:}}
+  <script src="{{=URL('static','js/analytics.min.js')}}"></script>
+  <script type="text/javascript">
+  analytics.initialize({
+    'Google Analytics':{trackingId:'{{=response.google_analytics_id}}'} 
+  });</script>
+  {{pass}}
+</body>
+</html>
+

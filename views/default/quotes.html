@@ -1,0 +1,114 @@
+{{extend 'layout.html'}}
+{{block head}}
+<script>
+// check for request vars
+{{if 'request_flag_type' in locals():}}
+var requestFlagType = {{=request_flag_type}};
+{{pass}}
+{{if 'request_comments' in locals():}}
+var requestComments = {{=request_comments}};
+{{pass}}
+</script>
+{{end}}
+
+
+
+<div class="row">
+	<div class="col-md-8 col-md-offset-2">
+		<div class="object quote" data-id="{{=q.QUOTE.id}}" 
+		data-comments="{{=comment_count}}" 
+		data-rating="{{if not rating == None:}}{{=rating}}{{else:}}0{{pass}}"
+		data-rating-count="{{if not rating_count == None:}}{{=rating_count}}{{else:}}0{{pass}}"
+		data-rating-user="{{=rating_user}}">
+			<div class="object-data panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Quote</h3>
+				</div>
+				<div class="panel-body">
+					<p class="lead">
+						{{=sanitize(q.QUOTE.Text)}}
+					</p>
+					<p class="text-center">
+						<a class="btn btn-primary" 
+						href="/Pindar/default/authors/{{=q.AUTHOR_TR.id}}">
+							{{=sanitize(q.AUTHOR_TR.DisplayName)}}
+						</a>
+						<a class="btn btn-primary" 
+						href="/Pindar/default/works/{{=q.WORK_TR.id}}">
+							{{=sanitize(q.WORK_TR.WorkName)}}
+						</a>
+					</p>
+
+					<div class="object-actions">
+					</div>
+				</div>
+			</div><!--/.object-data -->
+
+			<div class="panel object-results" style="display:none;">
+				<br>
+				{{if auth.user:}}
+				<div class="row edit" style="display:none;">
+					<div class="col-md-10 col-md-offset-1">
+						<form class="form-horizontal edit-form" role="form" autocomplete="off">
+							<div class="form-group enter-quote">
+								<div class="col-md-12">
+									<textarea class="form-control" rows="4" name="Text"
+									placeholder="Enter the quote..." id="QUOTE-Text">{{=q.QUOTE.Text}}</textarea>
+								</div>
+							</div>
+							<div class="form-group">					
+								<label for="QUOTE-QuoteLanguageID" class="col-md-3 control-label">Language</label>
+								<div class="col-md-4">
+									<select class="form-control" id="QUOTE-QuoteLanguageID"
+									 name="QuoteLanguageID" value="{{=q.QUOTE.QuoteLanguageID}}">
+										{{for lang in langs:}}
+									  <option value="{{=lang['id']}}">
+									  	{{=lang['NativeName']}}
+									  </option>
+									  {{pass}}
+									</select>
+								</div>
+								<div class="col-md-4 col-md-offset-1 checkbox">
+								  <label>
+								    <input type="checkbox" id="QUOTE-IsOriginalLanguage"
+								     name="IsOriginalLanguage" value={{=q.QUOTE.IsOriginalLanguage}}>Original language</label>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-md-12">
+									<textarea class="form-control" id="QUOTE-Note" rows="2"
+										placeholder="Context or additional information about this quote"
+										 name="Note">{{=q.QUOTE.Note}}</textarea>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-md-2 col-md-offset-4">
+									<button type="submit" class="btn btn-primary" id="edit-submit">
+									Submit</button> 
+								</div>
+								<div class="col-md-2">
+									<button type="button" class="btn btn-default cancel" 
+									id="quote-cancel">
+									Cancel</button> 
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+				{{pass}}		
+			</div><!--/.object-results -->
+		</div><!--/.object -->
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		<br>
+		
+		{{=response.toolbar()}}
+	</div>
+</div><!--/.row -->
+{{block extrajs}}
+<script type="text/javascript" src='/Pindar/static/js/quotify.js'></script>
+<script type="text/javascript" src='/Pindar/static/js/quotes.js'></script>
+{{end}}

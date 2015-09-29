@@ -1,0 +1,122 @@
+{{extend 'layout.html'}}
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
+  
+<!-- jQuery -->
+<script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+  
+<!-- DataTables -->
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.js"></script>
+
+<h2>{{=T( request.args(0).replace('_',' ').capitalize() )}}</h2>
+<div id="web2py_user_form">
+{{=form}}
+</div>
+<h3>Quotes added by {{=auth.user.username}}</h3>
+<table id="mytable" class="display" width="100%">
+	<thead>
+		<tr>
+			<td><b>Text</b></td>
+			<td><b>Author</b></td>
+			<td><b>Work</b></td>
+			<td><b>Date Added</b></td>
+		</tr>
+	</thead>
+	<tbody>
+		{{for row in quotes_added:}}
+		<tr>
+			<td>{{if len(row.QUOTE.Text) > 500:}}
+			{{=row.QUOTE.Text[:500]}}...
+			{{else:}}
+			{{=row.QUOTE.Text}}
+			{{pass}}
+			</td>
+			<td>{{=row.AUTHOR_TR.DisplayName}}</td>
+			<td>{{=row.WORK_TR.WorkName}}</td>
+			<td>{{=row.QUOTE.created_on}}</td>
+		</tr>
+		{{pass}}
+	</tbody>
+</table>
+<hr>
+<h3>Authors added by {{=auth.user.username}}</h3>
+<table id="mytable" class="display" width="100%">
+	<thead>
+		<tr>
+			<td><b>Name</b></td>
+			<td><b>Year Born</b></td>
+			<td><b>Year Died</b></td>
+			<td><b>Date Added</b></td>
+		</tr>
+	</thead>
+	<tbody>
+		{{for row in authors_added:}}
+		<tr>
+			<td>{{=row.AUTHOR_TR.DisplayName}}</td>
+			<td>{{=row.AUTHOR.YearBorn}}</td>
+			<td>{{=row.AUTHOR.YearDied}}</td>
+			<td>{{=row.AUTHOR_TR.created_on}}</td>
+		</tr>
+		{{pass}}
+	</tbody>
+</table>
+<hr>
+<h3>Works added by {{=auth.user.username}}</h3>
+<table id="mytable" class="display" width="100%">
+	<thead>
+		<tr>
+			<td><b>Work</b></td>
+			<td><b>Year Published</b></td>
+			<td><b>Author</b></td>
+			<td><b>Date Added</b></td>
+		</tr>
+	</thead>
+	<tbody>
+		{{for row in works_added:}}
+		<tr>
+			<td>{{=row.WORK_TR.WorkName}}</td>
+			<td>{{=row.WORK.YearPublished}}</td>
+			<td>{{=row.AUTHOR_TR.DisplayName}}</td>
+			<td>{{=row.WORK_TR.created_on}}</td>
+		</tr>
+		{{pass}}
+	</tbody>
+</table>
+<hr>
+<h3>Quotes edited by {{=auth.user.username}}</h3>
+<table id="mytable" class="display" width="100%">
+	<thead>
+		<tr>
+			<td><b>Text</b></td>
+			<td><b>Author</b></td>
+			<td><b>Work</b></td>
+			<td><b>Date Edited</b></td>
+		</tr>
+	</thead>
+	<tbody>
+		{{for row in quotes_edited:}}
+		<tr>
+			<td>{{=row.QUOTE.Text}}</td>
+			<td>{{=row.AUTHOR_TR.DisplayName}}</td>
+			<td>{{=row.WORK_TR.WorkName}}</td>
+			<td>{{=row.QUOTE.modified_on}}</td>
+		</tr>
+		{{pass}}
+	</tbody>
+</table>
+<hr>
+<script>
+$(document).ready(function(){
+	$('.display').DataTable({
+		"columns": [
+			{"width": "60%"},
+			{"width": "15%"},
+			{"width": "15%"},
+			null
+		],
+		"ordering": false,
+		"dom": '<<"clear"f>p<t>ip>'
+	});
+});
+</script>
+

@@ -1,0 +1,5 @@
+# don't track sessions or errors
+sessions/
+errors/
+databases/
+*.pyc

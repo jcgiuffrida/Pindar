@@ -1,0 +1,192 @@
+{{extend 'layout.html'}}
+{{block head}}{{end}}
+
+<div class="row">
+	<div class="col-md-8 col-md-offset-2">
+		{{if 'work' in locals():}}
+		<br>
+		{{for w in work:}}
+		{{try:}}
+			{{rating = ratings[0]['_extra']['AVG(RATING.Rating)']}}
+			{{rating_count = ratings[0]['_extra']['COUNT(RATING.Rating)']}}
+		{{except:}}
+			{{rating = 0}}
+			{{rating_count = 0}}
+		{{pass}}
+		<div class="object work" data-work-tr-id="{{=w.WORK_TR.id}}" 
+		data-work-id="{{=w.WORK.id}}" data-id="{{=w.WORK_TR.id}}"
+		data-rating="{{=rating}}" data-rating-count="{{=rating_count}}">
+			<div class="object-data panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Work</h3>
+				</div>
+				<div class="panel-body">
+					<p class="lead text-center">{{=sanitize(w.WORK_TR.WorkName)}}</p>
+					<p class="text-center">{{if w.WORK.YearPublished:}}Published {{=w.WORK.YearPublished}}{{pass}}</p>
+					<p class="text-center">
+						{{for a in authors:}}
+						<a class="btn btn-primary" href="/Pindar/default/authors/{{=a.AUTHOR_TR.id}}">
+							{{=sanitize(a.AUTHOR_TR.DisplayName)}}
+						</a>
+						{{pass}}
+					</p>
+					<p class="small">{{=sanitize(w.WORK_TR.WorkDescription)}}</p>
+					<div class="object-actions">
+						{{if w.WORK_TR.WikipediaLink:}}
+							<a class="btn btn-default pull-right" href="{{=w.WORK_TR.WikipediaLink}}" target="_blank">Wikipedia</a>
+						{{pass}}
+					</div>
+				</div>
+			</div><!--/.panel -->
+			<div class="panel object-results" style="display:none;">
+				<br>
+				{{if auth.user:}}
+				<div class="row edit" style="display:none;">
+					<div class="col-md-10 col-md-offset-1">
+						<form class="form-horizontal edit-form" role="form" autocomplete="off">
+							<div class="form-group">
+								<label for="WORK_TR-WorkName" class="col-md-3 control-label">
+									Name of work
+								</label>
+								<div class="col-md-9">
+									<input type="text" class="form-control" id="WORK_TR-WorkName"
+									placeholder="Romeo and Juliet" autocomplete="off" name="WorkName"
+									value="{{=w.WORK_TR.WorkName}}">
+									</input>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="WORK_TR-WorkSubtitle" class="col-md-3 control-label">
+									Subtitle
+								</label>
+								<div class="col-md-9">
+									<input type="text" class="form-control" id="WORK_TR-WorkSubtitle"
+									placeholder="A Tragic Tale" name="WorkSubtitle"
+									value="{{=w.WORK_TR.WorkSubtitle}}"></input>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="WORK_TR-WorkDescription" class="col-md-3 control-label">
+									Description of work
+								</label>
+								<div class="col-md-9">
+									<textarea class="form-control" id="WORK_TR-WorkDescription"
+									placeholder="Romeo and Juliet is a sadfest." rows="3"
+									name="WorkDescription">{{=w.WORK_TR.WorkDescription}}</textarea>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="WORK_TR-WikipediaLink" class="col-md-3 control-label">
+										Wikipedia page
+								</label>
+								<div class="col-md-9">
+									<div class="input-group">
+										<input type="url" class="form-control" id="WORK_TR-WikipediaLink"
+										placeholder="http://en.wikipedia.org/wiki/Romeo_and_Juliet"
+										name="WorkWikipediaLink"
+										value="{{=w.WORK_TR.WikipediaLink}}"></input>
+										<span class="input-group-btn">
+											<button class="btn btn-info wiki-link" type="button">
+												<i class="fa fa-external-link"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="WORK-YearPublished" class="col-md-3 control-label">
+									Publication year</label>
+								<div class="col-md-2">
+									<input type="text" class="form-control" id="WORK-YearPublished"
+									placeholder="1597" name="YearPublished"
+									value="{{if not w.WORK.YearPublished==None:}}{{=w.WORK.YearPublished}}{{pass}}"></input>
+								</div>
+								<label for="WORK-YearWritten" class="col-md-5 control-label">
+									Year written (if different)</label>
+								<div class="col-md-2">
+									<input type="text" class="form-control" id="WORK-YearWritten"
+									placeholder="1595" name="YearWritten"
+									value="{{if not w.WORK.YearWritten==None:}}{{=w.WORK.YearWritten}}{{pass}}"></input>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-md-2 col-md-offset-3">
+									<button type="submit" class="btn btn-primary" id="edit-submit">
+									Submit</button> 
+								</div>
+								<div class="col-md-2">
+									<button type="button" class="btn btn-default cancel" 
+									id="work-cancel">
+									Cancel</button> 
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+				{{pass}}
+			</div><!--/.object-results -->
+		</div><!--/.object -->
+		{{pass}}
+		<br/>
+		<br/>
+
+
+		<div class="row">
+			<div class="col-md-7">
+				<h4>Quotes by {{for w in work:}}{{=sanitize(w.WORK_TR.WorkName)}}{{pass}}
+				</h4>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<select class="form-control" id="sortOrder">
+						<option value="rating">Sort by rating</option>
+						<option value="dateSubmitted">Sort by newest</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-2">
+				<a href="/Pindar/default/add?work={{=w.WORK_TR.id}}" 
+				class="btn btn-primary pull-right">Add a quote</a>
+			</div>
+		</div>
+		<div class="row quotes-by-work"></div>
+
+
+		{{else:}}
+		<div class="row">
+			<div class="col-md-4">
+				<h3>All Works</h3>
+			</div>
+			<div class="col-md-4">
+				<br>
+				<div class="form-group search-box">
+					<input type="search" class="form-control works" id="textQuery" 
+					placeholder="Search works">
+					<span class="glyphicon glyphicon-remove"></span>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-8 show-works default">
+			</div>
+			<div class="col-md-8 search-works search" style="display:none;"></div>
+			</div>
+		</div>
+		{{pass}}
+		<hr>
+	</div>
+</div><!--/.row -->
+
+		<br/>
+<div class="row">
+	<div class="col-md-8 col-md-offset-2">
+	{{=response.toolbar()}}
+</div>
+</div>
+
+
+
+{{block tail}}
+<script src="{{=URL('static','js/works.js')}}"></script>
+<script src="{{=URL('static','js/quotify.js')}}"></script>
+{{end}}

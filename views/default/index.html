@@ -1,0 +1,22 @@
+{{extend 'layout.html'}}
+<h1>Menu<h1>
+Manage {{=A('Quotes', _href='/PindarApp/manage/quotes')}}, {{=A('Authors', _href='/PindarApp/manage/authors')}}, and {{=A('Works', _href='/PindarApp/manage/works')}}<br/>
+{{=A('Add Quote', _href='/PindarApp/manage/add_quote')}}
+<div id="myid"></div>
+
+<h2>Available quotes</h2>
+{{=quotes}}
+<h2>Available authors</h2>
+{{=authors}}
+{{=authors_tr}}
+<h2>Available works</h2>
+{{=works}}
+{{=works_tr}}
+<h2>Available users</h2>
+{{=users}}
+<h2>Available languages</h2>
+{{=languages}}
+<h2>Available translations</h2>
+{{=translations}}
+<h2>Diagnostics</h2>
+{{=response.toolbar()}}

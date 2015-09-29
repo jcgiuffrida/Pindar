@@ -1,0 +1,216 @@
+{{extend 'layout.html'}}
+{{block head}}{{end}}
+
+<div class="row">
+	<div class="col-md-8 col-md-offset-2">
+		{{if 'author' in locals():}}
+		<br>
+		{{for a in author:}}
+		{{rating_count = ratings[0]['_extra']['COUNT(RATING.Rating)']}}
+		{{if rating_count == 0:}}
+			{{rating = 0}}
+		{{else:}}	
+			{{rating = ratings[0]['_extra']['AVG(RATING.Rating)']}}
+		{{pass}}
+		<div class="object author" data-author-tr-id="{{=a.AUTHOR_TR.id}}" 
+		data-author-id="{{=a.AUTHOR.id}}" data-id="{{=a.AUTHOR_TR.id}}"
+		data-rating="{{=rating}}" data-rating-count="{{=rating_count}}">
+			<div class="object-data panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Author</h3>
+				</div>
+				<div class="panel-body">
+					<p class="lead text-center">{{=sanitize(a.AUTHOR_TR.DisplayName)}}</p>
+					<p class="text-center">{{if a.AUTHOR.YearBorn:}}
+						{{if a.AUTHOR.YearDied:}}({{=a.AUTHOR.YearBorn}} - {{=a.AUTHOR.YearDied}})
+						{{else:}}(b. {{=a.AUTHOR.YearBorn}}){{pass}}
+						{{else:}}{{if a.AUTHOR.YearDied:}}(d. {{=a.AUTHOR.YearDied}}){{pass}}{{pass}}
+					</p>
+					<p class="small">{{=sanitize(a.AUTHOR_TR.Biography)}}</p>
+
+					<div class="object-actions">
+						{{if a.AUTHOR_TR.WikipediaLink:}}
+							<a class="btn btn-default pull-right" 
+							href="{{=a.AUTHOR_TR.WikipediaLink}}" 
+							target="_blank">Wikipedia</a>
+						{{pass}}
+					</div>
+				</div>
+			</div><!--/.panel -->
+			<div class="panel object-results" style="display:none;">
+				<br>
+				{{if auth.user:}}
+				<div class="row edit" style="display:none;">
+					<div class="col-md-10 col-md-offset-1">
+						<form class="form-horizontal edit-form" role="form" autocomplete="off">
+							<div class="form-group">
+								<label for="AUTHOR_TR-DisplayName" class="col-md-3 control-label">
+									Name to display
+								</label>
+								<div class="col-md-9">
+									<input type="text" class="form-control" id="AUTHOR_TR-DisplayName"
+									placeholder="The Bard" autocomplete="off" name="DisplayName" 
+									value="{{=a.AUTHOR_TR.DisplayName}}"></input>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="AUTHOR_TR-FirstName" class="col-md-3 control-label">
+									Full name
+								</label>
+								<div class="col-md-3">
+									<input type="text" class="form-control" id="AUTHOR_TR-FirstName"
+									placeholder="William" autocomplete="off" name="FirstName" 
+									value="{{=a.AUTHOR_TR.FirstName}}"></input>
+								</div>
+								<div class="col-md-2">
+									<input type="text" class="form-control" id="AUTHOR_TR-MiddleName"
+									placeholder="X" autocomplete="off" name="MiddleName" 
+									value="{{=a.AUTHOR_TR.MiddleName}}"></input>
+								</div>
+								<div class="col-md-4">
+									<input type="text" class="form-control" id="AUTHOR_TR-LastName"
+									placeholder="Shakespeare" autocomplete="off" name="LastName" 
+									value="{{=a.AUTHOR_TR.LastName}}"></input>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="AUTHOR_TR-AKA" class="col-md-3 control-label">
+										Also known as
+								</label>
+								<div class="col-md-8">
+										<input type="text" class="form-control" id="AUTHOR_TR-AKA"
+										placeholder="Edward de Vere" autocomplete="off" name="AKA" 
+									value="{{=a.AUTHOR_TR.AKA}}"></input>
+								</div>
+								<div class="col-md-1">
+									<button class="btn btn-info" type="button">
+										<i class="fa fa-plus"></i>
+									</button>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="AUTHOR_TR-Biography" class="col-md-3 control-label">
+										Biography
+								</label>
+								<div class="col-md-9">
+									<textarea class="form-control" id="AUTHOR_TR-Biography" rows="3"
+									placeholder="William Shakespeare was the shit." name="Biography">{{=a.AUTHOR_TR.Biography}}
+									</textarea>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="AUTHOR_TR-WikipediaLink" class="col-md-3 control-label">
+										Wikipedia page
+								</label>
+								<div class="col-md-9">
+									<div class="input-group">
+										<input type="url" class="form-control" id="AUTHOR_TR-WikipediaLink"
+										placeholder="http://en.wikipedia.org/wiki/William_Shakespeare"
+										name="AuthorWikipediaLink" 
+									value="{{=a.AUTHOR_TR.WikipediaLink}}"></input>
+										<span class="input-group-btn">
+											<button class="btn btn-info wiki-link" type="button">
+												<i class="fa fa-external-link"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label for="AUTHOR-YearBorn" class="col-md-3 col-sm-3 control-label">Dates</label>
+								<div class="col-md-2 col-sm-3">
+									<input type="text" class="form-control" id="AUTHOR-YearBorn"
+									placeholder="1564" name="YearBorn" 
+									value="{{if not a.AUTHOR.YearBorn==None:}}{{=a.AUTHOR.YearBorn}}{{pass}}"></input>
+								</div>
+								<label for="AUTHOR-YearDied" class="col-md-1 col-sm-1 control-label"
+									style="text-align:center;">&mdash;</label>
+								<div class="col-md-2 col-sm-3">
+									<input type="text" class="form-control" id="AUTHOR-YearDied"
+									placeholder="1616" name="YearDied" 
+									value="{{if not a.AUTHOR.YearDied==None:}}{{=a.AUTHOR.YearDied}}{{pass}}"></input>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-md-2 col-md-offset-3">
+									<button type="button" class="btn btn-primary" id="edit-submit">
+									Submit</button> 
+								</div>
+								<div class="col-md-2">
+									<button type="button" class="btn btn-default cancel" 
+									id="author-cancel">
+									Cancel</button> 
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+				{{pass}}
+			</div><!--/.object-results -->
+		</div><!--/.object -->
+		{{pass}}
+		<br/>
+		<br/>
+
+
+		<h4>Works by {{for a in author:}}{{=sanitize(a.AUTHOR_TR.DisplayName)}}{{pass}}</h4>
+		<div class="row">
+			<div class="col-md-8">
+				<div class="row works-by-author">
+				</div>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+			<div class="col-md-7">
+				<h4>Quotes by {{for a in author:}}{{=sanitize(a.AUTHOR_TR.DisplayName)}}{{pass}}
+				</h4>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<select class="form-control" id="sortOrder">
+						<option value="rating">Sort by rating</option>
+						<option value="dateSubmitted">Sort by newest</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-2">
+				<a href="/Pindar/default/add?author={{=a.AUTHOR_TR.id}}" 
+				class="btn btn-primary pull-right">Add a quote</a>
+			</div>
+		</div>
+		<div class="row quotes-by-author"></div>
+
+		<hr>
+
+
+		{{else:}}
+		<div class="row">
+			<div class="col-md-4">
+				<h3>All Authors</h3>
+			</div>
+			<div class="col-md-4">
+				<br>
+				<div class="form-group search-box">
+					<input type="search" class="form-control authors" id="textQuery" 
+					placeholder="Search authors">
+					<span class="glyphicon glyphicon-remove"></span>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-8 show-authors default">
+			</div>
+			<div class="col-md-8 search-authors search" style="display:none;"></div>
+		</div>
+		{{pass}}
+		<br/>
+		<hr>
+		{{=response.toolbar()}}
+	</div>
+</div><!--/.row -->
+
+{{block tail}}
+<script src="{{=URL('static','js/authors.js')}}"></script>
+<script src="{{=URL('static','js/quotify.js')}}"></script>
+{{end}}

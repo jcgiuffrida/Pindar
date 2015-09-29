@@ -1,0 +1,139 @@
+{{extend 'layout.html'}}
+{{block head}}
+<link rel="stylesheet" href="{{=URL('static', 'css/select2.css')}}">
+<link rel="stylesheet" href="{{=URL('static', 'css/select2-bootstrap.css')}}">
+{{end}}
+
+<div class="row">
+	<div class="col-md-12">
+		<form class="form-inline search-bar" role="form">
+			<div class="form-group search-box">
+				<input type="search" class="form-control" id="textQuery" 
+				placeholder="Search everything">
+				<span class="glyphicon glyphicon-remove"></span>
+			</div>
+			<div class="form-group">
+				<select class="form-control" id="sortOrder">
+					<option value="rating">Sort by rating</option>
+					<option value="dateSubmitted">Sort by newest</option>
+				</select>
+			</div>
+			<button type="button" class="btn btn-primary btn-sm show-advanced">
+				Advanced <i class="fa fa-chevron-down"></i></button>
+			<div class="row advanced-searchbar" style="display:none;">
+				<div class="col-md-12">
+					<div class="form-group">
+						<input type="hidden" class="form-control" id="advancedAuthor"
+						style="width:300px;" multiple>
+						<input type="hidden" class="form-control" id="advancedWork"
+						style="width:300px;" multiple>
+						<input type="hidden" class="form-control" id="advancedLanguage"
+						style="width:150px;" multiple>
+					</div>
+				</div>
+				<div class="col-md-12">
+					<div class="form-group">
+						<label for="advancedMaxDate">Earliest date</label>
+						<input type="number" class="form-control" id="advancedMinDate"
+						style="width: 80px;">
+						</input>
+						<label for="advancedMaxDate">Latest date</label>
+						<input type="number" class="form-control" id="advancedMaxDate"
+						style="width: 80px;">
+						</input>
+					</div>
+					<div class="form-group">
+						<label for="advancedMinRating">Rated at least</label>
+						<select class="form-control" id="advancedMinRating" 
+						style="width: 70px;">
+							<option val="1">1</option>
+							<option val="1.5">1.5</option>
+							<option val="2">2</option>
+							<option val="2.5">2.5</option>
+							<option val="3">3</option>
+							<option val="3.5">3.5</option>
+							<option val="4">4</option>
+							<option val="4.5">4.5</option>
+							<option val="5">5</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<button type="button" class="btn btn-primary run-advanced-search"><i class="fa fa-search"></i> Search</button>
+						<button type="button" class="btn btn-default clear-advanced-search"><i class="fa fa-times"></i> Clear</button>
+					</div>
+				</div>
+			</div>
+			
+		</form>
+	</div>
+</div>
+
+
+<!-- ======== ADVANCED QUOTE SEARCH -->
+<div class="row advanced-content" style="display:none;">
+	<div class="col-md-12 quotes">
+		<h3>Results <span class="results-count badge"></span></h3>
+		<div class="row default"></div>
+		<div class="row search-advanced-quotes search"></div>
+	</div>	
+</div>
+<div class="row default-content">
+	<!-- ======== QUOTES ====== -->
+	<div class="col-md-8 quotes">
+		<h3>Quotes <span class="results-count badge"></span></h3>
+		<div class="row show-quotes default"
+			{{if 'search' in locals():}} style="display:none;"{{pass}}>
+		</div>
+		<div class="row search-quotes search target"></div>
+	</div>
+	<!-- ======== AUTHORS AND WORKS ====== -->
+	<div class="col-md-4 authors-and-works">
+		<div class="authors">
+			<div class="row">
+				<div class="col-md-8">
+					<h3>Authors <span class="results-count badge"></span></h3>
+				</div>
+				<div class="col-md-4">
+					<br><p class="text-right"><a class="btn btn-default btn-sm" 
+			href="/Pindar/default/authors/all">All Authors</a></p>
+				</div>
+			</div>
+
+			<div class="row show-authors default"
+				{{if 'search' in locals():}} style="display:none;"{{pass}}>
+			</div>
+			<div class="row search-authors search"></div>
+		</div>
+		<div class="works">
+			<div class="row">
+				<div class="col-md-8">
+					<h3>Works <span class="results-count badge"></span></h3>
+				</div>
+				<div class="col-md-4">
+					<br><p class="text-right"><a class="btn btn-default btn-sm" 
+			href="/Pindar/default/works/all">All Works</a></p>
+				</div>
+			</div>
+
+			<div class="row show-works default"
+				{{if 'search' in locals():}} style="display:none;"{{pass}}>
+			</div>
+			<div class="row search-works search"></div>
+		</div>
+	</div>
+</div>
+
+
+<div class="row">
+	<div class="col-md-8 col-md-offset-2">
+		{{=response.toolbar()}}
+	</div>
+</div>
+
+
+
+{{block tail}}
+<script src="{{=URL('static', 'js/select2.min.js')}}"></script>
+<script src="{{=URL('static','js/show.js')}}"></script>
+<script src="{{=URL('static','js/quotify.js')}}"></script>
+{{end}}
