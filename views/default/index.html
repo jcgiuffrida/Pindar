@@ -1,22 +1,107 @@
 {{extend 'layout.html'}}
-<h1>Menu<h1>
-Manage {{=A('Quotes', _href='/PindarApp/manage/quotes')}}, {{=A('Authors', _href='/PindarApp/manage/authors')}}, and {{=A('Works', _href='/PindarApp/manage/works')}}<br/>
-{{=A('Add Quote', _href='/PindarApp/manage/add_quote')}}
-<div id="myid"></div>
+{{block head}}{{end}}
 
-<h2>Available quotes</h2>
-{{=quotes}}
-<h2>Available authors</h2>
-{{=authors}}
-{{=authors_tr}}
-<h2>Available works</h2>
-{{=works}}
-{{=works_tr}}
-<h2>Available users</h2>
-{{=users}}
-<h2>Available languages</h2>
-{{=languages}}
-<h2>Available translations</h2>
-{{=translations}}
-<h2>Diagnostics</h2>
-{{=response.toolbar()}}
+<div class="row main-page">
+  <div class="col-md-8 col-md-offset-2">
+    <div class="jumbotron">
+      <div class="row" style="display:inline-block">
+        <h2 style="font-size: 40px;">Pindar</h2>
+         <p>An open-source, user-powered home for quotations.</p>
+         <br/>
+        <form class="main-page-search" role="search">
+          <div class="form-group">
+            <div class="col-md-12 btn-group search-box">
+              <label for="main-page-search">Search our database for quotes, authors, and works</label>
+              <input type="search" class="form-control input-lg" id="main-page-search" placeholder="To be or not to be / Virgil / Tender Is the Night ...">
+            </div>
+          </div>
+          <div class="form-group text-center main-page-search-button">
+            <button type="submit" class="btn btn-large btn-primary" style="display:none;">Search</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <h3>A rich, smooth interface.</h3>
+    <p class="lead">You can rate quotes, add comments, and even edit items that are incorrect. Feel free to lose yourself exploring the world of thought&mdash;because no ads, slow pages, or annoying pop-ups will interrupt you.</p>
+    <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+        <p class="text-center">
+          <a class="btn btn-success btn-lg" href="{{=URL('default', 'show')}}">Take a look inside <i class="fa fa-arrow-circle-right"></i></a>
+        </p>
+      </div>
+    </div>
+
+    <h3>Open to the public from the bottom up.</h3>
+    <p class="lead">Users decide what quotes to enter, and what floats to the top. Want to include your favorite line from a song? Part of a speech? A quote to use in your research paper? Go ahead! Plus, all the code behind Pindar is <a href="http://github.com/lucaluca/Pindar">open-source and community-driven</a>, and all data is available through a <a href="/Pindar/api/quote_query?sort=rating">developer-friendly API</a>.</p>
+    <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+        <div class='well'>
+          <p><strong>Go ahead: add your favorite quote!</strong>
+          <p class="text-center">
+            <a class="btn btn-info btn-lg" href="{{=URL('default', 'add')}}"><i class="fa fa-plus"></i> Add Quote</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Smarter than the others.</h3>
+    <p class="lead">We know quotes are <strong>more than "quotables,"</strong> and should be read in context. That&rsquo;s why we use machine-learning techniques to show you quotes that relate to each other, such as allusions, and quotes that other readers also liked. This keeps popular quotes from drowning out literary ones or academic ones, and vice versa&mdash;so everyone is satisfied. We also know that not all quotes are equal&mdash;and let you include your favorite song lyrics, poetry, and religious verses. <small>(Links between quotes are not yet functional)</small></p>
+    <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+        <div class='well'>
+          <p><strong>See an allusion in action!</strong>
+          <p class="text-center">
+            <a class="btn btn-default btn-lg" href="/Pindar/default/show?search=leaves">From Homer to Dante to Shelley</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Completely searchable.</h3>
+    <p class="lead">Find quotes on any topic, by any author, in any book. Find quotes from any time period. Find quotes in any language. Find quotes that mention any word or phrase. Find everything instantly.</p>
+    <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+        <div class='well'>
+          <p><strong>Give it a whirl!</strong>
+          <p class="text-center">
+            <a class="btn btn-default btn-lg" href="/Pindar/default/show?search=leaves"><i class="fa fa-search"></i> Search for &ldquo;leaves&rdquo;</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h3>Fully international.</h3>
+    <p class="lead">Why should English always take precedence? Pindar supports every language&mdash;and can even show you translations of quotes in multiple languages.</p>
+    <div class="row">
+      <div class="col-md-10 col-md-offset-1">
+        <div class='well'>
+          <p><strong>See it in action!</strong><br/>
+            <small>(This is not yet functional)</small>
+          <p class="text-center">
+            <a class="btn btn-default btn-lg" href="/Pindar/default/quotes/1">Forsan et haec olim meminisse iuvabit</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+
+    <h3>A growing community.</h3>
+    <p class="lead">The best quotes make life rich and meaningful. Let&rsquo;s discover them together.</p>
+    <br/>
+    <p class="text-center">
+      <a class="btn btn-info btn-lg" href="{{=URL('default','show')}}">Explore Pindar&nbsp;&nbsp;<i class="fa fa-arrow-circle-right"></i></a>
+      <a class="btn btn-default btn-lg" href="http://github.com/lucaluca/Pindar">Visit us on GitHub&nbsp;&nbsp;<i class="fa fa-github"></i></a>
+    </p>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+
+    <br/>
+  </div>
+</div><!--/.row -->
+
+{{block tail}}
+<script src="{{=URL('static','js/index.js')}}"></script>
+{{end}}

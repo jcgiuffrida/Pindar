@@ -1,32 +1,18 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-#########################################################################
-## This scaffolding model makes your app work on Google App Engine too
-## File is released under public domain and you can use without limitations
-#########################################################################
-
 ## if SSL/HTTPS is properly configured and you want all HTTP requests to
 ## be redirected to HTTPS, uncomment the line below:
 # request.requires_https()
 
-if not request.env.web2py_runtime_gae:
-    ## local
-    # db = DAL('mysql://bunny:rochester@localhost/pindar',pool_size=1,
-    #   check_reserved=['mysql', 'postgres'], 
-    #   driver_args={"unix_socket":"/tmp/mysql.sock"})
-    ## deployment
-    db = DAL('mysql://pindar:rochester@pindar.mysql.pythonanywhere-services.com/pindar$default', 
-      pool_size=1, check_reserved=['mysql', 'postgres'])
-else:
-    ## connect to Google BigTable (optional 'google:datastore://namespace')
-    db = DAL('google:datastore')
-    ## store sessions and tickets there
-    session.connect(request, response, db=db)
-    ## or store session in Memcache, Redis, etc.
-    ## from gluon.contrib.memdb import MEMDB
-    ## from google.appengine.api.memcache import Client
-    ## session.connect(request, response, db = MEMDB(Client()))
+## local
+# db = DAL('mysql://bunny:rochester@localhost/pindar',pool_size=1,
+#   check_reserved=['mysql', 'postgres'],
+#   driver_args={"unix_socket":"/tmp/mysql.sock"})
+
+## deployment
+db = DAL('mysql://pindar:rochester@pindar.mysql.pythonanywhere-services.com/pindar$default',
+  pool_size=1, check_reserved=['mysql', 'postgres'])
 
 ## by default give a view/generic.extension to all actions from localhost
 ## none otherwise. a pattern can be 'controller/function.extension'
@@ -55,7 +41,7 @@ auth = Auth(db)
 crud, service, plugins = Crud(db), Service(), PluginManager()
 
 auth.settings.extra_fields['auth_user'] = [
-    Field('DateJoined', 'datetime', default=datetime.now(), 
+    Field('DateJoined', 'datetime', default=datetime.now(),
           readable=False, writable=False),
     Field('PrimaryLanguageID', 'integer', default=1),
     Field('UserBiography', 'text'),
@@ -66,16 +52,16 @@ auth.define_tables(username=True, signature=False)
 
 
 # add signature to all tables (turn off cascade)
-auth_signature = db.Table(db,'auth_signature', 
-	Field('created_on','datetime',default=request.now, 
+auth_signature = db.Table(db,'auth_signature',
+	Field('created_on','datetime',default=request.now,
 		writable=False,readable=False),
 	Field('created_by',auth.settings.table_user,default=auth.user_id,
 		writable=False,readable=False,ondelete='SET NULL'),
 	Field('modified_on','datetime',update=request.now,default=request.now,
-		writable=False,readable=False), 
+		writable=False,readable=False),
 	Field('modified_by',auth.settings.table_user,
 		default=auth.user_id,update=auth.user_id,
-		writable=False,readable=False,ondelete='SET NULL')) 
+		writable=False,readable=False,ondelete='SET NULL'))
 
 
 ## configure email
@@ -133,7 +119,7 @@ db.auth_user.PrimaryLanguageID.requires = IS_IN_DB(db, db.LANGUAGE.id, '%(Native
 
 db.define_table('QUOTE',
             Field('Text', 'text', required=True),
-            Field('QuoteLanguageID', 'reference LANGUAGE', required=True, 
+            Field('QuoteLanguageID', 'reference LANGUAGE', required=True,
             		default=1, label='Language', ondelete='SET NULL'), # temporary default for testing purposes
             Field('IsOriginalLanguage', 'boolean', label='Quote is in original language'),
             Field('IsDeleted', 'boolean', default=False, readable=False, writable=False),
@@ -143,17 +129,18 @@ db.define_table('QUOTE',
 db.QUOTE.Text.requires = [IS_NOT_EMPTY(), IS_NOT_IN_DB(db, db.QUOTE.Text)]
 db.QUOTE.QuoteLanguageID.requires = IS_IN_DB(db, db.LANGUAGE.id, '%(NativeName)s')
 db.QUOTE.Note.requires = IS_LENGTH(maxsize=4096)
+# we may want to decrease this max character size: currently allows >500 words
 
 
 ###---------------------- WORK
 
-### note: it should not be possible to enter a WORK without joining it 
+### note: it should not be possible to enter a WORK without joining it
 ### to a WORK_TR. same with authors
 
 db.define_table('WORK',
             Field('YearPublished', 'integer', label='Year published'),
             Field('YearWritten', 'integer', label='Year written (if different)'),
-            Field('IsHidden', 'boolean', default=False, readable=False, 
+            Field('IsHidden', 'boolean', default=False, readable=False,
               writable=False),
             auth_signature)
 
@@ -165,11 +152,11 @@ db.WORK.YearWritten.requires = IS_INT_IN_RANGE(-5000,2050)
 
 db.define_table('WORK_TR',
 			Field('WorkID', 'reference WORK', required=True),
-			Field('LanguageID', 'reference LANGUAGE', required=True, 
+			Field('LanguageID', 'reference LANGUAGE', required=True,
 					label='Language of this work or translation', ondelete='SET NULL'),
 			Field('WorkName', 'string', length=1024, required=True,
 					label='Name of work'),
-			Field('WorkSubtitle', 'string', length=1024, 
+			Field('WorkSubtitle', 'string', length=1024,
 					label='Subtitle'),
 			Field('WorkDescription', 'text',
 					label='Description of work'),
@@ -185,7 +172,7 @@ db.WORK_TR.WorkName.requires = [IS_NOT_EMPTY(), IS_LENGTH(maxsize=1024)]
 db.WORK_TR.WorkSubtitle.requires = IS_LENGTH(maxsize=1024)
 db.WORK_TR.WorkDescription.requires = IS_LENGTH(maxsize=4096)
 db.WORK_TR.WikipediaLink.requires = \
-		[IS_MATCH('^(https://|http://)?[a-z]{2}\.wikipedia\.org/wiki/.{1,}'), 
+		[IS_MATCH('^(https://|http://)?[a-z]{2}\.wikipedia\.org/wiki/.{1,}'),
 		 IS_LENGTH(maxsize=256)]
 db.WORK_TR.WorkNote.requires = IS_LENGTH(maxsize=4096)
 
@@ -195,7 +182,7 @@ db.WORK_TR.WorkNote.requires = IS_LENGTH(maxsize=4096)
 db.define_table('AUTHOR',
 			Field('YearBorn', 'integer'),
 			Field('YearDied', 'integer'),
-			Field('IsHidden', 'boolean', default=False, readable=False, 
+			Field('IsHidden', 'boolean', default=False, readable=False,
         writable=False),
       auth_signature)
 
@@ -217,10 +204,10 @@ db.define_table('AUTHOR_TR',
 					label='Last name'),
 			Field('AKA', 'list:string',
 					label='Other names'),
-			Field('DisplayName', 'string', length=512, required=True, 
+			Field('DisplayName', 'string', length=512, required=True,
 					label='Default name'),
 			Field('Biography', 'text'),
-			Field('WikipediaLink', 'string', length=256, 
+			Field('WikipediaLink', 'string', length=256,
 					label='Link to Wikipedia page'),
       auth_signature)
 
@@ -234,7 +221,7 @@ db.AUTHOR_TR.AKA.requires = IS_LIST_OF(IS_LENGTH(maxsize=256))
 db.AUTHOR_TR.DisplayName.requires = [IS_NOT_EMPTY(), IS_LENGTH(maxsize=512)]
 db.AUTHOR_TR.Biography.requires = IS_LENGTH(maxsize=8192)
 db.AUTHOR_TR.WikipediaLink.requires = \
-		[IS_MATCH('^(https://|http://)?[a-z]{2}\.wikipedia\.org/wiki/.{1,}'), 
+		[IS_MATCH('^(https://|http://)?[a-z]{2}\.wikipedia\.org/wiki/.{1,}'),
 		 IS_LENGTH(maxsize=256)]
 
 
@@ -254,7 +241,7 @@ db.define_table('WORK_AUTHOR',
 			Field('WorkID', 'reference WORK', required=True),
 			Field('AuthorID', 'reference AUTHOR', required=True))
 
-db.WORK_AUTHOR.AuthorID.requires = IS_IN_DB(db, db.AUTHOR.id, 
+db.WORK_AUTHOR.AuthorID.requires = IS_IN_DB(db, db.AUTHOR.id,
 									'%(id)s (%(YearBorn)s-%(YearDied)s)')
 db.WORK_AUTHOR.WorkID.requires = IS_IN_DB(db, db.WORK.id, '%(id)s (%(YearPublished)s)')
 
@@ -273,7 +260,7 @@ db.define_table('TRANSLATION',
 # help if a work if flagged as offensive when in fact the author name is offensive, etc.
 
 db.define_table('FLAGTYPE',
-            Field('FlagName', 'string', required=True), 
+            Field('FlagName', 'string', required=True),
             format='%(FlagName)s')
 
 db.define_table('FLAG',
@@ -309,7 +296,7 @@ db.RATING.modified_on.readable=True
 db.define_table('COMMENT',
             Field('Text', 'text', required=True),
             Field('QuoteID', 'reference QUOTE', required=True),
-            Field('Active', 'boolean', default=True, readable=False, 
+            Field('Active', 'boolean', default=True, readable=False,
               writable=False),
             auth_signature)
 

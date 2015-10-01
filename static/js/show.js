@@ -85,33 +85,6 @@ $(document).ready(function(){
     }
   });
 
-  // fill in select2 elements
-  // $.getJSON('/Pindar/api/author_query', function(response){
-  //   var authorsArray = [];
-  //   for (c in response.authors){
-  //     authorsArray.push({id: response.authors[c].AUTHOR_TR.id, 
-  //       text: response.authors[c].AUTHOR_TR.DisplayName});
-  //   }
-  //   $("#advancedAuthor").select2({
-  //     data: authorsArray,
-  //     multiple: true,
-  //     placeholder: "Filter authors"
-  //   });
-  // });
-
-  $.getJSON('/Pindar/api/work_query', function(response){
-    var worksArray = [];
-    for (c in response.works){
-      worksArray.push({id: response.works[c].WORK_TR.id, 
-        text: response.works[c].WORK_TR.WorkName});
-    }
-    // $("#advancedWork").select2({
-    //   data: worksArray,
-    //   multiple: true,
-    //   placeholder: "Filter works"
-    // });
-  });
-
   $.getJSON('/Pindar/api/language_query', function(response){
     var languagesArray = [];
     for (c in response.languages){

@@ -6,9 +6,9 @@
 
 
 function parseQuotes(quotesObject, size, max){
-  /* 
+  /*
     takes a JSON quotes object from /api/text_query
-    returns a 2xN grid of quote tiles 
+    returns a 2xN grid of quote tiles
     improve: add parameters for # columns, features to show
   */
   if(typeof(size)==='undefined') size = "small";
@@ -21,13 +21,13 @@ function parseQuotes(quotesObject, size, max){
     /*if (parseInt(c) % columns === 0 | parseInt(c) === 0){
       object += '<div class="row">';
     }*/
-    object += '<div class="object" data-id="' + q.QUOTE.id + 
-      '" data-rating="' + q._extra['AVG(RATING.Rating)'] + 
+    object += '<div class="object" data-id="' + q.QUOTE.id +
+      '" data-rating="' + q._extra['AVG(RATING.Rating)'] +
       '" data-rating-count="' + q._extra['COUNT(RATING.Rating)'] + '">';
     object += '<div class="object-data panel panel-default">';
     object += '<div class="panel-body"><p class="text">';
     if (q.QUOTE.Text.length > 500){
-      object += q.QUOTE.Text.slice(0, q.QUOTE.Text.indexOf(' ', 490)) + 
+      object += q.QUOTE.Text.slice(0, q.QUOTE.Text.indexOf(' ', 490)) +
         ' ...';
     } else {
       object += q.QUOTE.Text;
@@ -39,7 +39,7 @@ function parseQuotes(quotesObject, size, max){
     object += 'href="/Pindar/default/works/' + q.WORK_TR.id + '">';
     object += q.WORK_TR.WorkName + '</a>';
     object += '</div><div class="object-actions"></div></div></div></div>';
-    
+
     /*if ((parseInt(c) + 1) % columns === 0){
       object += '</div>';
     }*/
@@ -50,7 +50,7 @@ function parseQuotes(quotesObject, size, max){
 
 
 function parseAuthors(authorsObject, unwrapped, max){
-  /* 
+  /*
     takes a JSON authors object from /api/author_query
     unwrapped = without the wrapper divs (ready to insert into a list-group)
     returns a list group of authors
@@ -67,9 +67,9 @@ function parseAuthors(authorsObject, unwrapped, max){
   for (c in authorsObject){
     if (c >= max){ break; }
     a = authorsObject[c];
-    object = '<a class="list-group-item" ' + 
-      'data-author-id="' + a.AUTHOR.id + 
-      '" data-author-tr-id="' + a.AUTHOR_TR.id + 
+    object = '<a class="list-group-item" ' +
+      'data-author-id="' + a.AUTHOR.id +
+      '" data-author-tr-id="' + a.AUTHOR_TR.id +
       '" href="/Pindar/default/authors/' + a.AUTHOR_TR.id + '">';
     object += a.AUTHOR_TR.DisplayName;
     object += getAuthorDates(a.AUTHOR.YearBorn, a.AUTHOR.YearDied);
@@ -88,7 +88,7 @@ function parseAuthors(authorsObject, unwrapped, max){
       object = $(object);
       authors.push(object);
     } else {
-      authors += object;  
+      authors += object;
     }
   }
   if (!unwrapped){
@@ -118,9 +118,9 @@ function parseWorks(worksObject, unwrapped, author, max){
   for (c in worksObject){
     if (c >= max){ break; }
     w = worksObject[c];
-    object = '<a class="list-group-item" ' + 
-      'data-work-id="' + w.WORK.id + 
-      '" data-work-tr-id="' + w.WORK_TR.id + 
+    object = '<a class="list-group-item" ' +
+      'data-work-id="' + w.WORK.id +
+      '" data-work-tr-id="' + w.WORK_TR.id +
       '" href="/Pindar/default/works/' + w.WORK_TR.id + '">';
     object += w.WORK_TR.WorkName;
     if (w.WORK.YearPublished != null){
@@ -130,7 +130,7 @@ function parseWorks(worksObject, unwrapped, author, max){
     }
     quotecount = w['_extra']['COUNT(QUOTE_WORK.QuoteID)'];
     if (quotecount > 0){
-      object += '<span class="badge">' + quotecount + ' quote' + 
+      object += '<span class="badge">' + quotecount + ' quote' +
         plural(quotecount) + '</span>';
     }
     if (author){
@@ -140,7 +140,7 @@ function parseWorks(worksObject, unwrapped, author, max){
     if (unwrapped){
       works.push($(object));
     } else {
-      works += object;  
+      works += object;
     }
   }
   if (!unwrapped){
@@ -152,7 +152,7 @@ function parseWorks(worksObject, unwrapped, author, max){
 // prevent enter from ever submitting form, except in navbar
 $(document).on('keypress', 'form', function (e) {
   var code = e.keyCode || e.which;
-  if ($(this).hasClass('navbar-form')){
+  if ($(this).hasClass('navbar-form') || $(this).hasClass('main-page-search')){
     if ($(this).find('input').val().length > 1){
       // do nothing
     } else if (code == 13){
@@ -160,8 +160,8 @@ $(document).on('keypress', 'form', function (e) {
     }
   } else if ($(this).find('textarea').is(':focus')){
     // allow enter in textarea
-  } else if ($(this).hasClass('search-bar') & 
-      $(this).find('.advanced-searchbar').is(':visible') & 
+  } else if ($(this).hasClass('search-bar') &
+      $(this).find('.advanced-searchbar').is(':visible') &
       code == 13){
         $(this).find('.run-advanced-search').trigger('click');
   } else if (code == 13){
@@ -230,14 +230,14 @@ $(document).ready(function(){
   // navbar functionality
   $('.navbar-form input').on('input', function(){
     if ($(this).val().length < 2){
-      $(this).closest('.navbar-form').find('button').fadeOut();  
+      $(this).closest('.navbar-form').find('button').fadeOut();
     } else {
-      $(this).closest('.navbar-form').find('button').fadeIn();  
+      $(this).closest('.navbar-form').find('button').fadeIn();
     }
   });
   $('.navbar-form').on('submit', function(e){
     e.preventDefault();
-    window.location.href='/Pindar/default/show?search=' + 
+    window.location.href='/Pindar/default/show?search=' +
       $(this).closest('.navbar-form').find('input').val();
   })
 

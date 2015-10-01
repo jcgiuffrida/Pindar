@@ -8,7 +8,7 @@
 	<div class="col-md-12">
 		<form class="form-inline search-bar" role="form">
 			<div class="form-group search-box">
-				<input type="search" class="form-control" id="textQuery" 
+				<input type="text" class="form-control" id="textQuery"
 				placeholder="Search everything">
 				<span class="glyphicon glyphicon-remove"></span>
 			</div>
@@ -17,9 +17,9 @@
 					<option value="rating">Sort by rating</option>
 					<option value="dateSubmitted">Sort by newest</option>
 				</select>
-			</div>
-			<button type="button" class="btn btn-primary btn-sm show-advanced">
+				<button type="button" class="btn btn-primary btn-sm show-advanced">
 				Advanced <i class="fa fa-chevron-down"></i></button>
+			</div>
 			<div class="row advanced-searchbar" style="display:none;">
 				<div class="col-md-12">
 					<div class="form-group">
@@ -33,7 +33,7 @@
 				</div>
 				<div class="col-md-12">
 					<div class="form-group">
-						<label for="advancedMaxDate">Earliest date</label>
+						<label for="advancedMinDate">Earliest date</label>
 						<input type="number" class="form-control" id="advancedMinDate"
 						style="width: 80px;">
 						</input>
@@ -44,17 +44,18 @@
 					</div>
 					<div class="form-group">
 						<label for="advancedMinRating">Rated at least</label>
-						<select class="form-control" id="advancedMinRating" 
+						<select class="form-control" id="advancedMinRating"
 						style="width: 70px;">
-							<option val="1">1</option>
-							<option val="1.5">1.5</option>
-							<option val="2">2</option>
-							<option val="2.5">2.5</option>
-							<option val="3">3</option>
-							<option val="3.5">3.5</option>
-							<option val="4">4</option>
-							<option val="4.5">4.5</option>
-							<option val="5">5</option>
+							<option value="0"></option>
+							<option value="1">1</option>
+							<option value="1.5">1.5</option>
+							<option value="2">2</option>
+							<option value="2.5">2.5</option>
+							<option value="3">3</option>
+							<option value="3.5">3.5</option>
+							<option value="4">4</option>
+							<option value="4.5">4.5</option>
+							<option value="5">5</option>
 						</select>
 					</div>
 					<div class="form-group">
@@ -63,7 +64,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 		</form>
 	</div>
 </div>
@@ -75,7 +76,7 @@
 		<h3>Results <span class="results-count badge"></span></h3>
 		<div class="row default"></div>
 		<div class="row search-advanced-quotes search"></div>
-	</div>	
+	</div>
 </div>
 <div class="row default-content">
 	<!-- ======== QUOTES ====== -->
@@ -94,7 +95,7 @@
 					<h3>Authors <span class="results-count badge"></span></h3>
 				</div>
 				<div class="col-md-4">
-					<br><p class="text-right"><a class="btn btn-default btn-sm" 
+					<br><p class="text-right"><a class="btn btn-default btn-sm"
 			href="/Pindar/default/authors/all">All Authors</a></p>
 				</div>
 			</div>
@@ -110,7 +111,7 @@
 					<h3>Works <span class="results-count badge"></span></h3>
 				</div>
 				<div class="col-md-4">
-					<br><p class="text-right"><a class="btn btn-default btn-sm" 
+					<br><p class="text-right"><a class="btn btn-default btn-sm"
 			href="/Pindar/default/works/all">All Works</a></p>
 				</div>
 			</div>

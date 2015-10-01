@@ -4,18 +4,12 @@
 
 
 def quotes():
-    """
-    *** for testing purposes only***
-    """
     grid = SQLFORM.grid(db.QUOTE, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('QUOTE', ids))])
     return locals()
 
 
 def works():
-    """
-    *** for testing purposes only***
-    """
     grid1 = SQLFORM.grid(db.WORK, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('WORK', ids))])
     grid2 = SQLFORM.grid(db.WORK_TR, user_signature=False,
@@ -25,9 +19,6 @@ def works():
 
 
 def authors():
-    """
-    *** for testing purposes only***
-    """
     grid1 = SQLFORM.grid(db.AUTHOR, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('AUTHOR', ids))])
     grid2 = SQLFORM.grid(db.AUTHOR_TR, user_signature=False,
@@ -36,9 +27,6 @@ def authors():
 
 
 def connections():
-    """
-    *** for testing purposes only***
-    """
     grid1 = SQLFORM.grid(db.QUOTE_WORK, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('QUOTE_WORK', ids))])
     grid2 = SQLFORM.grid(db.WORK_AUTHOR, user_signature=False,
@@ -47,51 +35,37 @@ def connections():
 
 
 def languages():
-    """
-    *** for testing purposes only***
-    """
     grid = SQLFORM.grid(db.LANGUAGE, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('LANGUAGE', ids))])
     return locals()
-    
+
 
 #@auth.requires_login()
 def users():
-    """
-    *** for testing purposes only***
-    """
     grid = SQLFORM.grid(db.auth_user, user_signature=False)
     return locals()
 
 
 def flags():
-    """
-    *** for testing purposes only***
-    """
     grid = SQLFORM.grid(db.FLAG, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('FLAG', ids))])
     return locals()
 
 
 def ratings():
-    """
-    *** for testing purposes only***
-    """
     grid = SQLFORM.grid(db.RATING, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('RATING', ids))])
     return locals()
 
 
 def comments():
-    """
-    *** for testing purposes only***
-    """
     grid = SQLFORM.grid(db.COMMENT, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('COMMENT', ids))])
     return locals()
 
 
 def delete_multiple(table, ids):
+    ''' allows us to make bulk changes'''
     if table == 'QUOTE':
         to_delete = db(db.QUOTE.id.belongs(ids))
         to_delete.delete()
@@ -125,5 +99,5 @@ def delete_multiple(table, ids):
     elif table == 'COMMENT':
         to_delete = db(db.COMMENT.id.belongs(ids))
         to_delete.delete()
-        
+
 

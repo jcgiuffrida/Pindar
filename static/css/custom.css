@@ -15,11 +15,11 @@ pre {
   white-space: pre-wrap;
 }
 
-.form-group .col-md-1, .form-group .col-md-2, 
-.form-group .col-md-3, .form-group .col-md-4, 
-.form-group .col-md-5, .form-group .col-md-6, 
-.form-group .col-md-7, .form-group .col-md-8, 
-.form-group .col-md-9, .form-group .col-md-10, 
+.form-group .col-md-1, .form-group .col-md-2,
+.form-group .col-md-3, .form-group .col-md-4,
+.form-group .col-md-5, .form-group .col-md-6,
+.form-group .col-md-7, .form-group .col-md-8,
+.form-group .col-md-9, .form-group .col-md-10,
 .form-group .col-md-11, .form-group .col-md-12 {
   padding-left: 5px;
   padding-right: 5px;
@@ -53,6 +53,10 @@ ul.nav li.dropdown:hover ul.dropdown-menu {
   position:relative;
 }
 
+.search-bar .search-box input#textQuery {
+  width: 300px;
+}
+
 .search-box .glyphicon-remove {
   position: absolute;
   right: 8px;
@@ -69,6 +73,29 @@ ul.nav li.dropdown:hover ul.dropdown-menu {
   color: #777;
 }
 
+
+
+
+/*****
+/*  ~main page
+/*****/
+
+.jumbotron {
+  text-align: center;
+}
+
+.jumbotron .main-page-search-button {
+  min-height: 150px;
+}
+
+.main-page-search .search-box input {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.main-page .lead {
+  font-size: 18px;
+}
 
 /*****
 /*  ~object

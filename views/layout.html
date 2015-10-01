@@ -15,7 +15,7 @@
   <!-- Always force latest IE rendering engine
        (even in intranet) & Chrome Frame
        Remove this if you use the .htaccess -->
-	   
+
   <meta charset="utf-8" />
 
   <meta name="application-name" content="{{=request.application}}" />
@@ -58,7 +58,7 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="{{=URL('default', 'show')}}"><i class="fa fa-pencil-square-o fa-small"></i> Pindar</a>
+        <a class="navbar-brand" href="/"><i class="fa fa-pencil-square-o fa-small"></i> Pindar</a>
       </div>
 
       <div class="collapse navbar-collapse" id="navbar-collapse-1">
@@ -93,7 +93,7 @@
         <form class="navbar-form navbar-left" role="search">
           <div class="form-group">
             <div class="btn-group search-box">
-              <input type="search" class="form-control" 
+              <input type="search" class="form-control"
               placeholder="Search everything">
               <span class="glyphicon glyphicon-remove" style="display:none;"></span>
             </div>
@@ -109,7 +109,7 @@
   </nav>
 
   <div class="container">
-    <!-- Masthead ================================================== 
+    <!-- Masthead ==================================================
     <header class="mastheader row" id="header">
       {{if response.title:}}
         <div class="span12">
@@ -165,7 +165,7 @@
   <script src="{{=URL('static','js/analytics.min.js')}}"></script>
   <script type="text/javascript">
   analytics.initialize({
-    'Google Analytics':{trackingId:'{{=response.google_analytics_id}}'} 
+    'Google Analytics':{trackingId:'{{=response.google_analytics_id}}'}
   });</script>
   {{pass}}
 </body>
