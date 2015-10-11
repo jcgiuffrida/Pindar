@@ -1,5 +1,5 @@
 $(document).ready(function(){
-  $('.object').quotify({size: 'large'});
+  $('.object').quotify({ size: 'large' });
   $('.object').trigger('clear.quotify');
 
   // requested options
@@ -11,7 +11,7 @@ $(document).ready(function(){
     $('.object-actions .btn-comments').trigger('click.quotify');
   }
 
-  // make sure appropriate values are included
+  // make sure appropriate values are included for editing
   var selectedLanguage = $('#QUOTE-QuoteLanguageID').attr('value');
   $('#QUOTE-QuoteLanguageID option').each(function(){
     var option = $(this);
@@ -20,15 +20,29 @@ $(document).ready(function(){
         return false;
     }
   });
-  $('#QUOTE-IsOriginalLanguage').prop('checked', 
+  $('#QUOTE-IsOriginalLanguage').prop('checked',
     $('#QUOTE-IsOriginalLanguage').val());
 
-  $('.all-quotes').searchify({
-    type: 'quotes',
-    isDefault: true,
-    searchFunction: function(){ return 'author=' + 
-      $('.object').data('author-tr-id') + '&sort=rating'; }
-  });
+  // add recommendations
+  // this is a good method for just appending quotes from an arbitrary
+  //   API query
+  var recommendationsDiv = $('.recommendations');
+  $.getJSON('/Pindar/api/recommend?q=' + $('.object').data('id'),
+      function(response) {
+      if (response.quotes.length > 0){
+        for (var i=0; i<1; i++){
+          recommendationsDiv.append($('<div class="col-md-12 column"></div>'));
+        }
+        var quotesArray = parseQuotes(response.quotes);
+        $.each(quotesArray, function(index, value){
+          var q = value;
+          q.quotify({size: 'small'});
+          q.appendTo(recommendationsDiv.find('.column'));
+        });
+      } else {
+        recommendationsDiv.append('<div class="col-md-12"><p>No quotes found. Rate more quotes to start getting recommendations!</p></div>');
+      }
+    });
 });
 
 

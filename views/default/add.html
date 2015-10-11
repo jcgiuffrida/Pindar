@@ -1,5 +1,6 @@
 {{block head}}
 <script>
+// if user loaded page with author or work in mind, load them
 {{if 'init_author' in locals():}}
 var initAuthor = '{{=init_author}}';
 var initAuthorName = "{{=sanitize(init_author_name)}}";
@@ -19,23 +20,24 @@ var initWorkName = '';
 {{extend 'layout.html'}}
 
 <div class="row">
-	<div class="col-md-6 col-md-offset-2 col-sm-8 col-sm-offset-2 
+	<div class="col-md-7 col-md-offset-2 col-sm-8 col-sm-offset-2
 	col-xs-10 col-xs-offset-1">
 		<form class="form-horizontal add-form" role="form" autocomplete="off"
 		style="display:none;">
-			
+
 			<div class="form-group enter-quote">
 				<div class="col-md-9 col-md-offset-3">
 					<textarea class="form-control input-lg" rows="6" name="Text"
 					placeholder="Enter the quote..." id="QUOTE-Text"></textarea>
 				</div>
-			</div>
-			
+			</div><!--/.enter-quote -->
+
 			<div class="author-lookup">
 				<div class="col-md-8 col-md-offset-3">
-					<div class="form-group">
-						<input type="search" class="form-control input-lg" 
+					<div class="form-group search-box">
+						<input type="search" class="form-control input-lg"
 						id="QUOTE-author-lookup" placeholder="Author"></input>
+						<span class="glyphicon glyphicon-remove" style="display:none;"></span>
 						<div class="results"></div>
 					</div>
 				</div>
@@ -45,7 +47,7 @@ var initWorkName = '';
 
 			<div class="col-md-8 col-md-offset-3 author-results">
 				<div class="row">
-					<h4>Search results <span class="searching pull-right"></span></h4>
+					<h4>Select the author: <span class="searching pull-right"></span></h4>
 				</div>
 				<div class="row">
 					<div class="list-group">
@@ -55,13 +57,35 @@ var initWorkName = '';
 			</div><!--/.author-results -->
 
 			<div class="add-author">
+				<div class="col-md-9 col-md-offset-3 add-explain">
+					<h4>Add New Author</h4>
+					<p class="small">Adding information about authors helps us make Pindar a better experience for everyone.</p>
+				</div>
 				<div class="form-group">
 					<label for="AUTHOR_TR-DisplayName" class="col-md-3 control-label">
 						Name to display
 					</label>
 					<div class="col-md-9">
 						<input type="text" class="form-control" id="AUTHOR_TR-DisplayName"
-						placeholder="" autocomplete="off" name="DisplayName"></input>
+						placeholder="" autocomplete="off" name="DisplayName" aria-describedby="help-AUTHOR_TR-DisplayName"></input>
+						<span id="help-AUTHOR_TR-DisplayName" class="help-block">This is the name that will primarily be shown in Pindar.</span>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="AUTHOR_TR-WikipediaLink" class="col-md-3 control-label">
+							Wikipedia page
+					</label>
+					<div class="col-md-9">
+						<div class="input-group">
+							<input type="url" class="form-control" id="AUTHOR_TR-WikipediaLink"
+							placeholder="" name="AuthorWikipediaLink" aria-describedby="help-AUTHOR_TR-WikipediaLink"></input>
+							<span class="input-group-btn">
+								<button class="btn btn-info wiki-link" type="button">
+									<i class="fa fa-external-link"></i>
+								</button>
+							</span>
+						</div>
+						<span id="help-AUTHOR_TR-WikipediaLink" class="help-block">Click the blue button to automatically search Wikipedia for this person, then copy and paste the URL into this field. Linking to Wikipedia helps avoid duplicate entries.</span>
 					</div>
 				</div>
 				<div class="form-group">
@@ -70,18 +94,19 @@ var initWorkName = '';
 					</label>
 					<div class="col-md-3">
 						<input type="text" class="form-control" id="AUTHOR_TR-FirstName"
-						placeholder="" autocomplete="off" name="FirstName"></input>
+						placeholder="(First)" autocomplete="off" name="FirstName"></input>
 					</div>
 					<div class="col-md-2">
 						<input type="text" class="form-control" id="AUTHOR_TR-MiddleName"
-						placeholder="" autocomplete="off" name="MiddleName"></input>
+						placeholder="(Middle)" autocomplete="off" name="MiddleName"></input>
 					</div>
 					<div class="col-md-4">
 						<input type="text" class="form-control" id="AUTHOR_TR-LastName"
-						placeholder="" autocomplete="off" name="LastName"></input>
+						placeholder="(Last)" autocomplete="off" name="LastName"></input>
 					</div>
 				</div>
-				<div class="form-group">
+
+				<!--<div class="form-group">
 					<label for="AUTHOR_TR-AKA" class="col-md-3 control-label">
 							Also known as
 					</label>
@@ -94,73 +119,67 @@ var initWorkName = '';
 							<i class="fa fa-plus"></i>
 						</button>
 					</div>
-				</div>
+				</div>-->
 				<div class="form-group">
 					<label for="AUTHOR_TR-Biography" class="col-md-3 control-label">
 							Biography
 					</label>
 					<div class="col-md-9">
 						<textarea class="form-control" id="AUTHOR_TR-Biography" rows="3"
-						placeholder="" name="Biography"></textarea>
+						placeholder="(Optional)" name="Biography" aria-describedby="help-AUTHOR_TR-Biography"></textarea>
+						<span id="help-AUTHOR_TR-Biography" class="help-block">Tell us a little about this person!</span>
 					</div>
 				</div>
-				<div class="form-group">
-					<label for="AUTHOR_TR-WikipediaLink" class="col-md-3 control-label">
-							Wikipedia page
-					</label>
-					<div class="col-md-9">
-						<div class="input-group">
-							<input type="url" class="form-control" id="AUTHOR_TR-WikipediaLink"
-							placeholder=""
-							name="AuthorWikipediaLink"></input>
-							<span class="input-group-btn">
-								<button class="btn btn-info wiki-link" type="button">
-									<i class="fa fa-external-link"></i>
-								</button>
-							</span>
-						</div>
-					</div>
-				</div>
+
 				<div class="form-group">
 					<label for="AUTHOR-YearBorn" class="col-md-3 col-sm-3 control-label">Dates</label>
-					<div class="col-md-2 col-sm-3">
+					<div class="col-md-2 col-sm-4">
 						<input type="text" class="form-control" id="AUTHOR-YearBorn"
-						placeholder="" name="YearBorn"></input>
+						placeholder="(Optional)" name="YearBorn"></input>
 					</div>
 					<label for="AUTHOR-YearDied" class="col-md-1 col-sm-1 control-label"
 						style="text-align:center;">&mdash;</label>
-					<div class="col-md-2 col-sm-3">
+					<div class="col-md-2 col-sm-4">
 						<input type="text" class="form-control" id="AUTHOR-YearDied"
-						placeholder="" name="YearDied"></input>
+						placeholder="(Optional)" name="YearDied"></input>
 					</div>
+					<span id="help-AUTHOR_TR-BornDied" class="help-block">Year born - year died<br>(negative for BC)</span>
 				</div>
 				<div class="form-group">
 					<div class="col-md-2 col-md-offset-3">
 						<button type="submit" class="btn btn-primary" id="author-submit">
-						Add author</button> 
+						Add author</button>
 					</div>
 					<div class="col-md-2 col-md-offset-1">
 						<button type="button" class="btn btn-default" id="author-cancel">
-						Cancel</button> 
+						Cancel</button>
 					</div>
 				</div>
 			</div><!--/.add-author -->
 
 			<div class="work-lookup">
 				<div class="col-md-8 col-md-offset-3">
-					<div class="form-group">
-						<input type="search" class="form-control input-lg" 
+					<div class="form-group search-box">
+						<input type="search" class="form-control input-lg"
 						id="QUOTE-work-lookup" placeholder="Source"></input>
+						<span class="glyphicon glyphicon-remove" style="display:none;"></span>
 						<div class="results"></div>
 					</div>
 				</div>
 				<div class="col-md-1 searching text-center">
 				</div>
+				<div class="col-md-8 col-md-offset-3 work-buttons">
+					<button type="button" class="btn btn-default btn-block btn-attributed" id="isAttributed">
+					The source for this quote is unknown</button>
+					<span id="help-isAttributed" class="help-block">The quote does not come from a published work, or you don&rsquo;t know what work the quote comes from.</span>
+					<button type="button" class="btn btn-default btn-block btn-show-all-works" id="showAllWorks">
+					Show all works by this author</button>
+				</div>
 			</div><!--/.lookup-work -->
 
 			<div class="col-md-8 col-md-offset-3 work-results">
 				<div class="row">
-					<h4>Search results<span class="searching pull-right"></span></h4>
+					<h4>Select the work: <span class="searching pull-right"></span></h4>
 				</div>
 				<div class="row">
 					<div class="list-group">
@@ -170,33 +189,19 @@ var initWorkName = '';
 			</div><!--/.author-results -->
 
 			<div class="add-work">
+				<div class="col-md-9 col-md-offset-3 add-explain">
+					<h4>Add New Work</h4>
+					<p class="small">Please fill in as many fields as you can about where this quote comes from. This helps us make Pindar a better experience for everyone.</p>
+				</div>
 				<div class="form-group">
 					<label for="WORK_TR-WorkName" class="col-md-3 control-label">
 						Name of work
 					</label>
 					<div class="col-md-9">
 						<input type="text" class="form-control" id="WORK_TR-WorkName"
-						placeholder="" autocomplete="off" name="WorkName">
+						placeholder="" autocomplete="off" name="WorkName" aria-describedby="help-WORK_TR-WorkName">
 						</input>
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="WORK_TR-WorkSubtitle" class="col-md-3 control-label">
-						Subtitle
-					</label>
-					<div class="col-md-9">
-						<input type="text" class="form-control" id="WORK_TR-WorkSubtitle"
-						placeholder="" name="WorkSubtitle"></input>
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="WORK_TR-WorkDescription" class="col-md-3 control-label">
-						Description of work
-					</label>
-					<div class="col-md-9">
-						<textarea class="form-control" id="WORK_TR-WorkDescription"
-						placeholder="" rows="3"
-						name="WorkDescription"></textarea>
+						<span id="help-WORK_TR-WorkName" class="help-block">This is the name that will be shown in Pindar.</span>
 					</div>
 				</div>
 				<div class="form-group">
@@ -206,44 +211,66 @@ var initWorkName = '';
 					<div class="col-md-9">
 						<div class="input-group">
 							<input type="url" class="form-control" id="WORK_TR-WikipediaLink"
-							placeholder=""
-							name="WorkWikipediaLink"></input>
+							placeholder="" name="WorkWikipediaLink" aria-describedby="help-WORK_TR-WikipediaLink"></input>
 							<span class="input-group-btn">
 								<button class="btn btn-info wiki-link" type="button">
 									<i class="fa fa-external-link"></i>
 								</button>
 							</span>
 						</div>
+						<span id="help-WORK_TR-WikipediaLink" class="help-block">Click the blue button to automatically search Wikipedia for this work, then copy and paste the URL into this field. Linking to Wikipedia helps avoid duplicate entries.</span>
 					</div>
 				</div>
 				<div class="form-group">
+					<label for="WORK_TR-WorkSubtitle" class="col-md-3 control-label">
+						Subtitle
+					</label>
+					<div class="col-md-9">
+						<input type="text" class="form-control" id="WORK_TR-WorkSubtitle"
+						placeholder="(Optional)" name="WorkSubtitle"></input>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="WORK_TR-WorkDescription" class="col-md-3 control-label">
+						Description of work
+					</label>
+					<div class="col-md-9">
+						<textarea class="form-control" id="WORK_TR-WorkDescription"
+						placeholder="(Optional)" rows="3"
+						name="WorkDescription"></textarea>
+					</div>
+				</div>
+
+				<div class="form-group">
 					<label for="WORK-YearPublished" class="col-md-3 control-label">
 						Publication year</label>
-					<div class="col-md-2">
-						<input type="text" class="form-control" id="WORK-YearPublished"
-						placeholder="" name="YearPublished"></input>
+					<div class="col-md-3 col-sm-4">
+						<input type="numeric" class="form-control" id="WORK-YearPublished"
+						placeholder="(Optional)" name="YearPublished"></input>
 					</div>
-					<label for="WORK-YearWritten" class="col-md-5 control-label">
+					<!--<label for="WORK-YearWritten" class="col-md-5 control-label">
 						Year written (if different)</label>
 					<div class="col-md-2">
 						<input type="text" class="form-control" id="WORK-YearWritten"
 						placeholder="" name="YearWritten"></input>
-					</div>
+					</div>-->
+					<span id="help-WORK_TR-Years" class="help-block">Negative for BC</span>
 				</div>
 				<div class="form-group">
 					<div class="col-md-2 col-md-offset-3">
 						<button type="submit" class="btn btn-primary" id="work-submit">
-						Add work</button> 
+						Add work</button>
 					</div>
 					<div class="col-md-2 col-md-offset-1">
 						<button type="button" class="btn btn-default" id="work-cancel">
-						Cancel</button> 
+						Cancel</button>
 					</div>
 				</div>
 			</div><!--/.add-work -->
 
 			<div class="add-quote">
-				<div class="form-group">					
+				<div class="form-group">
 					<label for="QUOTE-QuoteLanguageID" class="col-md-3 control-label">Language</label>
 					<div class="col-md-4">
 						<select class="form-control" id="QUOTE-QuoteLanguageID"
@@ -255,29 +282,30 @@ var initWorkName = '';
 						  {{pass}}
 						</select>
 					</div>
-					<div class="col-md-4 col-md-offset-1 checkbox">
+					<!--<div class="col-md-4 col-md-offset-1 checkbox">
 					  <label>
 					    <input type="checkbox" id="QUOTE-IsOriginalLanguage"
 					     name="IsOriginalLanguage" checked>Original language</label>
-					</div>
+					</div>-->
 				</div>
 				<div class="form-group">
-					<div class="col-md-8 col-md-offset-3">
+					<label for="QUOTE-Note" class="col-md-3 control-label">Context</label>
+					<div class="col-md-8">
 						<textarea class="form-control" id="QUOTE-Note" rows="2"
-							placeholder="Context or additional information about this quote"
-							 name="Note"></textarea>
+							placeholder="(Optional)" name="Note" aria-describedby="help-QUOTE-Note"></textarea>
+						<span id="help-QUOTE-Note" class="help-block">Context or additional information about this quote, such as the chapter it comes from, line numbers (if from a poem), or what it refers to</span>
 					</div>
 				</div>
 				<div class="form-group">
 					<div class="col-md-2 col-md-offset-3">
 						<button type="submit" class="btn btn-primary" id="quote-submit">
-						Add quote</button> 
+						Add quote</button>
 					</div>
-					<div class="col-md-2 col-md-offset-1">
-						<button type="button" class="btn btn-default disabled" 
+					<!--<div class="col-md-2 col-md-offset-1">
+						<button type="button" class="btn btn-default disabled"
 						id="quote-cancel">
-						Cancel</button> 
-					</div>
+						Cancel</button>
+					</div>-->
 				</div>
 			</div><!--/.add-quote -->
 

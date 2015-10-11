@@ -1,6 +1,6 @@
-/* 
+/*
 
-quotify takes a quotes, authors, or works object output by one of 
+quotify takes a quotes, authors, or works object output by one of
 the tools.js 'Parse' functions and turns it into a fully functioning object.
 
 */
@@ -9,70 +9,73 @@ the tools.js 'Parse' functions and turns it into a fully functioning object.
 
 $.fn.quotify = function(options){
 
-  var settings = $.extend({ size: 'small', 
+  var settings = $.extend({ size: 'small',
     auth: !!user, objectType: 'quote' }, options);
 
   /********************
-          ELEMENT CONSTRUCTORS  
+          ELEMENT CONSTRUCTORS
   ********************/
 
   var constructBtnEditElement = function(){
-    var element = '<div class="btn-group">' + 
-      '<button class="btn btn-default btn-edit">Edit</button>' + 
+    var element = '<div class="btn-group">' +
+      '<button class="btn btn-default btn-edit">Edit</button>' +
       '<button type="button" class="btn btn-default dropdown-toggle"' +
-      'data-toggle="dropdown"><span class="caret"></span></button>' + 
-      '<ul class="dropdown-menu" role="menu">' + 
-      '<li><a href="#" class="btn-edit-history">' + 
+      'data-toggle="dropdown"><span class="caret"></span></button>' +
+      '<ul class="dropdown-menu" role="menu">' +
+      '<li><a href="#" class="btn-edit-history">' +
       'See past versions</a></li></ul></div>';
     return $(element); };
+
   var constructBtnFlagElement = function(type, size){
     if (size == 'large'){
-      var element = '<div class="btn-group btn-flag">' + 
-        '<button type="button" class="btn btn-default dropdown-toggle" ' + 
-        'data-toggle="dropdown"><i class="fa fa-flag"></i> ' + 
+      var element = '<div class="btn-group btn-flag">' +
+        '<button type="button" class="btn btn-default dropdown-toggle" ' +
+        'data-toggle="dropdown"><i class="fa fa-flag"></i> ' +
         '<i class="fa fa-caret-down"></i></button>';
     } else {
-      var element = '<div class="btn-group btn-goto-flag">' + 
-        '<a class="dropdown-toggle" data-toggle="dropdown">' + 
+      var element = '<div class="btn-group btn-goto-flag">' +
+        '<a class="dropdown-toggle" data-toggle="dropdown">' +
         '<i class="fa fa-flag"></i></a>';
     }
-    element += '<ul class="dropdown-menu" role="menu">' + 
-      '<li><a href="#" class="flag" data-type="1">' + 
-      'This ' + type + ' is offensive</a></li>' + 
-      '<li><a href="#" class="flag" data-type="2">' + 
-      'This ' + type + ' is not correct</a></li>' + 
-      '<li><a href="#" class="flag" data-type="3">' + 
-      'This ' + type + ' is a duplicate</a></li>' + 
-      '<li><a href="#" class="flag" data-type="4">' + 
+    element += '<ul class="dropdown-menu" role="menu">' +
+      '<li><a href="#" class="flag" data-type="1">' +
+      'This ' + type + ' is offensive</a></li>' +
+      '<li><a href="#" class="flag" data-type="2">' +
+      'This ' + type + ' is not correct</a></li>' +
+      '<li><a href="#" class="flag" data-type="3">' +
+      'This ' + type + ' is a duplicate</a></li>' +
+      '<li><a href="#" class="flag" data-type="4">' +
       'Something else...</a></li></ul></div>';
     return $(element); };
+
   var constructRateElement = function(type, size){
     var element = '<div class="sum-ratings ';
     if (type == 'quote'){
-      element += 'pull-left ' + size + '"><div class="ratings-box">' + 
-      '<div class="star-ratings-user">' + 
-      '<span data-star="5" class="star"></span>' + 
-      '<span data-star="4" class="star"></span>' + 
-      '<span data-star="3" class="star"></span>' + 
-      '<span data-star="2" class="star"></span>' + 
+      element += 'pull-left ' + size + '"><div class="ratings-box">' +
+      '<div class="star-ratings-user">' +
+      '<span data-star="5" class="star"></span>' +
+      '<span data-star="4" class="star"></span>' +
+      '<span data-star="3" class="star"></span>' +
+      '<span data-star="2" class="star"></span>' +
       '<span data-star="1" class="star"></span></div>';
     } else {
       element += 'pull-right ' + size + '"><div class="ratings-box">';
     }
-    element += '<div class="star-ratings-top">' + 
-      '<span class="star"></span>' + 
-      '<span class="star"></span>' + 
-      '<span class="star"></span>' + 
-      '<span class="star"></span>' + 
-      '<span class="star"></span></div>' + 
-      '<div class="star-ratings-bottom">' + 
-      '<span class="star"></span>' + 
-      '<span class="star"></span>' + 
-      '<span class="star"></span>' + 
-      '<span class="star"></span>' + 
-      '<span class="star"></span></div></div>' + 
+    element += '<div class="star-ratings-top">' +
+      '<span class="star"></span>' +
+      '<span class="star"></span>' +
+      '<span class="star"></span>' +
+      '<span class="star"></span>' +
+      '<span class="star"></span></div>' +
+      '<div class="star-ratings-bottom">' +
+      '<span class="star"></span>' +
+      '<span class="star"></span>' +
+      '<span class="star"></span>' +
+      '<span class="star"></span>' +
+      '<span class="star"></span></div></div>' +
       '<div class="ratings-count"></div></div>';
     return $(element); };
+
   var constructBtnCommentsElement = function(size, comment_count){
     if(typeof(comment_count)==='undefined') comment_count = 0;
     if (size == 'large'){
@@ -83,53 +86,56 @@ $.fn.quotify = function(options){
       }
       element += '>' + comment_count + '</span></button>';
     } else {
-      var element = '<div><a class="btn-goto-comments">' + 
+      var element = '<div><a class="btn-goto-comments">' +
         '<i class="fa fa-comments"></i></a></div>';
     }
     return $(element); };
+
   var constructEditHistoryElement = function(){
-    var element = '<div class="row edit-history" style="display:none;">' + 
+    var element = '<div class="row edit-history" style="display:none;">' +
       '<div class="col-md-12"></div></div>';
     return $(element); };
+
   var constructFlagElement = function(){
-    var element = '<div class="row flag-submit" style="display:none;">' + 
-      '<div class="col-md-12"><form role="form"><div class="form-group">' + 
-      '<label for="complaint"></label>' + 
-      '<textarea class="form-control" id="complaint" ' + 
-      'placeholder="Add a comment..."></textarea></div>' + 
-      '<div class="form-group">' + 
-      '<button class="btn btn-primary submit" type="button">Submit</button> ' + 
-      '<button class="btn btn-default cancel" type="button">Cancel</button>' + 
+    var element = '<div class="row flag-submit" style="display:none;">' +
+      '<div class="col-md-12"><form role="form"><div class="form-group">' +
+      '<label for="complaint"></label>' +
+      '<textarea class="form-control" id="complaint" ' +
+      'placeholder="Add a comment..."></textarea></div>' +
+      '<div class="form-group">' +
+      '<button class="btn btn-primary submit" type="button">Submit</button> ' +
+      '<button class="btn btn-default cancel" type="button">Cancel</button>' +
       '</div></form></div></div>';
     return $(element); };
+
   var constructCommentsElement = function(auth, type, id){
-    var element = '<div class="row comments" style="display:none;">' + 
+    var element = '<div class="row comments" style="display:none;">' +
       '<div class="list-group col-md-8 col-md-offset-2">';
     if (auth){
-      element += '<li class="list-group-item mycomment">' + 
-        '<form role="form"><div class="form-group">' + 
-        '<textarea class="form-control" id="commentfield"' + 
-        'placeholder="Add your own comment..."></textarea></div>' + 
-        '<div class="form-group">' + 
-        '<button class="btn btn-primary submit" type="button">Submit</button>' + 
-        ' <button class="btn btn-default cancel" type="button">Cancel</button>' + 
+      element += '<li class="list-group-item mycomment">' +
+        '<form role="form"><div class="form-group">' +
+        '<textarea class="form-control" id="commentfield"' +
+        'placeholder="Add your own comment..."></textarea></div>' +
+        '<div class="form-group">' +
+        '<button class="btn btn-primary submit" type="button">Submit</button>' +
+        ' <button class="btn btn-default cancel" type="button">Cancel</button>' +
         '</div></form></li>';
     } else {
-      element += '<a class="list-group-item mycomment text-center" ' + 
-        'href="/Pindar/default/user/login?_next=' + 
-        '/Pindar/default/' + type + 's/' + id + '?comments=true">' + 
-        'Please log in to add your own comment.</a>'; 
+      element += '<a class="list-group-item mycomment text-center" ' +
+        'href="/Pindar/default/user/login?_next=' +
+        '/Pindar/default/' + type + 's/' + id + '?comments=true">' +
+        'Please log in to add your own comment.</a>';
     }
     element += '</div></div>';
     return $(element); };
 
 
   this.each(function(){
-    
+
     /********************
-          INITIALIZE  
+          INITIALIZE
     ********************/
-    
+
     var object = $(this);
 
     var objectActions = object.find('.object-actions');
@@ -137,10 +143,10 @@ $.fn.quotify = function(options){
 
 
     /********************
-          ADD APPROPRIATE ELEMENTS  
+          ADD APPROPRIATE ELEMENTS
     ********************/
-    
-    
+
+
     objectActions.append(constructRateElement(settings.objectType,
       settings.size));
     if (settings.objectType == 'quote'){
@@ -150,7 +156,7 @@ $.fn.quotify = function(options){
         objectResults.append(constructCommentsElement(settings.auth,
           settings.objectType, object.data('id')));
       } else {
-        objectActions.append(constructBtnCommentsElement(settings.size));  
+        objectActions.append(constructBtnCommentsElement(settings.size));
       }
     }
     if (settings.auth & settings.size == 'large'){
@@ -162,7 +168,7 @@ $.fn.quotify = function(options){
     if (settings.size == 'large'){
       objectResults.append(constructFlagElement());
     }
-    
+
 
     /********************
           BASIC FUNCTIONALITY
@@ -198,13 +204,13 @@ $.fn.quotify = function(options){
 
     // on clicking quote, take user to quote page
     object.on('click', '.text', function(){
-      window.location.href = '/Pindar/default/quotes/' + 
+      window.location.href = '/Pindar/default/quotes/' +
         object.data('id');
     });
 
     // handlers
     object.on('clear.quotify', clear);
-    
+
     // cancel buttons
     objectResults.on('click', '.cancel', function(e){
       e.preventDefault();
@@ -245,37 +251,37 @@ $.fn.quotify = function(options){
       // add verifications here
       var call = '';
       if (settings.objectType == 'quote'){
-        call = '/Pindar/api/edit_quote?' + 
-          'QuoteID=' + object.data('id') + 
-          '&Text=' + $('#QUOTE-Text').val().sanitize() + 
-          '&QuoteLanguageID=' + $('#QUOTE-QuoteLanguageID').val() + 
-          '&IsOriginalLanguage=' + $('#QUOTE-IsOriginalLanguage').val() + 
+        call = '/Pindar/api/edit_quote?' +
+          'QuoteID=' + object.data('id') +
+          '&Text=' + $('#QUOTE-Text').val().sanitize() +
+          '&QuoteLanguageID=' + $('#QUOTE-QuoteLanguageID').val() +
+          '&IsOriginalLanguage=' + $('#QUOTE-IsOriginalLanguage').val() +
           '&Note=' + $('#QUOTE-Note').val().sanitize();
       } else if (settings.objectType == 'author'){
-        call = '/Pindar/api/edit_author?' + 
-          'AuthorId=' + object.data('author-id') + 
-          '&AuthorTrId=' + object.data('author-tr-id') + 
-          '&FirstName=' + $('#AUTHOR_TR-FirstName').val() + 
-          '&MiddleName=' + $('#AUTHOR_TR-MiddleName').val() + 
-          '&LastName=' + $('#AUTHOR_TR-LastName').val() + 
-          '&DisplayName=' + $('#AUTHOR_TR-DisplayName').val() + 
+        call = '/Pindar/api/edit_author?' +
+          'AuthorId=' + object.data('author-id') +
+          '&AuthorTrId=' + object.data('author-tr-id') +
+          '&FirstName=' + $('#AUTHOR_TR-FirstName').val() +
+          '&MiddleName=' + $('#AUTHOR_TR-MiddleName').val() +
+          '&LastName=' + $('#AUTHOR_TR-LastName').val() +
+          '&DisplayName=' + $('#AUTHOR_TR-DisplayName').val() +
           '&Biography=' + $('#AUTHOR_TR-Biography').val()+
-          '&WikipediaLink=' + $('#AUTHOR_TR-WikipediaLink').val() + 
-          '&YearBorn=' + $('#AUTHOR-YearBorn').val() + 
+          '&WikipediaLink=' + $('#AUTHOR_TR-WikipediaLink').val() +
+          '&YearBorn=' + $('#AUTHOR-YearBorn').val() +
           '&YearDied=' + $('#AUTHOR-YearDied').val();
       } else if (settings.objectType == 'work'){
-        call = '/Pindar/api/edit_work?' + 
-          'WorkId=' + object.data('work-id') + 
-          '&WorkTrId=' + object.data('work-tr-id') + 
-          '&WorkName=' + $('#WORK_TR-WorkName').val() + 
-          '&WorkSubtitle=' + $('#WORK_TR-WorkSubtitle').val() + 
-          '&WorkDescription=' + 
-          $('#WORK_TR-WorkDescription').val() + 
-          '&WikipediaLink=' + $('#WORK_TR-WikipediaLink').val() + 
-          '&YearPublished=' + $('#WORK-YearPublished').val() + 
+        call = '/Pindar/api/edit_work?' +
+          'WorkId=' + object.data('work-id') +
+          '&WorkTrId=' + object.data('work-tr-id') +
+          '&WorkName=' + $('#WORK_TR-WorkName').val() +
+          '&WorkSubtitle=' + $('#WORK_TR-WorkSubtitle').val() +
+          '&WorkDescription=' +
+          $('#WORK_TR-WorkDescription').val() +
+          '&WikipediaLink=' + $('#WORK_TR-WikipediaLink').val() +
+          '&YearPublished=' + $('#WORK-YearPublished').val() +
           '&YearWritten=' + $('#WORK-YearWritten').val();
       }
-      $.getJSON(call, function(response){ 
+      $.getJSON(call, function(response){
           location.reload();
       }).error(function(e){
         $('.edit>div').append(e.responseText);
@@ -290,7 +296,7 @@ $.fn.quotify = function(options){
 
     objectResults.find('.edit').append(
       '<div class="col-md-6 col-md-offset-3">'+
-      '<a class="btn btn-default btn-block ' + 
+      '<a class="btn btn-default btn-block ' +
       'btn-append-edit-history">Show edit history</a></div>');
 
     var editHistory = function(){
@@ -306,9 +312,9 @@ $.fn.quotify = function(options){
         closest('.btn-group').find('.dropdown-toggle').addClass('disabled');
       editHistoryDiv.fadeIn('fast');
       objectResults.slideDown();
-      editHistoryDivDiv.html('<span><i class="fa fa-spinner ' + 
+      editHistoryDivDiv.html('<span><i class="fa fa-spinner ' +
           'fa-spin"></i></span>');
-      $.getJSON('/Pindar/api/get_edit_history?' + 
+      $.getJSON('/Pindar/api/get_edit_history?' +
         settings.objectType.capitalize() + 'ID=' + object.data('id'),
         function(response){
           var table = '<table>';
@@ -319,7 +325,7 @@ $.fn.quotify = function(options){
             table += 'Name</th><th>Full Name</th>';
           } else if (settings.objectType == 'work'){
             table += 'Title</th><th>Subtitle</th>';
-          } 
+          }
           table += '<th>User</th><th>Modified</th></tr></thead>';
           var row = '';
           // the current record
@@ -329,15 +335,15 @@ $.fn.quotify = function(options){
             if (settings.objectType == 'quote'){
               row += h.QUOTE.Text + '</td><td>' + h.QUOTE.Note;
             } else if (settings.objectType == 'author'){
-              row += h.AUTHOR_TR.DisplayName + '</td><td>' + 
-                h.AUTHOR_TR.FirstName + ' ' + 
-                h.AUTHOR_TR.MiddleName + ' ' + 
+              row += h.AUTHOR_TR.DisplayName + '</td><td>' +
+                h.AUTHOR_TR.FirstName + ' ' +
+                h.AUTHOR_TR.MiddleName + ' ' +
                 h.AUTHOR_TR.LastName;
             } else if (settings.objectType == 'work'){
-              row += h.WORK_TR.WorkName + '</td><td>' + 
+              row += h.WORK_TR.WorkName + '</td><td>' +
                 h.WORK_TR.WorkSubtitle;
-            } 
-            row += '</td><td><a href="/Pindar/default/users/' + 
+            }
+            row += '</td><td><a href="/Pindar/default/users/' +
               h.auth_user.username + '">' + h.auth_user.username + '</td><td>';
             if (settings.objectType == 'quote'){
               row += h.QUOTE.modified_on + '</td></tr>';
@@ -345,7 +351,7 @@ $.fn.quotify = function(options){
               row += h.AUTHOR_TR.modified_on + '</td></tr>';
             } else if (settings.objectType == 'work'){
               row += h.WORK_TR.modified_on + '</td></tr>';
-            } 
+            }
             table += row;
           }
           // all past edits
@@ -355,15 +361,15 @@ $.fn.quotify = function(options){
             if (settings.objectType == 'quote'){
               row += h.QUOTE_archive.Text + '</td><td>' + h.QUOTE_archive.Note;
             } else if (settings.objectType == 'author'){
-              row += h.AUTHOR_TR_archive.DisplayName + '</td><td>' + 
-                h.AUTHOR_TR_archive.FirstName + ' ' + 
-                h.AUTHOR_TR_archive.MiddleName + ' ' + 
+              row += h.AUTHOR_TR_archive.DisplayName + '</td><td>' +
+                h.AUTHOR_TR_archive.FirstName + ' ' +
+                h.AUTHOR_TR_archive.MiddleName + ' ' +
                 h.AUTHOR_TR_archive.LastName;
             } else if (settings.objectType == 'work'){
-              row += h.WORK_TR_archive.WorkName + '</td><td>' + 
+              row += h.WORK_TR_archive.WorkName + '</td><td>' +
                 h.WORK_TR_archive.WorkSubtitle;
-            } 
-            row += '</td><td><a href="/Pindar/default/users/' + 
+            }
+            row += '</td><td><a href="/Pindar/default/users/' +
               h.auth_user.username + '">' + h.auth_user.username + '</td><td>';
             if (settings.objectType == 'quote'){
               row += h.QUOTE_archive.modified_on + '</td></tr>';
@@ -371,12 +377,12 @@ $.fn.quotify = function(options){
               row += h.AUTHOR_TR_archive.modified_on + '</td></tr>';
             } else if (settings.objectType == 'work'){
               row += h.WORK_TR_archive.modified_on + '</td></tr>';
-            } 
+            }
             table += row;
           }
           table += '</tbody></table>';
-          table += '<div class="form-group col-md-2">' + 
-            '<button class="btn btn-default cancel" type="button">' + 
+          table += '<div class="form-group col-md-2">' +
+            '<button class="btn btn-default cancel" type="button">' +
                 'Done</button></div>';
           editHistoryDivDiv.html(table);
           $('.edit-history table').DataTable({
@@ -439,11 +445,11 @@ $.fn.quotify = function(options){
         find('label').text(label);
       object.trigger('flag.quotify');
     });
-    
+
     // go to object page with flag open
     objectActions.on('click.quotify', '.btn-goto-flag ul a', function(e){
       e.preventDefault();
-      window.location.href = '/Pindar/default/' + settings.objectType + 
+      window.location.href = '/Pindar/default/' + settings.objectType +
         's/' + object.data('id') + '?flagType=' + $(this).data('type');
     })
 
@@ -453,30 +459,30 @@ $.fn.quotify = function(options){
       var form = $(this).closest('.flag-submit');
       var button = object.find('.btn-flag>.btn');
       var call = '/Pindar/api/flag?Type=' + form.data('type') + '&FlagNote=' +
-        form.find('textarea').val() + '&' + 
+        form.find('textarea').val() + '&' +
         settings.objectType.capitalize() + 'ID=' + object.data('id');
       $.getJSON('/Pindar/api/flag?Type=' + form.data('type') + '&FlagNote=' +
-        form.find('textarea').val() + '&' + 
+        form.find('textarea').val() + '&' +
         settings.objectType.capitalize() + 'ID=' + object.data('id'),
         function(response) {
           button.removeClass('btn-default').addClass('btn-danger').
             html('<i class="fa fa-flag"></i>');
-          button.closest('.btn-flag').attr('title', 'You flagged this ' + 
+          button.closest('.btn-flag').attr('title', 'You flagged this ' +
             settings.objectType);
       }).error(function(e){
         console.log(e.responseText);
-        button.html('<i class="fa fa-flag"></i> ' + 
+        button.html('<i class="fa fa-flag"></i> ' +
           '<i class="fa fa-exclamation-circle"></i>').
           removeClass('btn-default').addClass('btn-warning');
       });
       object.off('flag.quotify');
       flagged = true;
       object.trigger('clear.quotify');
-      button.html('<i class="fa fa-circle-o-notch fa-spin"></i> ' + 
+      button.html('<i class="fa fa-circle-o-notch fa-spin"></i> ' +
         '<i class="fa fa-caret-down"></i>');
     });
-    
-    
+
+
     /********************
           COMMENTING
     ********************/
@@ -491,16 +497,16 @@ $.fn.quotify = function(options){
         objectResults.slideDown();
         objectActions.find('.btn-comments').addClass('active');
         if (!commentsLoaded){
-          $('<li class="list-group-item">' + 
+          $('<li class="list-group-item">' +
             '<p class="text-center"><i class="fa fa-spinner fa-spin"></i>' +
             '</p></li>').appendTo(comments);
           $.getJSON('/Pindar/api/get_comments?QuoteID=' + object.data('id'),
             function(response) {
             for (q in response.comments){
               c = response.comments[q];
-              comment = $('<li class="list-group-item"><p>' + c.text + 
-                '</p><p class="small"><a href="/Pindar/default/users/' + 
-                c.user + '">' + c.user + '</a>, ' + c.timestamp + 
+              comment = $('<li class="list-group-item"><p>' + c.text +
+                '</p><p class="small"><a href="/Pindar/default/users/' +
+                c.user + '">' + c.user + '</a>, ' + c.timestamp +
                 '</p></li>');
               comments.append(comment);
             }
@@ -515,11 +521,11 @@ $.fn.quotify = function(options){
       e.preventDefault();
       object.trigger('loadComments.quotify');
     });
-    
+
     // go to object page with comments open
     objectActions.on('click.quotify', '.btn-goto-comments', function(e){
       e.preventDefault();
-      window.location.href = '/Pindar/default/' + settings.objectType + 
+      window.location.href = '/Pindar/default/' + settings.objectType +
         's/' + object.data('id') + '?comments=true';
     })
 
@@ -536,13 +542,13 @@ $.fn.quotify = function(options){
           replace('\n', '<br>');
         var button = objectActions.find('.btn-comments');
         var submitButton = $(this);
-        submitButton.html('<i class="fa fa-spinner fa-spin"></i> ' + 
+        submitButton.html('<i class="fa fa-spinner fa-spin"></i> ' +
           'Working...');
-        $.getJSON('/Pindar/api/comment?Text=' + text + '&QuoteID=' + 
+        $.getJSON('/Pindar/api/comment?Text=' + text + '&QuoteID=' +
           object.data('id'), function(response) {
           var c = response.mycomment;
           comment = '<li class="list-group-item"><p>' + c.text + '</p>';
-          comment += '<p class="small"><a href="/Pindar/default/users/' + 
+          comment += '<p class="small"><a href="/Pindar/default/users/' +
             c.user + '">' + c.user + '</a>, ' + c.timestamp + '</p></li>';
           object.find('.mycomment').hide();
           object.find('.comments .list-group').prepend(comment).show();
@@ -552,8 +558,8 @@ $.fn.quotify = function(options){
         });
       }
     })
-    
-    
+
+
     /********************
           RATING
     ********************/
@@ -568,13 +574,13 @@ $.fn.quotify = function(options){
     // show current rating
     var updateSumRating = function(newRating, newCount){
       var ratingAsWidth = newRating / 0.05;
-      objectActions.find('.star-ratings-top').css('width', ratingAsWidth + '%');  
+      objectActions.find('.star-ratings-top').css('width', ratingAsWidth + '%');
       if (settings.objectType == 'author' | settings.objectType == 'work'){
-        objectActions.find('.sum-ratings').attr('title', 'Average rating: ' + 
-          parseFloat(newRating).toFixed(1) + ', based on ' + newCount + 
+        objectActions.find('.sum-ratings').attr('title', 'Average rating: ' +
+          parseFloat(newRating).toFixed(3) + ', based on ' + newCount +
           ' rating' + plural(newCount));
       }
-      if (settings.size == 'large' & settings.objectType == 'quote'){
+      if (settings.size == 'large'){
         objectActions.find('.ratings-count').html(newCount);
       }
       if (settings.objectType == 'quote'){
@@ -590,7 +596,7 @@ $.fn.quotify = function(options){
       objectActions.find('.star-ratings-user span.star').
         removeClass('starred');
       for (i = 1; i <= rating; i++){
-        objectActions.find('.star-ratings-user span.star[data-star=' + i + 
+        objectActions.find('.star-ratings-user span.star[data-star=' + i +
           ']').addClass('starred');
       }
     };
@@ -608,25 +614,25 @@ $.fn.quotify = function(options){
         var rating = 5 - $(this).index();
         objectActions.find('.star-ratings-user').off('.rating').
           css('cursor', 'default');
-        $.getJSON('/Pindar/api/rate?Rating=' + rating + 
+        $.getJSON('/Pindar/api/rate?Rating=' + rating +
           '&QuoteID=' + object.data('id'), function(response) {
           updateUserRating(rating);
           if (response.update){
-            var newRating = (object.data('rating-count') * 
-              object.data('rating') - response.update + rating) / 
+            var newRating = (object.data('rating-count') *
+              object.data('rating') - response.update + rating) /
               object.data('rating-count');
             object.data('rating', newRating);
             object.data('rating-user', rating);
           } else {
             object.data('rating-user', rating);
-            var newRating = (object.data('rating-count') * 
+            var newRating = (object.data('rating-count') *
               object.data('rating') + rating) / (object.data('rating-count')+1);
             var newRatingCount = object.data('rating-count')+1;
             object.data('rating-count', newRatingCount);
             object.data('rating', newRating);
           }
           updateSumRating(object.data('rating'), object.data('rating-count'));
-          objectActions.find('.star-ratings-user').on('click.rating', 
+          objectActions.find('.star-ratings-user').on('click.rating',
             'span.star', submitRating).css('cursor', 'pointer');
         }).error(function(e){
           console.log(e.responseText);
@@ -637,7 +643,7 @@ $.fn.quotify = function(options){
     objectActions.find('.star-ratings-user').on('click.rating', 'span.star',
       submitRating);
 
-    
+
     /********************
           EXTRA FUNCTIONALITY
     ********************/
@@ -653,14 +659,14 @@ $.fn.quotify = function(options){
         } else if (settings.objectType == 'work'){
           query = $('#WORK_TR-WorkName').val();
         }
-        var link = "https://en.wikipedia.org/w/index.php?search=" + 
+        var link = "https://en.wikipedia.org/w/index.php?search=" +
           query + "&title=Special%3ASearch";
       }
       link = link.replace(' ', '%20');
       window.open(link);
     });
 
-    
+
     // permissions
     if (!settings.auth){
       object.off('.auth');

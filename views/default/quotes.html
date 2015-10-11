@@ -14,12 +14,13 @@ var requestComments = {{=request_comments}};
 
 
 <div class="row">
-	<div class="col-md-8 col-md-offset-2">
-		<div class="object quote" data-id="{{=q.QUOTE.id}}" 
-		data-comments="{{=comment_count}}" 
+	<div class="col-md-7 col-md-offset-1">
+		<div class="object quote" data-id="{{=q.QUOTE.id}}"
+		data-comments="{{=comment_count}}"
 		data-rating="{{if not rating == None:}}{{=rating}}{{else:}}0{{pass}}"
 		data-rating-count="{{if not rating_count == None:}}{{=rating_count}}{{else:}}0{{pass}}"
 		data-rating-user="{{=rating_user}}">
+			<!-- panel for the quote itself -->
 			<div class="object-data panel panel-default">
 				<div class="panel-heading">
 					<h3 class="panel-title">Quote</h3>
@@ -29,21 +30,24 @@ var requestComments = {{=request_comments}};
 						{{=sanitize(q.QUOTE.Text)}}
 					</p>
 					<p class="text-center">
-						<a class="btn btn-primary" 
+						<a class="btn btn-primary"
 						href="/Pindar/default/authors/{{=q.AUTHOR_TR.id}}">
 							{{=sanitize(q.AUTHOR_TR.DisplayName)}}
 						</a>
-						<a class="btn btn-primary" 
+						<a class="btn btn-primary"
 						href="/Pindar/default/works/{{=q.WORK_TR.id}}">
 							{{=sanitize(q.WORK_TR.WorkName)}}
 						</a>
 					</p>
-
+					<p class="pull-right small">
+						Submitted by <a href="/Pindar/default/users/{{=q.auth_user.username}}">{{=q.auth_user.username}}</a>
+					</p>
 					<div class="object-actions">
 					</div>
 				</div>
 			</div><!--/.object-data -->
 
+			<!-- panel for quote actions: edit, flag, etc -->
 			<div class="panel object-results" style="display:none;">
 				<br>
 				{{if auth.user:}}
@@ -56,7 +60,7 @@ var requestComments = {{=request_comments}};
 									placeholder="Enter the quote..." id="QUOTE-Text">{{=q.QUOTE.Text}}</textarea>
 								</div>
 							</div>
-							<div class="form-group">					
+							<div class="form-group">
 								<label for="QUOTE-QuoteLanguageID" class="col-md-3 control-label">Language</label>
 								<div class="col-md-4">
 									<select class="form-control" id="QUOTE-QuoteLanguageID"
@@ -84,18 +88,18 @@ var requestComments = {{=request_comments}};
 							<div class="form-group">
 								<div class="col-md-2 col-md-offset-4">
 									<button type="submit" class="btn btn-primary" id="edit-submit">
-									Submit</button> 
+									Submit</button>
 								</div>
 								<div class="col-md-2">
-									<button type="button" class="btn btn-default cancel" 
+									<button type="button" class="btn btn-default cancel"
 									id="quote-cancel">
-									Cancel</button> 
+									Cancel</button>
 								</div>
 							</div>
 						</form>
 					</div>
 				</div>
-				{{pass}}		
+				{{pass}}
 			</div><!--/.object-results -->
 		</div><!--/.object -->
 		<br>
@@ -104,8 +108,11 @@ var requestComments = {{=request_comments}};
 		<br>
 		<br>
 		<br>
-		
+
 		{{=response.toolbar()}}
+	</div>
+	<div class="col-md-4 recommendations">
+		<h4>Users who liked this quote also liked:</h4>
 	</div>
 </div><!--/.row -->
 {{block extrajs}}

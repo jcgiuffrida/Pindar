@@ -29,6 +29,18 @@ pre {
   padding-left: 15px;
 }
 
+.alert-dismissable, .alert {
+  position: fixed;
+  top: 70px;
+  left: 5px;
+  padding: 10px 30px;
+  background-color: lightpink;
+  border: 1px solid red;
+  border-radius: 10px;
+  color: #333;
+  cursor: pointer;
+}
+
 /*****
 /*  ~navbar
 /*****/
@@ -278,6 +290,14 @@ span.star:before {
 }
 .work-results a.disabled {
   cursor: default;
+}
+
+#AUTHOR_TR-DisplayName {
+  font-weight: bold;
+}
+
+#WORK_TR-WorkName {
+  font-weight: bold;
 }
 
 /****

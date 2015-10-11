@@ -6,13 +6,13 @@ from datetime import datetime
 # request.requires_https()
 
 ## local
-# db = DAL('mysql://bunny:rochester@localhost/pindar',pool_size=1,
-#   check_reserved=['mysql', 'postgres'],
-#   driver_args={"unix_socket":"/tmp/mysql.sock"})
+db = DAL('mysql://bunny:rochester@localhost/pindar',pool_size=1,
+  check_reserved=['mysql', 'postgres'],
+  driver_args={"unix_socket":"/tmp/mysql.sock"})
 
 ## deployment
-db = DAL('mysql://pindar:rochester@pindar.mysql.pythonanywhere-services.com/pindar$default',
-  pool_size=1, check_reserved=['mysql', 'postgres'])
+# db = DAL('mysql://pindar:rochester@pindar.mysql.pythonanywhere-services.com/pindar$default',
+#   pool_size=1, check_reserved=['mysql', 'postgres'])
 
 ## by default give a view/generic.extension to all actions from localhost
 ## none otherwise. a pattern can be 'controller/function.extension'

@@ -6,7 +6,7 @@ $(document).ready(function(){
   var authorNewItem = authorTable.find('.new-item');
   var workTable = $('.work-results .list-group');
   var workNewItem = workTable.find('.new-item');
-  
+
   if (initAuthor !== ''){
     $('.author-lookup').data('author-id', initAuthor);
     $('.author-lookup input').val(initAuthorName)
@@ -16,7 +16,7 @@ $(document).ready(function(){
   }
   $('.author-results').hide();
   $('.add-author').hide();
-  
+
   if (initWork !== ''){
     $('.work-lookup').data('work-id', initWork);
     $('.work-lookup input').val(initWorkName);
@@ -25,12 +25,13 @@ $(document).ready(function(){
   }
   $('.work-results').hide();
   $('.add-work').hide();
-  
+
   $('.add-form').hide().fadeIn('slow');
   $('#QUOTE-Text').focus();
-  
+
   var button = '';
 
+  /*
   var started = false;
   $('#QUOTE-Text').keyup(function(){
     if (started | $('#QUOTE-Text').val().length > 2){
@@ -38,6 +39,7 @@ $(document).ready(function(){
       $('.author-lookup').fadeIn('slow');
     }
   });
+*/
 
   // regex validation
   // what is this???
@@ -54,17 +56,19 @@ $(document).ready(function(){
   $('.author-lookup input').keyup(function(){
     // do this first for speed reasons
     var query = $(this).val();
-    authorNewItem.html('<b>' + query.capitalize() + 
+    authorNewItem.html('<b>' + query.capitalize() +
       '</b>&nbsp;&nbsp;&nbsp;<em>Create new author</em>');
-
     $('.work-results').hide().find('.list-group a').not('.new-item').remove();
     $('.work-lookup').fadeOut('fast');
     $('.work-lookup input').val('');
+    $('.work-lookup .glyphicon-remove').hide();
+    $('.work-lookup .work-buttons').fadeIn('fast');
     $('.add-quote').fadeOut('fast');
     $('.work-lookup').data('work-id', '');
     $('.work-lookup').data('work-tr-id', '');
     $('.author-lookup').data('author-id', '');
     $('.author-lookup').data('author-tr-id', '');
+    $('.author-lookup').removeClass('has-success');
     if ($('.author-lookup input').val().length < 2){
       if ($('.author-results').is(':visible')){
         $('.author-results').hide();
@@ -74,81 +78,99 @@ $(document).ready(function(){
       $('.author-results').fadeIn('slow');
       $('.author-results .searching').
         html('<i class="fa fa-spinner fa-spin"></i>');
-      
+
       $.getJSON('/Pindar/api/author_query?lookup=' + query,
         function(response) {
         $('.author-results .searching').html('');
         authorTable.detach();
         authorTable.find('a').not('.new-item').remove();
         if (response['authors'].length > 0){
-        var authors = $(parseAuthors(response.authors, 
+        var authors = $(parseAuthors(response.authors,
           unwrapped=true));
           authors.each(function(){
             authorTable.prepend(this);
           });
         } else {
-          authorTable.prepend('<a class="list-group-item disabled">' + 
+          authorTable.prepend('<a class="list-group-item disabled">' +
             '<em>No authors found.</em></a>');
         }
         $('.author-results .row:last').append(authorTable);
       });
     }
   });
-  
+
   // if work lookup changes, reset
   $('.work-lookup input').keyup(function(){
     // do this first for speed reasons
     var query = $(this).val();
-    workNewItem.html('<b>' + query.capitalize() + 
+    workNewItem.html('<b>' + query.capitalize() +
       '</b>&nbsp;&nbsp;&nbsp;<em>Create new work</em>');
 
     $('.add-quote').fadeOut('fast');
     $('.work-lookup').data('work-id', '');
     $('.work-lookup').data('work-tr-id', '');
+    $('.work-lookup').removeClass('has-success');
     if ($('.work-lookup input').val().length < 2){
       if ($('.work-results').is(':visible')){
         $('.work-results').hide();
         $('.work-results .list-group a').not('.new-item').remove();
       }
+      $('.work-lookup .work-buttons').fadeIn('fast');
     } else {
+      $('.work-lookup .work-buttons').hide();
       var author = $('.author-lookup').data('author-id');
       $('.work-results').fadeIn('slow');
       $('.work-results .searching').
         html('<i class="fa fa-spinner fa-spin"></i>');
-      
-      $.getJSON('/Pindar/api/work_query?lookup=' + query + 
+
+      $.getJSON('/Pindar/api/work_query?lookup=' + query +
         '&author=' + author, function(response) {
         $('.work-results .searching').html('');
         workTable.detach();
         workTable.find('a').not('.new-item').remove();
         if (response['works'].length > 0){
-          var works = $(parseWorks(response.works, 
+          var works = $(parseWorks(response.works,
             unwrapped=true, author=false));
           works.each(function(){
             workTable.prepend(this);
           });
         } else {
-          workTable.prepend('<a class="list-group-item disabled">' + 
+          workTable.prepend('<a class="list-group-item disabled">' +
             '<em>No works found.</em></a>');
         }
         $('.work-results .row:last').append(workTable);
       });
     }
   });
-  
-  // only check that quote is entered if quote submit is clicked
+
+  // button handling
   $('.add-form').on('click', 'button', function(){
     // open wikipedia link in new window or tab
     if ($(this).hasClass('wiki-link')){
       var query = $(this).closest('.form-group').parent('div').
         find('input:first').val();
-      var link = "https://en.wikipedia.org/w/index.php?search=" + 
+      var link = "https://en.wikipedia.org/w/index.php?search=" +
         query + "&title=Special%3ASearch";
       link = link.replace(' ', '%20');
       window.open(link);
+    } else if ($(this).hasClass('btn-attributed')){
+      // if user clicks Attributed button, select Attributed
+      $('.work-lookup .work-buttons').hide();
+      // select Attributed for this author
+      $.getJSON('/Pindar/api/work_query?lookup=Attributed&author=' + $('.author-lookup').data('author-id') + '&showAttributed=true', function(response){
+        var attributed = response.works[0];
+        $('.work-lookup').data('work-id', attributed.WORK.id);
+        $('.work-lookup').data('work-tr-id', attributed.WORK_TR.id);
+        $('.work-lookup input').val('(Attributed)');
+        $('.add-quote').fadeIn('slow');
+        $('.work-lookup .glyphicon-remove').show();
+      });
+    } else if ($(this).hasClass('btn-show-all-works')){
+      $('.work-lookup input').val('  ').trigger('keyup').trigger('input');
     } else {
       button = $(this).attr('id');
       if (button == 'quote-submit'){
+        // only check that quote has text if that button is clicked
         $('#QUOTE-Text').rules('add', {
           required: true
         });
@@ -173,7 +195,7 @@ $(document).ready(function(){
       }
     }
   });
-  
+
   // validations
   var validator = $('.add-form').validate({
     rules: {
@@ -197,12 +219,10 @@ $(document).ready(function(){
         regex: '^(https://|http://)?[a-z]{2}\.wikipedia\.org/wiki/.{1,}'
       },
       YearBorn: {
-        range: [-5000,2050],
-        digits: true
+        range: [-5000,2050]
       },
       YearDied: {
-        range: [-5000, 2050],
-        digits: true
+        range: [-5000, 2050]
       },
       WorkName: {
         required: true,
@@ -260,58 +280,68 @@ $(document).ready(function(){
       if (button == 'author-submit'){
         $('.' + button).addClass('disabled');
 
-        $.getJSON('/Pindar/api/author_submit?' + 
-          'FirstName=' + $('#AUTHOR_TR-FirstName').val() + 
-          '&MiddleName=' + $('#AUTHOR_TR-MiddleName').val() + 
-          '&LastName=' + $('#AUTHOR_TR-LastName').val() + 
-          '&DisplayName=' + $('#AUTHOR_TR-DisplayName').val() + 
-          '&AKA=' + $('#AUTHOR_TR-AKA').val() + 
-          '&Biography=' + 
-          $('#AUTHOR_TR-Biography').val().sanitize() + 
-          '&WikipediaLink=' + $('#AUTHOR_TR-WikipediaLink').val() + 
-          '&YearBorn=' + $('#AUTHOR-YearBorn').val() + 
+        $.getJSON('/Pindar/api/author_submit?' +
+          'FirstName=' + $('#AUTHOR_TR-FirstName').val() +
+          '&MiddleName=' + $('#AUTHOR_TR-MiddleName').val() +
+          '&LastName=' + $('#AUTHOR_TR-LastName').val() +
+          '&DisplayName=' + $('#AUTHOR_TR-DisplayName').val() +
+          //'&AKA=' + $('#AUTHOR_TR-AKA').val() +
+          '&Biography=' +
+          $('#AUTHOR_TR-Biography').val().sanitize() +
+          '&WikipediaLink=' + $('#AUTHOR_TR-WikipediaLink').val() +
+          '&YearBorn=' + $('#AUTHOR-YearBorn').val() +
           '&YearDied=' + $('#AUTHOR-YearDied').val(),
           function(response) {
+            var authorName = $('#AUTHOR_TR-DisplayName').val();
             $('.add-author').fadeOut('fast');
             $('.author-lookup').fadeIn('fast').find('input').
               val($('#AUTHOR_TR-DisplayName').val());
             $('.author-lookup').data('author-id', response.AuthorID).
               data('author-tr-id', response.AuthorTrID);
+            $('.author-lookup').addClass('has-success');
             $('.work-lookup').fadeIn('fast').find('input').focus();
             clear_author();
             $('.' + button).removeClass('disabled');
+            // tell reader it worked
+            $('.flash.alert').html('Added ' + authorName + ' as a new author<span id="closeflash"> × </span>')
+              .slideDown();
         });
       } else if (button == 'work-submit'){
         $('.' + button).addClass('disabled');
 
-        $.getJSON('/Pindar/api/work_submit?' + 
-          'WorkName=' + $('#WORK_TR-WorkName').val() + 
-          '&WorkSubtitle=' + $('#WORK_TR-WorkSubtitle').val() + 
-          '&WorkDescription=' + 
-          $('#WORK_TR-WorkDescription').val().sanitize() + 
-          '&WikipediaLink=' + $('#WORK_TR-WikipediaLink').val() + 
-          '&YearPublished=' + $('#WORK-YearPublished').val() + 
-          '&YearWritten=' + $('#WORK-YearWritten').val() + 
+        $.getJSON('/Pindar/api/work_submit?' +
+          'WorkName=' + $('#WORK_TR-WorkName').val() +
+          '&WorkSubtitle=' + $('#WORK_TR-WorkSubtitle').val() +
+          '&WorkDescription=' +
+          $('#WORK_TR-WorkDescription').val().sanitize() +
+          '&WikipediaLink=' + $('#WORK_TR-WikipediaLink').val() +
+          '&YearPublished=' + $('#WORK-YearPublished').val() +
+          //'&YearWritten=' + $('#WORK-YearWritten').val() +
           '&AuthorID=' + $('.author-lookup').data('author-id'),
           function(response) {
+            var workName = $('#WORK_TR-WorkName').val();
             $('.add-work').fadeOut('fast');
             $('.work-lookup').fadeIn('fast').find('input').
               val($('#WORK_TR-WorkName').val());
             $('.work-lookup').data('work-id', response.WorkID).
               data('work-tr-id', response.WorkTrID);
+            $('.work-lookup').addClass('has-success');
             $('.add-quote').fadeIn('fast').find('textarea').focus();
             clear_work();
             $('.' + button).removeClass('disabled');
+            // tell reader it worked
+            $('.flash.alert').html('Added ' + workName + ' as a new work<span id="closeflash"> × </span>')
+              .slideDown();
         });
       } else if (button == 'quote-submit'){
         $('.' + button).addClass('disabled');
 
-        $.getJSON('/Pindar/api/quote_submit?' + 
-          'Text=' + $('#QUOTE-Text').val().sanitize() + 
-          '&QuoteLanguageID=' + $('#QUOTE-QuoteLanguageID').val() + 
-          '&IsOriginalLanguage=' + 
-          $('#QUOTE-IsOriginalLanguage').prop('checked') + 
-          '&Note=' + $('#QUOTE-Note').val().sanitize() + 
+        $.getJSON('/Pindar/api/quote_submit?' +
+          'Text=' + $('#QUOTE-Text').val().sanitize() +
+          '&QuoteLanguageID=' + $('#QUOTE-QuoteLanguageID').val() +
+          //'&IsOriginalLanguage=' +
+          //$('#QUOTE-IsOriginalLanguage').prop('checked') +
+          '&Note=' + $('#QUOTE-Note').val().sanitize() +
           '&WorkID=' + $('.work-lookup').data('work-id'),
           function(response) {
             clear_quote();
@@ -319,13 +349,16 @@ $(document).ready(function(){
             clear_work();
             $('#QUOTE-Text').focus();
             $('.' + button).removeClass('disabled');
+            // tell reader it worked
+            $('.flash.alert').html('Quote added! <a href="/Pindar/default/quotes/' + response.QuoteID + '">View quote</a><span id="closeflash"> × </span>')
+              .slideDown();
         });
       }
     }
   });
 });
 
-
+// select the author
 (function ($) {
   $.selectAuthor = function(list){
     var selected;
@@ -352,10 +385,10 @@ $(document).ready(function(){
           $('#AUTHOR_TR-MiddleName').val(names[1]);
           $('#AUTHOR_TR-LastName').val(names[2]);
         }
-      } else {      
+      } else {
         // select an existing author
         $('.author-lookup').data('author-id', selected.data('author-id'));
-        $('.author-lookup').data('author-tr-id', 
+        $('.author-lookup').data('author-tr-id',
           selected.data('author-tr-id'));
         if (selected.html().indexOf('(') !== -1){
           $('.author-lookup input').val(selected.html().substring(0,
@@ -368,6 +401,7 @@ $(document).ready(function(){
         }
         $('.author-results').fadeOut('fast').find('.list-group a').
           not('.new-item').remove();
+        $('.author-lookup').addClass('has-success');
         $('.work-lookup').fadeIn('slow');
       }
     });
@@ -419,7 +453,7 @@ function clear_work() {
         $('#WORK_TR-WorkName').val($('.work-lookup input').
           val().capitalize());
         var names = $('#WORK_TR-WorkName').val().split(" ");
-      } else {  
+      } else {
         // select an existing work
         $('.work-lookup').data('work-id', selected.data('work-id'));
         $('.work-lookup').data('work-tr-id', selected.data('work-tr-id'));
@@ -434,11 +468,11 @@ function clear_work() {
         }
         $('.work-results').fadeOut('fast').find('.list-group a').
           not('.new-item').remove();
+          $('.work-lookup').addClass('has-success');
         $('.add-quote').fadeIn('slow');
       }
     });
   }
 })($);
 $.selectWork(".work-results");
-
 

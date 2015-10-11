@@ -149,7 +149,7 @@ function parseWorks(worksObject, unwrapped, author, max){
   return works;
 }
 
-// prevent enter from ever submitting form, except in navbar
+// prevent enter from ever submitting form, except in navbar and main page
 $(document).on('keypress', 'form', function (e) {
   var code = e.keyCode || e.which;
   if ($(this).hasClass('navbar-form') || $(this).hasClass('main-page-search')){
@@ -183,10 +183,17 @@ function isCharacterKeyPress(evt) {
 }
 
 String.prototype.capitalize = function(delim) {
+  // return the string capitalized, in title case
   if(typeof(delim)==='undefined') delim = " ";
-  var strings = this.split(delim);
+  var strings = this.trim().split(delim);
   for (var i = 0; i < strings.length; i++){
-    strings[i] = strings[i].charAt(0).toUpperCase() + strings[i].slice(1);
+    // fromhttp://writers.stackexchange.com/questions/4621/which-words-should-not-be-capitalized-in-title-case
+    if (["a", "an", "the", "and", "but", "for", "nor", "or", "at", "by", "for", "from", "in", "of", "on", "to", "with"].indexOf(strings[i]) !== -1 && i !== 0 && i !== strings.length - 1){
+      // don't capitalize
+      strings[i] = strings[i]
+    } else {
+      strings[i] = strings[i].charAt(0).toUpperCase() + strings[i].slice(1);
+    }
   }
     return strings.join(' ');
 }
@@ -242,7 +249,7 @@ $(document).ready(function(){
   })
 
   // clear search boxes
-  $('.glyphicon-remove').hide();
+  $('.search-box .glyphicon-remove').hide();
   $(document).on('.search-box input', 'input', function(){
     var val = $(this).val();
     if (val.length > 0){
@@ -253,7 +260,7 @@ $(document).ready(function(){
   });
   $(document).on('click', '.glyphicon-remove', function(){
     $(this).closest('.search-box').find('input').val('').focus().
-      trigger('input');
+      trigger('input').trigger('keyup');
   });
 
 });

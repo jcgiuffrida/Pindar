@@ -160,12 +160,15 @@ def quotes():
         lang = auth.user.PrimaryLanguageID
     else:
         lang = 1  # default is english
+    # get comments
     comment_count = db((db.COMMENT.QuoteID==request.args(0))).count()
+    # get avg and count of ratings
     rating_query = db(db.RATING.QuoteID==request.args(0))
     sum_ratings = rating_query.select(
         db.RATING.Rating.avg(), db.RATING.Rating.count()).first()
     rating = sum_ratings._extra['AVG(RATING.Rating)']
     rating_count = sum_ratings._extra['COUNT(RATING.Rating)']
+    # if user, note what user's rating is
     if auth.user:
         try:
             rating_user = rating_query(db.RATING.created_by==auth.user).select(
@@ -174,6 +177,7 @@ def quotes():
             rating_user = 0
     else:
         rating_user = 0
+    # select quote information
     q = db((db.QUOTE._id==request.args(0)) &
             (db.QUOTE._id==db.QUOTE_WORK.QuoteID) &
             (db.QUOTE_WORK.WorkID==db.WORK._id) &
@@ -182,12 +186,15 @@ def quotes():
             (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) &
             (db.AUTHOR_TR.AuthorID==db.AUTHOR._id) &
             (db.AUTHOR_TR.LanguageID==lang) &
-            (db.WORK_TR.LanguageID==lang)).select(
+            (db.WORK_TR.LanguageID==lang) &
+            (db.QUOTE.created_by==db.auth_user.id)).select(
             db.QUOTE.ALL, db.WORK_TR.WorkName,
-            db.AUTHOR_TR.DisplayName, db.WORK_TR._id, db.AUTHOR_TR._id).first()
+            db.AUTHOR_TR.DisplayName, db.WORK_TR._id, db.AUTHOR_TR._id,
+            db.auth_user.username).first()
     langs = db((db.LANGUAGE._id > 0)).select(
         db.LANGUAGE.NativeName, db.LANGUAGE._id,
         orderby=db.LANGUAGE._id).as_list()
+    # if user clicked on flag or comments to get to this page, show them
     if request.vars.flagType:
         request_flag_type = request.vars.flagType
     if request.vars.comments:
@@ -201,7 +208,8 @@ def authors():
         lang = auth.user.PrimaryLanguageID
     else:
         lang = 1  # default is english
-    # what author?
+
+    # get author id
     if request.args(0)=='all':
         if request.vars['e']:
             response.flash='Author ' + request.vars['e'] + ' was not found'
@@ -209,19 +217,25 @@ def authors():
             search = request.vars.search
         return locals()
     a = db.AUTHOR_TR(request.args(0))
+
     # if author is invalid, show all authors and an error message
     if not a:
         if not request.args(0):
             redirect(URL('Pindar/default', 'authors', 'all'))
         else:
             redirect(URL('Pindar/default', 'authors', 'all?e='+request.args(0)))
+
+    # get author data
     try:
         author = db((db.AUTHOR_TR._id==request.args(0)) &
             (db.AUTHOR_TR.AuthorID==db.AUTHOR._id)).select()
         author_id = author[0]['AUTHOR']['id']
     except KeyError:
         redirect(URL('authors', 'all?e='+request.args(0)))
+
+    # get quote count, ratings, works, and quotes associated with the author
     quotecount = db.QUOTE_WORK.QuoteID.count()
+
     ratings = db((db.WORK_AUTHOR.AuthorID==author_id) &
         (db.QUOTE_WORK.WorkID==db.WORK_AUTHOR.WorkID)).select(
         db.RATING.Rating.avg(), db.RATING.Rating.count(),
@@ -238,6 +252,7 @@ def authors():
             left=db.QUOTE_WORK.on(db.WORK.id==db.QUOTE_WORK.WorkID),
             groupby=db.WORK.id, orderby=~quotecount|db.WORK_TR.WorkName,
             limitby=(0,10))
+
     quotes = db((db.WORK_AUTHOR.AuthorID==author_id) &
             (db.WORK_AUTHOR.WorkID==db.WORK._id) &
             (db.WORK_TR.WorkID==db.WORK._id) &
@@ -245,6 +260,7 @@ def authors():
             (db.QUOTE_WORK.QuoteID==db.QUOTE._id) &
             (db.QUOTE.QuoteLanguageID==lang)).select(
             orderby=~db.QUOTE.created_on, limitby=(0,10))
+
     return locals()
 
 
