@@ -3,7 +3,7 @@ from datetime import datetime
 
 ## if SSL/HTTPS is properly configured and you want all HTTP requests to
 ## be redirected to HTTPS, uncomment the line below:
-# request.requires_https()
+request.requires_https()
 
 ## local
 # db = DAL('mysql://bunny:rochester@localhost/pindar',pool_size=1,
@@ -34,6 +34,34 @@ def plural(num):
 def sanitize(q):
     return XML(q.replace('\n', '<br/>').\
           replace('    ', '&nbsp;&nbsp;&nbsp;&nbsp;'), sanitize=True)
+
+def get_dates(date1, date2, type):
+    s = ''
+    if date1 and date1 < 0:
+        date1 = str(0 - date1) + ' BC'
+    if date2 and date2 < 0:
+        date2 = str(0 - date2) + ' BC'
+    if date1:
+        if date2:
+            # both dates
+            if type == 'author':
+                s = ' (' + str(date1) + ' - ' + str(date2) + ')'
+            else:
+                s = ' (Published in ' + str(date1) + ', written in ' + \
+                    str(date2) + ')'
+        else:
+            # no date2
+            if type == 'author':
+                s = ' (b. ' + str(date1) + ')'
+            else:
+                s = ' (Published in ' + str(date1) + ')'
+    elif date2:
+        # no date1
+        if type == 'author':
+            s = ' (d. ' + str(date2) + ')'
+        else:
+            s = ' (Written in ' + str(date2) + ')'
+    return s
 
 
 from gluon.tools import Auth, Crud, Service, PluginManager, prettydate
@@ -137,13 +165,19 @@ db.QUOTE.Note.requires = IS_LENGTH(maxsize=4096)
 ### note: it should not be possible to enter a WORK without joining it
 ### to a WORK_TR. same with authors
 
+db.define_table('WORKTYPE',
+            Field('TypeName', 'string', required=True),
+            format='%(TypeName)s')
+
 db.define_table('WORK',
             Field('YearPublished', 'integer', label='Year published'),
             Field('YearWritten', 'integer', label='Year written (if different)'),
+            Field('Type', 'reference WORKTYPE', ondelete='SET NULL'),
             Field('IsHidden', 'boolean', default=False, readable=False,
               writable=False),
             auth_signature)
 
+db.WORK.Type.requires = [IS_NOT_EMPTY(), IS_IN_DB(db, db.WORKTYPE.id, '%(TypeName)s')]
 db.WORK.YearPublished.requires = IS_INT_IN_RANGE(-5000,2050)
 db.WORK.YearWritten.requires = IS_INT_IN_RANGE(-5000,2050)
 
@@ -179,13 +213,19 @@ db.WORK_TR.WorkNote.requires = IS_LENGTH(maxsize=4096)
 
 ###---------------------- AUTHOR
 
+db.define_table('AUTHORTYPE',
+            Field('TypeName', 'string', required=True),
+            format='%(TypeName)s')
+
 db.define_table('AUTHOR',
 			Field('YearBorn', 'integer'),
 			Field('YearDied', 'integer'),
+            Field('Type', 'reference AUTHORTYPE', ondelete='SET NULL'),
 			Field('IsHidden', 'boolean', default=False, readable=False,
         writable=False),
       auth_signature)
 
+db.AUTHOR.Type.requires = [IS_NOT_EMPTY(), IS_IN_DB(db, db.AUTHORTYPE.id, '%(TypeName)s')]
 db.AUTHOR.YearBorn.requires = IS_INT_IN_RANGE(-5000,2050)
 db.AUTHOR.YearDied.requires = IS_INT_IN_RANGE(-5000,2050)
 

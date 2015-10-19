@@ -14,6 +14,8 @@ def works():
         selectable=[('Delete', lambda ids: delete_multiple('WORK', ids))])
     grid2 = SQLFORM.grid(db.WORK_TR, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('WORK_TR', ids))])
+    grid3 = SQLFORM.grid(db.WORKTYPE, user_signature=False,
+        selectable=[('Delete', lambda ids: delete_multiple('WORKTYPE', ids))])
     return locals()
 
 
@@ -23,6 +25,8 @@ def authors():
         selectable=[('Delete', lambda ids: delete_multiple('AUTHOR', ids))])
     grid2 = SQLFORM.grid(db.AUTHOR_TR, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('AUTHOR_TR', ids))])
+    grid3 = SQLFORM.grid(db.AUTHORTYPE, user_signature=False,
+        selectable=[('Delete', lambda ids: delete_multiple('AUTHORTYPE', ids))])
     return locals()
 
 
@@ -69,11 +73,17 @@ def delete_multiple(table, ids):
     if table == 'QUOTE':
         to_delete = db(db.QUOTE.id.belongs(ids))
         to_delete.delete()
+    elif table == 'WORKTYPE':
+        to_delete = db(db.WORKTYPE.id.belongs(ids))
+        to_delete.delete()
     elif table == 'WORK':
         to_delete = db(db.WORK.id.belongs(ids))
         to_delete.delete()
     elif table == 'WORK_TR':
         to_delete = db(db.WORK_TR.id.belongs(ids))
+        to_delete.delete()
+    elif table == 'AUTHORTYPE':
+        to_delete = db(db.AUTHORTYPE.id.belongs(ids))
         to_delete.delete()
     elif table == 'AUTHOR':
         to_delete = db(db.AUTHOR.id.belongs(ids))

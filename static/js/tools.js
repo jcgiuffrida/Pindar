@@ -26,8 +26,8 @@ function parseQuotes(quotesObject, size, max){
       '" data-rating-count="' + q._extra['COUNT(RATING.Rating)'] + '">';
     object += '<div class="object-data panel panel-default">';
     object += '<div class="panel-body"><p class="text">';
-    if (q.QUOTE.Text.length > 500){
-      object += q.QUOTE.Text.slice(0, q.QUOTE.Text.indexOf(' ', 490)) +
+    if (q.QUOTE.Text.length > 750){
+      object += q.QUOTE.Text.slice(0, q.QUOTE.Text.indexOf(' ', 740)) +
         ' ...';
     } else {
       object += q.QUOTE.Text;
@@ -72,7 +72,7 @@ function parseAuthors(authorsObject, unwrapped, max){
       '" data-author-tr-id="' + a.AUTHOR_TR.id +
       '" href="/Pindar/default/authors/' + a.AUTHOR_TR.id + '">';
     object += a.AUTHOR_TR.DisplayName;
-    object += getAuthorDates(a.AUTHOR.YearBorn, a.AUTHOR.YearDied);
+    object += getDates(a.AUTHOR.YearBorn, a.AUTHOR.YearDied, 'author');
     workcount = a['_extra']['COUNT(WORK_AUTHOR.WorkID)'] - 1; // minus 'attributed'
     if (workcount > 0){
       object += '<span class="badge">';
@@ -123,11 +123,10 @@ function parseWorks(worksObject, unwrapped, author, max){
       '" data-work-tr-id="' + w.WORK_TR.id +
       '" href="/Pindar/default/works/' + w.WORK_TR.id + '">';
     object += w.WORK_TR.WorkName;
-    if (w.WORK.YearPublished != null){
-      object += ' (' + w.WORK.YearPublished + ')';
-    } else if (w.WORK.YearWritten != null){
-      object += ' (' + w.WORK.YearWritten + ')';
-    }
+    object += getDates(w.WORK.YearPublished, w.WORK.YearWritten, 'work');
+    // if (w.WORKTYPE.TypeName != null){
+    //   object += '<span><i> (' + w.WORKTYPE.TypeName + ')</i></span>';
+    // }
     quotecount = w['_extra']['COUNT(QUOTE_WORK.QuoteID)'];
     if (quotecount > 0){
       object += '<span class="badge">' + quotecount + ' quote' +
@@ -210,26 +209,172 @@ function plural(num){
   }
 }
 
-function getAuthorDates(bdate, ddate){
+function getDates(date1, date2, type){
   var str = '';
-  if (bdate){
-    if (ddate){
+  if (date1 && date1 < 0){
+    date1 = (0 - date1) + ' BC';
+  }
+  if (date2 && date2 < 0){
+    date2 = (0 - date2) + ' BC';
+  }
+  if (date1){
+    if (date2){
       // both dates
-      str = ' (' + bdate + ' - ' + ddate + ')';
+      if (type == 'author'){
+        str = ' (' + date1 + ' - ' + date2 + ')';
+      } else {
+        str = ' (' + date1 + ')';
+      }
     } else {
-      // no ddate
-      str = ' (b. ' + bdate + ')';
+      // no date1
+      if (type == 'author'){
+        str = ' (b. ' + date1 + ')';
+      } else {
+        str = ' (' + date1 + ')';
+      }
     }
   } else {
-    if (ddate){
-      // no bdate
-      str = ' (d. ' + ddate + ')';
+    if (date2){
+      // no date2
+      if (type == 'author'){
+        str = ' (d. ' + date2 + ')';
+      } else {
+        str = ' (' + date2 + ')';
+      }
     } else {
       // no dates
       str = '';
     }
   }
   return str;
+}
+
+function reflectTypeChange(el, authorWork, type){
+  // alter which fields and labels are shown based on the type
+  if (authorWork == 'author'){
+    switch(type.trim()){
+      case "Person":
+        $('#AUTHOR_TR-FirstName').closest('.form-group').show();
+        $('#AUTHOR_TR-Biography').closest('div').siblings('label')
+          .text('Biography');
+        $('#AUTHOR-YearBorn').closest('div').siblings('label').eq(0)
+          .text('Dates');
+        break;
+      case "Band":
+        $('#AUTHOR_TR-FirstName').closest('.form-group').hide();
+        $('#AUTHOR_TR-Biography').closest('div').siblings('label')
+          .text('Biography');
+        $('#AUTHOR-YearBorn').closest('div').siblings('label').eq(0)
+          .text('Dates Active');
+        break;
+      case "Anonymous":
+        $('#AUTHOR_TR-FirstName').closest('.form-group').hide();
+        $('#AUTHOR_TR-Biography').closest('div').siblings('label')
+          .text('Biography (if known)');
+        $('#AUTHOR-YearBorn').closest('div').siblings('label').eq(0)
+          .text('Approximate dates');
+        break;
+      default: // company or public entity
+        $('#AUTHOR_TR-FirstName').closest('.form-group').hide();
+        $('#AUTHOR_TR-Biography').closest('div').siblings('label')
+          .text('Description');
+        $('#AUTHOR-YearBorn').closest('div').siblings('label').eq(0)
+          .text('Dates Active');
+    }
+  } else {
+    switch(type.trim()){
+      case "Book":
+        $('#WORK_TR-WorkName').closest('div').siblings('label')
+          .text('Title');
+        $('#WORK_TR-WorkSubtitle').closest('.form-group').show();
+        $('#WORK_TR-WorkDescription').closest('div').siblings('label')
+          .text('Description of book');
+        $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
+          .text('Publication year');
+        $('#WORK-YearPublished').closest('div').show()
+          .siblings('label').eq(1).show();
+        break;
+      case "Poem":
+      case "Essay":
+      case "Other Publication":
+      case "Short Story":
+        $('#WORK_TR-WorkName').closest('div').siblings('label')
+          .text('Title');
+        $('#WORK_TR-WorkSubtitle').closest('.form-group').hide();
+        $('#WORK_TR-WorkDescription').closest('div').siblings('label')
+          .text('Description');
+        $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
+          .text('Publication year');
+        $('#WORK-YearPublished').closest('div').hide()
+          .siblings('label').eq(1).hide();
+        break;
+      case "Song":
+        $('#WORK_TR-WorkName').closest('div').siblings('label')
+          .text('Title');
+        $('#WORK_TR-WorkSubtitle').closest('.form-group').hide();
+        $('#WORK_TR-WorkDescription').closest('div').siblings('label')
+          .text('Description of song');
+        $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
+          .text('Year released');
+        $('#WORK-YearPublished').closest('div').hide()
+          .siblings('label').eq(1).hide();
+        break;
+      case "Speech":
+        $('#WORK_TR-WorkName').closest('div').siblings('label')
+          .text('Title');
+        $('#WORK_TR-WorkSubtitle').closest('.form-group').hide();
+        $('#WORK_TR-WorkDescription').closest('div').siblings('label')
+          .text('Location and audience of speech');
+        $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
+          .text('Year');
+        $('#WORK-YearPublished').closest('div').hide()
+          .siblings('label').eq(1).hide();
+        break;
+      case "Private Letter":
+        $('#WORK_TR-WorkName').closest('div').siblings('label')
+          .text('Recipient ("Letter to...")');
+        $('#WORK_TR-WorkSubtitle').closest('.form-group').hide();
+        $('#WORK_TR-WorkDescription').closest('div').siblings('label')
+          .text('Description');
+        $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
+          .text('Year');
+        $('#WORK-YearPublished').closest('div').hide()
+          .siblings('label').eq(1).hide();
+        break;
+      case "In Conversation":
+        $('#WORK_TR-WorkName').closest('div').siblings('label')
+          .text('Context ("In conversation with...")');
+        $('#WORK_TR-WorkSubtitle').closest('.form-group').hide();
+        $('#WORK_TR-WorkDescription').closest('div').siblings('label')
+          .text('Description');
+        $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
+          .text('Year');
+        $('#WORK-YearPublished').closest('div').hide()
+          .siblings('label').eq(1).hide();
+        break;
+      case "Film":
+        $('#WORK_TR-WorkName').closest('div').siblings('label')
+          .text('Title');
+        $('#WORK_TR-WorkSubtitle').closest('.form-group').hide();
+        $('#WORK_TR-WorkDescription').closest('div').siblings('label')
+          .text('Description');
+        $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
+          .text('Year Released');
+        $('#WORK-YearPublished').closest('div').hide()
+          .siblings('label').eq(1).hide();
+        break;
+      default:
+        $('#WORK_TR-WorkName').closest('div').siblings('label')
+          .text('Title');
+        $('#WORK_TR-WorkSubtitle').closest('.form-group').hide();
+        $('#WORK_TR-WorkDescription').closest('div').siblings('label')
+          .text('Description');
+        $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
+          .text('Year');
+        $('#WORK-YearPublished').closest('div').hide()
+          .siblings('label').eq(1).hide();
+    }
+  }
 }
 
 // functionality to apply on EVERY page

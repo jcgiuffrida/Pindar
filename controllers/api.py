@@ -89,6 +89,7 @@ def check_response(request_vars, check={}, user=False):
 
 
 def quote_query():
+    ''' searches works
     # params:
     #   lookup    = text query
     #   quote     = quote ID
@@ -101,6 +102,7 @@ def quote_query():
     #   maxDate   = maximum date
     #   sort      = (rating, ~rating, dateSubmitted, ~dateSubmitted)
     #               default is rating
+    '''
 
     response = check_response(request.vars,
         {'lookup': 'length_2_128', 'quote': 'is_integer'})
@@ -122,10 +124,11 @@ def quote_query():
                 (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) & \
                 (db.AUTHOR._id==db.AUTHOR_TR.AuthorID)
             if request.vars.lookup:
+                request.vars.sort = 'rating' # no sort when there's a query
                 lookup = request.vars.lookup
                 lookup = lookup.split(' ')
                 for word in lookup:
-                    query &= db.QUOTE.Text.like('%' + word + '%')
+                    query &= (db.QUOTE.Text.like('%' + word + '%') | db.WORK_TR.WorkName.like('%' + word + '%') | db.AUTHOR_TR.DisplayName.like('%' + word + '%'))
             init_query = db(query).select(
                 db.QUOTE.Text, db.QUOTE.QuoteLanguageID, db.QUOTE._id,
                 db.QUOTE.IsOriginalLanguage, db.QUOTE.created_on,
@@ -163,7 +166,7 @@ def quote_query():
                 language_list = map(int, language_list)
                 init_query = init_query.find(lambda row:
                     row.QUOTE.QuoteLanguageID in language_list)
-            if request.vars.minRating:
+            if request.vars.minRating and float(request.vars.minRating) > 0:
                 init_query = init_query.find(lambda row:
                     row._extra['AVG(RATING.Rating)'] >= \
                     float(request.vars.minRating))
@@ -231,6 +234,9 @@ def quote_query():
 
 
 def __check_dates(row, min=-10000, max=10000):
+    ''' Identifies whether a quote falls within a specified date range
+    need to clean up this function
+    '''
     min = int(min)
     max = int(max)
     # min date: if earlier than work or author born, know it's false
@@ -262,6 +268,7 @@ def __check_dates(row, min=-10000, max=10000):
 
 
 def author_query():
+    ''' searches authors '''
     response = check_response(request.vars,
         {'lookup': 'length_2_128'})
     if response['status'] == 200:
@@ -305,6 +312,7 @@ def author_query():
 
 @auth.requires_login()
 def author_submit():
+    ''' submits a new author, and adds an "Attributed" work by that author '''
     request.vars.LanguageID = 1
     response = check_response(request.vars, {'DisplayName': 'length_2_512'}, user=True)
     if response['status'] == 200:
@@ -315,7 +323,7 @@ def author_submit():
                 'AuthorID': request.vars.AuthorID,
                 'AuthorTrID': AuthorTrID })
             # insert "attributed" work
-            attributedWorkID = db.WORK.insert()
+            attributedWorkID = db.WORK.insert(Type=11)
             attributedWorkTrID = db.WORK_TR.insert(
                 WorkName='Attributed', LanguageID=1, WorkID=attributedWorkID,
                 WorkSubtitle='These quotes are attributed and do not come from a specified work.', WorkDescription='', WikipediaLink='', WorkNote='')
@@ -333,6 +341,7 @@ def author_submit():
 
 
 def work_query():
+    ''' searches works '''
     response = check_response(request.vars,
         {'lookup': 'length_2_128'}) # add 'not_%'
     if response['status'] == 200:
@@ -351,15 +360,18 @@ def work_query():
                 for word in lookup:
                     word = '%' + word + '%'
                     query &= ((db.WORK_TR.WorkName.like(word)) | \
-                        (db.WORK_TR.WorkSubtitle.like(word)))
+                        (db.WORK_TR.WorkSubtitle.like(word)) |
+                        (db.AUTHOR_TR.DisplayName.like('%' + word + '%')))
             if request.vars.author:
                 author_queries = tuple(request.vars.author.split(','))
                 query &= db.AUTHOR._id.belongs(author_queries)
             init_query = db(query).select(
                     db.WORK_TR.WorkName, db.WORK_TR.id,
                     db.WORK_TR.WorkSubtitle, db.WORK.YearPublished,
-                    db.WORK.id, db.AUTHOR_TR.DisplayName, quotecount,
-                    left=db.QUOTE_WORK.on(db.WORK.id==db.QUOTE_WORK.WorkID),
+                    db.WORK.id, db.AUTHOR_TR.DisplayName,
+                    db.AUTHOR_TR.id, db.WORKTYPE.TypeName, quotecount,
+                    left=(db.QUOTE_WORK.on(db.WORK.id==db.QUOTE_WORK.WorkID),
+                        db.WORKTYPE.on(db.WORK.Type==db.WORKTYPE._id)),
                     groupby=db.WORK.id,
                     orderby=~quotecount)
 
@@ -387,6 +399,7 @@ def work_query():
 
 @auth.requires_login()
 def work_submit():
+    ''' submits a new work '''
     request.vars.LanguageID = 1
     response = check_response(request.vars,
         {'WorkName': 'length_2_1024', 'AuthorID': 'is_integer'},
@@ -413,6 +426,7 @@ def work_submit():
 
 @auth.requires_login()
 def quote_submit():
+    ''' submits a new quote '''
     response = check_response(request.vars,
         {'QuoteLanguageID': 'is_integer', 'Text': 'length_3',
         'WorkID': 'is_integer'},
@@ -435,6 +449,7 @@ def quote_submit():
 
 
 def language_query():
+    ''' Returns a list of languages, ordered by number of quotes '''
     response = check_response(request.vars,
         {})
     counts = db.QUOTE.QuoteLanguageID.count()
@@ -722,6 +737,10 @@ def recommend():
             # generally, high-rated quotes with many ratings float to the top
 
             filter_query = db.executesql('SELECT QuoteID, SQRT(num_ratings) * weighted_rating * random AS final_score FROM ( SELECT SUM(t.weight * RATING.Rating)/SUM(t.weight) AS weighted_rating, COUNT(*) AS num_ratings, QuoteID, SQRT(RAND()) AS random FROM RATING INNER JOIN ( SELECT created_by, (RATING.Rating - 3) AS weight FROM RATING WHERE QuoteID = ' + request.vars.q + ' AND RATING.Rating >= 4 GROUP BY created_by) AS t ON RATING.created_by = t.created_by WHERE RATING.Rating >= 4 AND QuoteID != ' + request.vars.q + ' GROUP BY QuoteID) AS r ORDER BY final_score DESC;')
+
+            # someday we might want to replace this with a different question:
+            #   of all other quotes, which ones do lovers of this quote
+            #   disproportionately tend to love?
 
             recs = {}
             for rec in filter_query:

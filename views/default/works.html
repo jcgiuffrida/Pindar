@@ -20,6 +20,12 @@
 			data-rating="{{=rating}}" data-rating-count="{{=rating_count}}">
 				<div class="object-data panel panel-default">
 					<div class="panel-heading">
+						<div class="panel-type pull-right">
+							{{for type in worktypes:}}
+								{{if type['id']==w.WORK.Type:}}
+									{{=type['TypeName']}}
+								{{break}}
+							{{pass}}</div>
 						<h3 class="panel-title">Work</h3>
 					</div>
 					<div class="panel-body">
@@ -30,8 +36,7 @@
 								{{=sanitize(w.WORK_TR.WorkName)}}
 							{{pass}}</p>
 						<p class="text-center"><i>{{=w.WORK_TR.WorkSubtitle}}</i></p>
-						<p class="text-center">{{if w.WORK.YearPublished:}}Published in {{=w.WORK.YearPublished}}{{pass}}</p>
-						{{if w.WORK.YearWritten:}}<p class="text-center">Written in {{=w.WORK.YearWritten}}</p>{{pass}}
+						<p class="text-center">{{=get_dates(w.WORK.YearPublished, w.WORK.YearWritten, "work")}}
 						<p class="text-center">
 							{{for a in authors:}}
 							<a class="btn btn-primary" href="/Pindar/default/authors/{{=a.AUTHOR_TR.id}}">
@@ -64,6 +69,35 @@
 									</div>
 								</div>
 								<div class="form-group">
+									<label for="WORK-Type" class="col-md-3 control-label">Type</label>
+									<div class="col-md-4">
+										<select class="form-control" id="WORK-Type"
+										 name="WorkType" aria-describedby="help-WORK-Type"
+										 value="{{=w.WORK.Type}}">
+											{{for type in worktypes:}}
+										  <option value="{{=type['id']}}">{{=type['TypeName']}}</option>
+										  {{pass}}
+										</select>
+									</div>
+									<span id="help-WORK-Type" class="help-block">Is this a book, a song, a poem, ...</span>
+								</div>
+								<div class="form-group">
+									<label for="WORK_TR-WikipediaLink" class="col-md-3 control-label">
+											Wikipedia page
+									</label>
+									<div class="col-md-9">
+										<div class="input-group">
+											<input type="url" class="form-control" id="WORK_TR-WikipediaLink" name="WorkWikipediaLink"
+											value="{{=w.WORK_TR.WikipediaLink}}"></input>
+											<span class="input-group-btn">
+												<button class="btn btn-info wiki-link" type="button">
+													<i class="fa fa-external-link"></i>
+												</button>
+											</span>
+										</div>
+									</div>
+								</div>
+								<div class="form-group">
 									<label for="WORK_TR-WorkSubtitle" class="col-md-3 control-label">
 										Subtitle
 									</label>
@@ -80,22 +114,6 @@
 										<textarea class="form-control" id="WORK_TR-WorkDescription"
 										rows="3"
 										name="WorkDescription">{{=w.WORK_TR.WorkDescription}}</textarea>
-									</div>
-								</div>
-								<div class="form-group">
-									<label for="WORK_TR-WikipediaLink" class="col-md-3 control-label">
-											Wikipedia page
-									</label>
-									<div class="col-md-9">
-										<div class="input-group">
-											<input type="url" class="form-control" id="WORK_TR-WikipediaLink" name="WorkWikipediaLink"
-											value="{{=w.WORK_TR.WikipediaLink}}"></input>
-											<span class="input-group-btn">
-												<button class="btn btn-info wiki-link" type="button">
-													<i class="fa fa-external-link"></i>
-												</button>
-											</span>
-										</div>
 									</div>
 								</div>
 								<div class="form-group">

@@ -1,9 +1,21 @@
 $(document).ready(function(){
 
+  // update when author type is changed
+  $('#AUTHOR-Type').on('change', function(){
+    reflectTypeChange($('.edit-form'), 'author',
+      $('#AUTHOR-Type option:selected').text());
+  });
 
-
-  // fill in list of authors (if present)
-
+  // make sure correct author type is filled in
+  var selectedType = $('#AUTHOR-Type').attr('value');
+  $('#AUTHOR-Type option').each(function(){
+    var option = $(this);
+    if (option.val() == selectedType) {
+        option.prop('selected', true);
+        return false;
+    }
+  });
+  $('#AUTHOR-Type').trigger('change');
 
   $('.object').quotify({objectType: 'author', size: 'large'});
 

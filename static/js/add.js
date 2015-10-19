@@ -87,7 +87,7 @@ $(document).ready(function(){
         if (response['authors'].length > 0){
         var authors = $(parseAuthors(response.authors,
           unwrapped=true));
-          authors.each(function(){
+          $(authors.get().reverse()).each(function(){
             authorTable.prepend(this);
           });
         } else {
@@ -131,7 +131,7 @@ $(document).ready(function(){
         if (response['works'].length > 0){
           var works = $(parseWorks(response.works,
             unwrapped=true, author=false));
-          works.each(function(){
+          $(works.get().reverse()).each(function(){
             workTable.prepend(this);
           });
         } else {
@@ -241,12 +241,10 @@ $(document).ready(function(){
         maxlength: 4096
       },
       YearPublished: {
-        range: [-5000, 2050],
-        digits: true
+        range: [-5000, 2050]
       },
       YearWritten: {
-        range: [-5000, 2050],
-        digits: true
+        range: [-5000, 2050]
       },
       Text: {
         required: true,
@@ -290,7 +288,8 @@ $(document).ready(function(){
           $('#AUTHOR_TR-Biography').val().sanitize() +
           '&WikipediaLink=' + $('#AUTHOR_TR-WikipediaLink').val() +
           '&YearBorn=' + $('#AUTHOR-YearBorn').val() +
-          '&YearDied=' + $('#AUTHOR-YearDied').val(),
+          '&YearDied=' + $('#AUTHOR-YearDied').val() +
+          '&Type=' + $('#AUTHOR-Type').val(),
           function(response) {
             var authorName = $('#AUTHOR_TR-DisplayName').val();
             $('.add-author').fadeOut('fast');
@@ -317,6 +316,7 @@ $(document).ready(function(){
           '&WikipediaLink=' + $('#WORK_TR-WikipediaLink').val() +
           '&YearPublished=' + $('#WORK-YearPublished').val() +
           //'&YearWritten=' + $('#WORK-YearWritten').val() +
+          '&Type=' + $('#WORK-Type').val(),
           '&AuthorID=' + $('.author-lookup').data('author-id'),
           function(response) {
             var workName = $('#WORK_TR-WorkName').val();
@@ -356,6 +356,18 @@ $(document).ready(function(){
       }
     }
   });
+
+  // author and work type selections
+  $('#AUTHOR-Type').on('change', function(){
+    reflectTypeChange($('.add-author'), 'author',
+      $('#AUTHOR-Type option:selected').text());
+  });
+
+  $('#WORK-Type').on('change', function(){
+    reflectTypeChange($('.add-work'), 'work',
+      $('#WORK-Type option:selected').text());
+  });
+
 });
 
 // select the author

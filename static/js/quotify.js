@@ -261,6 +261,7 @@ $.fn.quotify = function(options){
         call = '/Pindar/api/edit_author?' +
           'AuthorId=' + object.data('author-id') +
           '&AuthorTrId=' + object.data('author-tr-id') +
+          '&Type=' + $('#AUTHOR-Type').val() +
           '&FirstName=' + $('#AUTHOR_TR-FirstName').val() +
           '&MiddleName=' + $('#AUTHOR_TR-MiddleName').val() +
           '&LastName=' + $('#AUTHOR_TR-LastName').val() +
@@ -274,6 +275,7 @@ $.fn.quotify = function(options){
           'WorkId=' + object.data('work-id') +
           '&WorkTrId=' + object.data('work-tr-id') +
           '&WorkName=' + $('#WORK_TR-WorkName').val() +
+          '&Type=' + $('#WORK-Type').val() +
           '&WorkSubtitle=' + $('#WORK_TR-WorkSubtitle').val() +
           '&WorkDescription=' +
           $('#WORK_TR-WorkDescription').val() +

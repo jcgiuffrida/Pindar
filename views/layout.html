@@ -143,15 +143,16 @@
   <script src="{{=URL('static','js/bootstrap.js')}}"></script>
   <script src="{{=URL('static','js/web2py_bootstrap.js')}}"></script>
   <script src="{{=URL('static','js/tools.js')}}"></script>
+  <script src="{{=URL('static','js/hilitor.js')}}"></script><!-- ugh, need to do this for now -->
   <script src="{{=URL('static','js/searchify.js')}}"></script>
-  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
-  <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.js"></script>
   <!--[if lt IE 7 ]>
       <script src="{{=URL('static','js/dd_belatedpng.js')}}"></script>
       <script> DD_belatedPNG.fix('img, .png_bg'); //fix any <img> or .png_bg background-images </script>
       <![endif]-->
-  {{if 'search' in locals():}}
+  {{if 'search' in locals() and len(search) > 1:}}
   <script>
+    var searchOnLoad = false;
+    // initiate search and hide the default view
     $(document).ready(function(){
       var input = $('#textQuery');
       input.val('{{=search}}');

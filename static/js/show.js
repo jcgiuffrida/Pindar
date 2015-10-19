@@ -6,39 +6,43 @@ var advancedVisible = false;
 
 $(document).ready(function(){
   var quotesFunction = function(){
-    return 'lookup=' + $('#textQuery').val() + '&sort=' + $('#sortOrder').val(); 
+    return 'lookup=' + $('#textQuery').val() + '&sort=' + $('#sortOrder').val();
   };
   var defaultFunction = function(){ return 'sort=' + $('#sortOrder').val(); };
   var advancedQuotesFunction = function(){
-    return 'lookup=' + $('#textQuery').val() + 
-      '&author=' + $('#advancedAuthor').val() + 
-      '&work=' + $('#advancedWork').val() + 
-      '&language=' + $('#advancedLanguage').val() + 
-      '&minDate=' + $('#advancedMinDate').val() + 
-      '&maxDate=' + $('#advancedMaxDate').val() + 
-      '&minRating=' + $('#advancedMinRating').val() + 
-      '&sort=' + $('#sortOrder').val(); 
+    return 'lookup=' + $('#textQuery').val() +
+      '&author=' + $('#advancedAuthor').val() +
+      '&work=' + $('#advancedWork').val() +
+      '&language=' + $('#advancedLanguage').val() +
+      '&minDate=' + $('#advancedMinDate').val() +
+      '&maxDate=' + $('#advancedMaxDate').val() +
+      '&minRating=' + $('#advancedMinRating').val() +
+      '&sort=' + $('#sortOrder').val();
   };
   $('.default-content .search-quotes').searchify({
     searchFunction: quotesFunction,
-    cols: 2
+    highlightTerms: true,
+    cols: 1
   });
   $('.default-content .search-authors').searchify({type: 'authors'});
   $('.default-content .search-works').searchify({type: 'works'});
   $('.default-content .show-quotes').searchify({
     searchFunction: defaultFunction,
-    cols: 2,
-    isDefault: true 
+    cols: 1,
+    isDefault: true,
+    searchOnLoad: (typeof searchOnLoad != 'undefined' ? searchOnLoad : true)
   });
   $('.default-content .show-authors').searchify({
-    type: 'authors', 
+    type: 'authors',
     searchFunction: defaultFunction,
-    isDefault: true 
+    isDefault: true,
+    searchOnLoad: (typeof searchOnLoad != 'undefined' ? searchOnLoad : true)
   });
   $('.default-content .show-works').searchify({
     type: 'works',
     searchFunction: defaultFunction,
-    isDefault: true 
+    isDefault: true,
+    searchOnLoad: (typeof searchOnLoad != 'undefined' ? searchOnLoad : true)
   });
   $('#sortOrder').on('change', function(){
     if ($('.default-content .show-quotes').is(':visible')){
@@ -51,13 +55,14 @@ $(document).ready(function(){
     type: 'quotes',
     searchFunction: advancedQuotesFunction,
     isAdvanced: true,
-    cols: 3
+    highlightTerms: true,
+    cols: 2
   });
   $('.advanced-content .search').trigger('sleep');
 
   // trigger input in case there's text in the box on page load
   $('#textQuery').trigger('input');
-  
+
   // switch between basic and advanced search
   $('.search-bar').on('click', '.show-advanced', function(){
     if ($('.advanced-searchbar').is(':visible')){
@@ -88,7 +93,7 @@ $(document).ready(function(){
   $.getJSON('/Pindar/api/language_query', function(response){
     var languagesArray = [];
     for (c in response.languages){
-      languagesArray.push({id: response.languages[c].LANGUAGE.id, 
+      languagesArray.push({id: response.languages[c].LANGUAGE.id,
         text: response.languages[c].LANGUAGE.NativeName});
     }
     $("#advancedLanguage").select2({
@@ -121,7 +126,7 @@ $(document).ready(function(){
         console.log(myResults);
         return {
           results: myResults
-        };  
+        };
       },
       cache: true
     },
@@ -148,7 +153,7 @@ $(document).ready(function(){
         var myResults = [];
         $.each(data.works, function (index, item) {
           myResults.push({
-            'id': item.WORK.id,
+            'id': item.WORK_TR.id,
             'text': item.WORK_TR.WorkName,
             'quotes': item['_extra']['COUNT(QUOTE_WORK.QuoteID)'],
             'author': item.AUTHOR_TR.DisplayName
@@ -157,7 +162,7 @@ $(document).ready(function(){
         console.log(myResults);
         return {
           results: myResults
-        };  
+        };
       },
       cache: true
     },
@@ -171,20 +176,27 @@ $(document).ready(function(){
 
   function formatAuthorResult (r) {
     var markup = '<div class="row"><div class="col-sm-12">' +
-      r.text + '<span class="badge pull-right">' + 
-      r.works + ' work' + plural(r.works) + '</span></div></div>'; 
+      r.text;
+    if (r.works > 0){
+      markup += '<span class="badge pull-right">' +
+      r.works + ' work' + plural(r.works) + '</span>';
+    }
+    markup += '</div></div>';
     return markup;
   }
 
   function formatWorkResult (r) {
     var markup = '<div class="row"><div class="col-sm-12">' +
       r.text;
-      if (r.text == 'Attributed'){
-        // give author name
-        markup += ' to ' + r.author;
-      }
-      markup += '<span class="badge pull-right">' + r.quotes + ' quote' + 
-        plural(r.quotes) + '</span></div></div>'; 
+    if (r.text == 'Attributed'){
+      // give author name
+      markup += ' to ' + r.author;
+    }
+    if (r.quotes > 0){
+      markup += '<span class="badge pull-right">' + r.quotes + ' quote' +
+        plural(r.quotes) + '</span>';
+    }
+    markup += '</div></div>';
     return markup;
   }
 

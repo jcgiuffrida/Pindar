@@ -7,16 +7,18 @@
 // okay, here we go
 $.fn.searchify = function(options){
 
-  var settings = $.extend({ 
-    type: 'quotes', 
+  var settings = $.extend({
+    type: 'quotes',
     searchInput: $('#textQuery'),
-    searchFunction: function(){ return 'lookup=' + settings.searchInput.val(); }, 
-    objectsToShow: 30, 
-    cols: 2, 
-    pagination: true, 
+    searchFunction: function(){ return 'lookup=' + settings.searchInput.val(); },
+    objectsToShow: 30,
+    cols: 2,
+    pagination: true,
     isDefault: false,
-    isAdvanced: false, 
+    isAdvanced: false,
     showAuthor: true,
+    highlightTerms: false,
+    searchOnLoad: true,
     advancedSearchButton: $('.run-advanced-search'),
     clearAdvancedSearchButton: $('.clear-advanced-search')
   }, options);
@@ -29,7 +31,7 @@ $.fn.searchify = function(options){
   }
 
   var countBadge = searchDiv.parent('div').find('.results-count');
-  
+
 
   // pagination variables
   var objectsStorage = [];
@@ -48,15 +50,16 @@ $.fn.searchify = function(options){
 
   var objectsFadeQueue = [];
 
-  
+
 
 
   function buildBtnShowMore(objects){
-    return $('<div class="col-md-8 col-md-offset-2">' + 
-    '<button type="button" class="btn btn-default btn-block btn-' + objects + 
+    return $('<div class="col-md-8 col-md-offset-2">' +
+    '<button type="button" class="btn btn-default btn-block btn-' + objects +
     '-more">Show more ' + objects + '</button></div>');
   }
 
+  // this is the master function
   function handleSearchInput(el){
     if (!settings.isAdvanced){
       return function(){
@@ -66,18 +69,19 @@ $.fn.searchify = function(options){
             if (searchDiv.is(':visible')){
               searchDiv.hide().empty();
               defaultDiv.show();
+              updateCountBadge("");
             }
-          } else {
-
-            // run search
+          } else {;
             // first, check that no searches are already running
             var query = settings.searchFunction();
             if (searching){
-              clearTimeout(pendingSearch);
-              pendingSearch = setTimeout(function(){checkTimer(query)}, 500);
+              clearTimeout(pendingSearch); // cancel any other timers
+              // check every 200 ms for permission to search
+              pendingSearch = setTimeout(function(){checkTimer(query)}, 100);
             } else {
               searching = true;
-              setTimeout(function(){searching=false;}, 1000);
+              // after 500 ms, allow add'l searches
+              setTimeout(function(){searching=false;}, 400);
               lastSearched = query;
               runSearch(query);
             }
@@ -87,9 +91,9 @@ $.fn.searchify = function(options){
         // frequently check the input field, in case it's lagging behind search
         searchInterval = window.setInterval(function(){
           if (lastSearched != settings.searchFunction()){
-            el.trigger('input'); 
+            el.trigger('input');
           }
-        }, 1500);
+        }, 750);
       };
     } else {
       return function(){
@@ -121,6 +125,7 @@ $.fn.searchify = function(options){
     }
   }
 
+  // this adds a search to the queue
   function queueSearch(query){
     if (searching){
       clearTimeout(pendingSearch);
@@ -133,6 +138,7 @@ $.fn.searchify = function(options){
     }
   }
 
+  // this periodically checks for new input
   function checkTimer(newQuery){
     if (searching){
       pendingSearch = setTimeout(function(){checkTimer(newQuery)}, 100);
@@ -159,45 +165,126 @@ $.fn.searchify = function(options){
     }
   }
 
+  searchDiv.on('search', function(){
+    var query = settings.searchFunction();
+    queueSearch(query);
+  });
+
+  searchDiv.on('sleep', function(){
+    if (settings.isAdvanced){
+      settings.advancedSearchButton.off('click');
+    } else {
+      settings.searchInput.off('input');
+    }
+    window.clearInterval(searchInterval);
+  });
+
+  searchDiv.on('wake', function(){
+    handleSearchInput(settings.searchInput)();
+  });
+
+  function updateCountBadge(count){
+    if (count !== undefined){
+      countBadge.text(count);
+      return true;
+    }
+    var currentCount = '';
+    if (!settings.isDefault){
+      if (moreObjectsExist){
+        currentCount = (objectsRetrieved+1) + '+';
+      } else {
+        currentCount = objectsRetrieved;
+      }
+    }
+    countBadge.text(currentCount);
+    return true;
+  }
+
+  // this initiates everything
+  if (settings.isDefault){
+   if (settings.searchOnLoad){
+      searchDiv.trigger('search'); // load the default div with stuff
+      searchInterval = window.setInterval(function(){
+        if (lastSearched != settings.searchFunction()){
+          searchDiv.trigger('search');
+        }
+      }, 1500);
+    } else {
+      // need to delay the search
+      setTimeout(function(){
+        searchDiv.trigger('search'); // load the default div with stuff
+        searchInterval = window.setInterval(function(){
+          if (lastSearched != settings.searchFunction()){
+            searchDiv.trigger('search');
+          }
+        }, 1500);
+      }, 500);
+    }
+  } else {
+    handleSearchInput(settings.searchInput)();
+  }
+
+
 
   function makeQuotesQuery(query){
     $.getJSON('/Pindar/api/quote_query?' + query,
       function(response) {
-      defaultDiv.hide();
-      searchDiv.empty().show();
-      objectsStorage = []; // reset
-      if (response.quotes.length > 0){  
-        var colWidth = parseInt(12 / settings.cols);
-        for (var i=0; i<settings.cols; i++){
-          searchDiv.append($('<div class="col-md-' + colWidth + 
-            ' column"></div>'));
+        if (query == settings.searchFunction()){
+        if (!(settings.isDefault && settings.searchInput.val())){
+          defaultDiv.hide();
+          searchDiv.empty().show();
         }
-        var quotesArray = parseQuotes(response.quotes);
-        // console.log(quotesArray.length + ' quotes');
-        if (quotesArray.length == quotesAPILimit){
-          quotesArray.pop();
-          moreObjectsExist = true;
-          objectsOffset += quotesAPILimit - 1;
+        objectsStorage = []; // reset
+        if (response.quotes.length > 0){
+          var colWidth = parseInt(12 / settings.cols);
+          for (var i=0; i<settings.cols; i++){
+            searchDiv.append($('<div class="col-md-' + colWidth +
+              ' column"></div>'));
+          }
+          var quotesArray = parseQuotes(response.quotes);
+          // console.log(quotesArray.length + ' quotes');
+          if (quotesArray.length == quotesAPILimit){
+            quotesArray.pop();
+            moreObjectsExist = true;
+            objectsOffset += quotesAPILimit - 1;
+          } else {
+            moreObjectsExist = false;
+          }
+          $.each(quotesArray, function(index, value){
+            objectsStorage.push(value);
+            objectsRetrieved += 1;
+          });
+          appendQuotes();
         } else {
-          moreObjectsExist = false;
+          searchDiv.html('<div class="col-md-12"><p>No quotes found.</p></div>');
         }
-        $.each(quotesArray, function(index, value){
-          objectsStorage.push(value);
-          objectsRetrieved += 1;
-        });
-        appendQuotes();
-      } else {
-        searchDiv.html('<div class="col-md-12"><p>No quotes found.</p></div>');
+        if (!(settings.isDefault && settings.searchInput.val())){
+          updateCountBadge();
+        }
+
+        // highlight search terms
+        if (settings.isAdvanced){
+          var myHilitor = new Hilitor('search-advanced-quotes');
+          myHilitor.setMatchType("open");
+          myHilitor.apply($('#textQuery').val());
+        } else {
+          var myHilitor = new Hilitor('search-quotes');
+          myHilitor.setMatchType("open");
+          myHilitor.apply($('#textQuery').val());
+        }
       }
-      updateCountBadge();
     });
+
   }
 
   function makeAuthorsQuery(query){
     $.getJSON('/Pindar/api/author_query?' + query,
       function(response) {
-      defaultDiv.hide();
-      searchDiv.empty().show();
+      if (query == settings.searchFunction()){
+      if (!(settings.isDefault && settings.searchInput.val())){
+        defaultDiv.hide();
+        searchDiv.empty().show();
+      }
       objectsStorage = []; // reset
       if (response.authors.length > 0){
         var authorsArray = parseAuthors(response.authors, true, authorsAPILimit);
@@ -217,7 +304,10 @@ $.fn.searchify = function(options){
       } else {
         searchDiv.html('<div class="col-md-12"><p>No authors found.</p></div>');
       }
-      updateCountBadge();
+      if (!(settings.isDefault && settings.searchInput.val())){
+        updateCountBadge();
+      }
+      }
     });
   }
 
@@ -225,11 +315,14 @@ $.fn.searchify = function(options){
   function makeWorksQuery(query){
     $.getJSON('/Pindar/api/work_query?' + query,
       function(response) {
-      defaultDiv.hide();
-      searchDiv.empty().show();
+      if (query == settings.searchFunction()){
+      if (!(settings.isDefault && settings.searchInput.val())){
+        defaultDiv.hide();
+        searchDiv.empty().show();
+      }
       objectsStorage = []; // reset
       if (response.works.length > 0){
-        var worksArray = parseWorks(response.works, true, settings.showAuthor, 
+        var worksArray = parseWorks(response.works, true, settings.showAuthor,
           worksAPILimit);
         if (worksArray.length == worksAPILimit){
           worksArray.pop();
@@ -247,12 +340,15 @@ $.fn.searchify = function(options){
       } else {
         searchDiv.html('<div class="col-md-12"><p>No works found.</p></div>');
       }
-      updateCountBadge();
+      if (!(settings.isDefault && settings.searchInput.val())){
+        updateCountBadge();
+      }
+      }
     });
   }
 
 
-  
+
   function appendQuotes(){
     var columns = searchDiv.find('.column');
     var minHeight = undefined;
@@ -325,7 +421,7 @@ $.fn.searchify = function(options){
   // have objects fade in one by one
   // window.setInterval(function(){
   //   if (!!objectsFadeQueue.length){
-  //     objectsFadeQueue.shift().fadeIn();  
+  //     objectsFadeQueue.shift().fadeIn();
   //   }
   // }, 200);
 
@@ -351,10 +447,10 @@ $.fn.searchify = function(options){
   function replenishObjects(){
     if (moreObjectsExist){
       searchDiv.find('.btn-' + settings.type + '-more').
-        html('<span class="text-center"><i class="fa fa-spinner fa-spin">' + 
+        html('<span class="text-center"><i class="fa fa-spinner fa-spin">' +
         '</i></span>').addClass('disabled');
       if (settings.type == 'quotes'){
-        $.getJSON('/Pindar/api/quote_query?' + objectsQuery + 
+        $.getJSON('/Pindar/api/quote_query?' + objectsQuery +
           '&offset=' + objectsOffset, function(response) {
           var quotesArray = parseQuotes(response.quotes);
           if (quotesArray.length == quotesAPILimit){
@@ -374,9 +470,9 @@ $.fn.searchify = function(options){
             html('Show more ' + settings.type).removeClass('disabled');
         });
       } else if (settings.type == 'authors'){
-        $.getJSON('/Pindar/api/author_query?' + objectsQuery + 
+        $.getJSON('/Pindar/api/author_query?' + objectsQuery +
           '&offset=' + objectsOffset, function(response){
-          var authorsArray = parseAuthors(response.authors, true, 
+          var authorsArray = parseAuthors(response.authors, true,
             authorsAPILimit);
           if (authorsArray.length == authorsAPILimit){
             authorsArray.pop();
@@ -393,11 +489,11 @@ $.fn.searchify = function(options){
           updateCountBadge();
           searchDiv.find('.btn-' + settings.type + '-more').
             html('Show more ' + settings.type).removeClass('disabled');
-        }); 
+        });
       } else if (settings.type == 'works'){
-        $.getJSON('/Pindar/api/work_query?' + objectsQuery + 
+        $.getJSON('/Pindar/api/work_query?' + objectsQuery +
           '&offset=' + objectsOffset, function(response){
-          var worksArray = parseWorks(response.works, unwrapped=true, 
+          var worksArray = parseWorks(response.works, unwrapped=true,
             author=true, worksAPILimit);
           if (worksArray.length == worksAPILimit){
             worksArray.pop();
@@ -414,7 +510,7 @@ $.fn.searchify = function(options){
           updateCountBadge();
           searchDiv.find('.btn-' + settings.type + '-more').
             html('Show more ' + settings.type).removeClass('disabled');
-        }); 
+        });
       }
     } else {
       // no more objects: pass
@@ -422,39 +518,7 @@ $.fn.searchify = function(options){
     }
   }
 
-  searchDiv.on('search', function(){
-    var query = settings.searchFunction();
-    queueSearch(query);
-  });
 
-  searchDiv.on('sleep', function(){
-    if (settings.isAdvanced){
-      settings.advancedSearchButton.off('click');
-    } else {
-      settings.searchInput.off('input');
-    }
-    window.clearInterval(searchInterval);
-  });
-
-  searchDiv.on('wake', function(){
-    handleSearchInput(settings.searchInput)();
-  });
-
-  function updateCountBadge(){
-    var currentCount = '';
-    if (!settings.isDefault){
-      if (moreObjectsExist){
-        currentCount = (objectsRetrieved+1) + '+';
-      } else {
-        currentCount = objectsRetrieved;
-      }
-    }
-    countBadge.text(currentCount);
-    return true;
-  }
-
-
-  
 
   searchDiv.on('click', '.btn-' + settings.type + '-more', function(){
     if ((objectsStorage.length < settings.objectsToShow) & moreObjectsExist){
@@ -466,17 +530,7 @@ $.fn.searchify = function(options){
     $(this).blur();
   });
 
-  // this initiates everything
-  if (settings.isDefault){
-    searchDiv.trigger('search');
-    searchInterval = window.setInterval(function(){
-      if (lastSearched != settings.searchFunction()){
-        searchDiv.trigger('search'); 
-      }
-    }, 1500);
-  } else {
-    handleSearchInput(settings.searchInput)();
-  }
+
 };
 
 

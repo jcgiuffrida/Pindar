@@ -1,12 +1,6 @@
 {{extend 'layout.html'}}
 <!-- DataTables CSS -->
 <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css">
-  
-<!-- jQuery -->
-<script type="text/javascript" charset="utf8" src="//code.jquery.com/jquery-1.10.2.min.js"></script>
-  
-<!-- DataTables -->
-<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.js"></script>
 
 <h2>{{=T( request.args(0).replace('_',' ').capitalize() )}}</h2>
 <div id="web2py_user_form">
@@ -105,6 +99,8 @@
 	</tbody>
 </table>
 <hr>
+
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.js"></script>
 <script>
 $(document).ready(function(){
 	$('.display').DataTable({

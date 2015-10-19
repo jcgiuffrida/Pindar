@@ -19,14 +19,19 @@
 			data-rating="{{=rating}}" data-rating-count="{{=rating_count}}">
 				<div class="object-data panel panel-default">
 					<div class="panel-heading">
+						<div class="panel-type pull-right">
+							{{for type in authortypes:}}
+								{{if type['id']==a.AUTHOR.Type:}}
+									{{if type['TypeName'] != 'Person':}}
+										{{=type['TypeName']}}
+									{{break}}
+								{{pass}}
+							{{pass}}</div>
 						<h3 class="panel-title">Author</h3>
 					</div>
 					<div class="panel-body">
 						<p class="lead text-center">{{=sanitize(a.AUTHOR_TR.DisplayName)}}</p>
-						<p class="text-center">{{if a.AUTHOR.YearBorn:}}
-							{{if a.AUTHOR.YearDied:}}({{=a.AUTHOR.YearBorn}} - {{=a.AUTHOR.YearDied}})
-							{{else:}}(b. {{=a.AUTHOR.YearBorn}}){{pass}}
-							{{else:}}{{if a.AUTHOR.YearDied:}}(d. {{=a.AUTHOR.YearDied}}){{pass}}{{pass}}
+						<p class="text-center">{{=get_dates(a.AUTHOR.YearBorn, a.AUTHOR.YearDied, "author")}}
 						</p>
 						<p class="small">{{=sanitize(a.AUTHOR_TR.Biography)}}</p>
 
@@ -56,6 +61,38 @@
 									</div>
 								</div>
 								<div class="form-group">
+									<label for="AUTHOR-Type" class="col-md-3 control-label">Type</label>
+									<div class="col-md-4">
+										<select class="form-control" id="AUTHOR-Type"
+										 name="AuthorType" aria-describedby="help-AUTHOR-Type"
+										 value="{{=a.AUTHOR.Type}}">
+											{{for type in authortypes:}}
+										  <option value="{{=type['id']}}">
+										  	{{=type['TypeName']}}
+										  </option>
+										  {{pass}}
+										</select>
+									</div>
+									<span id="help-AUTHOR-Type" class="help-block">Is this a person, a band, ...</span>
+								</div>
+								<div class="form-group">
+									<label for="AUTHOR_TR-WikipediaLink" class="col-md-3 control-label">
+											Wikipedia page
+									</label>
+									<div class="col-md-9">
+										<div class="input-group">
+											<input type="url" class="form-control" id="AUTHOR_TR-WikipediaLink"
+											name="AuthorWikipediaLink"
+										value="{{=a.AUTHOR_TR.WikipediaLink}}"></input>
+											<span class="input-group-btn">
+												<button class="btn btn-info wiki-link" type="button">
+													<i class="fa fa-external-link"></i>
+												</button>
+											</span>
+										</div>
+									</div>
+								</div>
+								<div class="form-group">
 									<label for="AUTHOR_TR-FirstName" class="col-md-3 control-label">
 										Full name
 									</label>
@@ -75,7 +112,7 @@
 										value="{{=a.AUTHOR_TR.LastName}}"></input>
 									</div>
 								</div>
-								<div class="form-group">
+								<!--<div class="form-group">
 									<label for="AUTHOR_TR-AKA" class="col-md-3 control-label">
 											Also known as
 									</label>
@@ -89,7 +126,7 @@
 											<i class="fa fa-plus"></i>
 										</button>
 									</div>
-								</div>
+								</div>-->
 								<div class="form-group">
 									<label for="AUTHOR_TR-Biography" class="col-md-3 control-label">
 											Biography
@@ -98,23 +135,6 @@
 										<textarea class="form-control" id="AUTHOR_TR-Biography" rows="3"
 										name="Biography">{{=a.AUTHOR_TR.Biography}}
 										</textarea>
-									</div>
-								</div>
-								<div class="form-group">
-									<label for="AUTHOR_TR-WikipediaLink" class="col-md-3 control-label">
-											Wikipedia page
-									</label>
-									<div class="col-md-9">
-										<div class="input-group">
-											<input type="url" class="form-control" id="AUTHOR_TR-WikipediaLink"
-											name="AuthorWikipediaLink"
-										value="{{=a.AUTHOR_TR.WikipediaLink}}"></input>
-											<span class="input-group-btn">
-												<button class="btn btn-info wiki-link" type="button">
-													<i class="fa fa-external-link"></i>
-												</button>
-											</span>
-										</div>
 									</div>
 								</div>
 								<div class="form-group">

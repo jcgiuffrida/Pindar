@@ -85,6 +85,12 @@ ul.nav li.dropdown:hover ul.dropdown-menu {
   color: #777;
 }
 
+/* search */
+hi {
+  background-color: #a0ffff;
+  color: #000;
+  padding: 0px 2px;
+}
 
 
 
@@ -117,6 +123,7 @@ ul.nav li.dropdown:hover ul.dropdown-menu {
 .object .text {
   cursor: pointer;
   padding: 5px;
+  font-size: 1.1em;
 }
 
 /* object panels */
@@ -286,7 +293,7 @@ span.star:before {
   cursor: pointer;
 }
 .author-results a.disabled {
-  cursor: default;
+  cursor: ;
 }
 .work-results a.disabled {
   cursor: default;
@@ -296,9 +303,7 @@ span.star:before {
   font-weight: bold;
 }
 
-#WORK_TR-WorkName {
-  font-weight: bold;
-}
+
 
 /****
 /* ~quote page

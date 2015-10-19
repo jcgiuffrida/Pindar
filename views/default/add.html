@@ -45,6 +45,9 @@ var initWorkName = '';
 				</div>
 			</div><!--/.author-lookup -->
 
+
+
+
 			<div class="col-md-8 col-md-offset-3 author-results">
 				<div class="row">
 					<h4>Select the author: <span class="searching pull-right"></span></h4>
@@ -72,6 +75,20 @@ var initWorkName = '';
 					</div>
 				</div>
 				<div class="form-group">
+					<label for="AUTHOR-Type" class="col-md-3 control-label">Type</label>
+					<div class="col-md-4">
+						<select class="form-control" id="AUTHOR-Type"
+						 name="AuthorType" aria-describedby="help-AUTHOR-Type">
+							{{for type in authortypes:}}
+						  <option value="{{=type['id']}}">
+						  	{{=type['TypeName']}}
+						  </option>
+						  {{pass}}
+						</select>
+					</div>
+					<span id="help-AUTHOR-Type" class="help-block">Is this a person, a band, ...</span>
+				</div>
+				<div class="form-group">
 					<label for="AUTHOR_TR-WikipediaLink" class="col-md-3 control-label">
 							Wikipedia page
 					</label>
@@ -85,7 +102,7 @@ var initWorkName = '';
 								</button>
 							</span>
 						</div>
-						<span id="help-AUTHOR_TR-WikipediaLink" class="help-block">Click the blue button to automatically search Wikipedia for this person, then copy and paste the URL into this field. Linking to Wikipedia helps avoid duplicate entries.</span>
+						<span id="help-AUTHOR_TR-WikipediaLink" class="help-block">Click the blue button to automatically search Wikipedia for this author, then copy and paste the URL into this field. Linking to Wikipedia helps avoid duplicate entries.</span>
 					</div>
 				</div>
 				<div class="form-group">
@@ -161,7 +178,7 @@ var initWorkName = '';
 				<div class="col-md-8 col-md-offset-3">
 					<div class="form-group search-box">
 						<input type="search" class="form-control input-lg"
-						id="QUOTE-work-lookup" placeholder="Source"></input>
+						id="QUOTE-work-lookup" placeholder="Where is this quote from?"></input>
 						<span class="glyphicon glyphicon-remove" style="display:none;"></span>
 						<div class="results"></div>
 					</div>
@@ -203,6 +220,20 @@ var initWorkName = '';
 						</input>
 						<span id="help-WORK_TR-WorkName" class="help-block">This is the name that will be shown in Pindar.</span>
 					</div>
+				</div>
+				<div class="form-group">
+					<label for="WORK-Type" class="col-md-3 control-label">Type</label>
+					<div class="col-md-4">
+						<select class="form-control" id="WORK-Type"
+						 name="WorkType" aria-describedby="help-WORK-Type">
+							{{for type in worktypes:}}
+						  <option value="{{=type['id']}}">
+						  	{{=type['TypeName']}}
+						  </option>
+						  {{pass}}
+						</select>
+					</div>
+					<span id="help-WORK-Type" class="help-block">Is this a book, a song, a poem, ...</span>
 				</div>
 				<div class="form-group">
 					<label for="WORK_TR-WikipediaLink" class="col-md-3 control-label">

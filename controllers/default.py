@@ -261,6 +261,10 @@ def authors():
             (db.QUOTE.QuoteLanguageID==lang)).select(
             orderby=~db.QUOTE.created_on, limitby=(0,10))
 
+    authortypes = db((db.AUTHORTYPE._id > 0)).select(
+        db.AUTHORTYPE._id, db.AUTHORTYPE.TypeName,
+        orderby=db.AUTHORTYPE._id).as_list()
+
     return locals()
 
 
@@ -288,7 +292,8 @@ def works():
             (db.WORK_TR.WorkID==db.WORK._id) &
             (db.WORK_TR.LanguageID==lang)).select(
             db.WORK.ALL, db.WORK_TR.ALL, groupby=db.WORK._id)
-        work_id = work[0]['WORK_TR']['id']
+        work_tr_id = work[0]['WORK_TR']['id']
+        work_id = work[0]['WORK']['id']
     except KeyError:
         redirect(URL('Pindar/default', 'works', 'all?e='+request.args(0)))
     ratings = db(db.QUOTE_WORK.WorkID==work_id).select(
@@ -300,11 +305,14 @@ def works():
             (db.AUTHOR._id==db.AUTHOR_TR.AuthorID) &
             (db.AUTHOR_TR.LanguageID==lang)).select(
             orderby=db.AUTHOR_TR.DisplayName, limitby=(0,10))
-    quotes = db((db.WORK_TR._id==work_id) &
+    quotes = db((db.WORK_TR._id==work_tr_id) &
             (db.WORK_TR.WorkID==db.WORK._id) &
             (db.QUOTE_WORK.WorkID==db.WORK._id) &
             (db.QUOTE_WORK.QuoteID==db.QUOTE._id)).select(
             orderby=~db.QUOTE.created_on, limitby=(0,10))
+    worktypes = db((db.WORKTYPE._id > 0)).select(
+        db.WORKTYPE._id, db.WORKTYPE.TypeName,
+        orderby=db.WORKTYPE._id).as_list()
     return locals()
 
 
@@ -313,6 +321,12 @@ def add():
     langs = db((db.LANGUAGE._id > 0)).select(
         db.LANGUAGE.NativeName, db.LANGUAGE._id,
         orderby=db.LANGUAGE._id).as_list()
+    authortypes = db((db.AUTHORTYPE._id > 0)).select(
+        db.AUTHORTYPE._id, db.AUTHORTYPE.TypeName,
+        orderby=db.AUTHORTYPE._id).as_list()
+    worktypes = db((db.WORKTYPE._id > 0)).select(
+        db.WORKTYPE._id, db.WORKTYPE.TypeName,
+        orderby=db.WORKTYPE._id).as_list()
     if request.vars.author:
         init_author_query = db((db.AUTHOR_TR.id==request.vars.author) &
             (db.AUTHOR_TR.AuthorID==db.AUTHOR.id)).select(

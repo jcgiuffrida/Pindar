@@ -70,26 +70,25 @@
 	</div>
 </div>
 
-
 <!-- ======== ADVANCED QUOTE SEARCH -->
-<div class="row advanced-content" style="display:none;">
+<div class="row advanced-content" id="advanced-content" style="display:none;">
 	<div class="col-md-12 quotes">
 		<h3>Results <span class="results-count badge"></span></h3>
 		<div class="row default"></div>
-		<div class="row search-advanced-quotes search"></div>
+		<div class="row search-advanced-quotes search" id="search-advanced-quotes"></div>
 	</div>
 </div>
 <div class="row default-content">
 	<!-- ======== QUOTES ====== -->
-	<div class="col-md-8 quotes">
+	<div class="col-md-7 quotes">
 		<h3>Quotes <span class="results-count badge"></span></h3>
 		<div class="row show-quotes default"
 			{{if 'search' in locals():}} style="display:none;"{{pass}}>
 		</div>
-		<div class="row search-quotes search target"></div>
+		<div class="row search-quotes search target" id="search-quotes"></div>
 	</div>
 	<!-- ======== AUTHORS AND WORKS ====== -->
-	<div class="col-md-4 authors-and-works">
+	<div class="col-md-5 authors-and-works">
 		<div class="authors">
 			<div class="row">
 				<div class="col-md-8">
@@ -138,4 +137,5 @@
 <script src="{{=URL('static', 'js/select2.min.js')}}"></script>
 <script src="{{=URL('static','js/show.js')}}"></script>
 <script src="{{=URL('static','js/quotify.js')}}"></script>
+<script src="{{=URL('static','js/hilitor.js')}}"></script>
 {{end}}
