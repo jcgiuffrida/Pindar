@@ -90,6 +90,7 @@ $(document).ready(function(){
     }
   });
 
+  // fill in languages filter
   $.getJSON('/Pindar/api/language_query', function(response){
     var languagesArray = [];
     for (c in response.languages){
@@ -208,6 +209,8 @@ $(document).ready(function(){
       return r.text;
     }
   }
+
+
 
 });
 

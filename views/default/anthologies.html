@@ -1,0 +1,84 @@
+{{extend 'layout.html'}}
+{{block head}} {{end}}
+
+
+{{if 'anths' in locals():}}
+<div class="row">
+  <div class="col-md-6">
+    <h2>{{if 'mine' in locals():}}My{{else:}}Popular{{pass}} Anthologies</h2>
+  </div>
+  <div class="col-md-2">
+    <a href="/Pindar/default/add_anthology" class="btn btn-info">
+      <i class="fa fa-plus"></i> New Anthology</a>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+      <div class="col-md-6 column">
+        {{count = 0}}
+        {{for a in anths:}}
+        {{if count % 2 == 0:}}
+          <div class="anthology" data-id="{{=a['ANTHOLOGY']['id']}}">
+            <h3>{{=a['ANTHOLOGY']['Name']}}
+              <span class="badge pull-right">{{=a['_extra']['COUNT(SELECTION.AnthologyID)']}} Quote{{=plural(a['_extra']['COUNT(SELECTION.AnthologyID)'])}}</span>
+            </h3>
+            <p class="description">{{=a['ANTHOLOGY']['Description']}}</p>
+            <p class="text-right">&mdash;<i>Created by <a href="/Pindar/default/users/{{=a['auth_user']['username']}}">{{=a['auth_user']['username']}}</a> {{=str(prettydate(a['ANTHOLOGY']['created_on']))}}</i></p>
+            <div class="anthology-quotes">
+              <ul class="list-group">
+              </ul>
+            </div>
+          </div>
+        {{pass}}
+        {{count = count + 1}}
+        {{pass}}
+      </div>
+      <div class="col-md-6 column">
+        {{count = 0}}
+        {{for a in anths:}}
+        {{if count % 2 == 1:}}
+          <div class="anthology">
+            <h3>{{=a['ANTHOLOGY']['Name']}}
+              <span class="badge pull-right">{{=a['_extra']['COUNT(SELECTION.AnthologyID)']}} Quote{{=plural(a['_extra']['COUNT(SELECTION.AnthologyID)'])}}</span>
+            </h3>
+            <p>{{=a['ANTHOLOGY']['Description']}} &mdash;<i>Created by <a href="/default/users/{{=a['auth_user']['id']}}">{{=a['auth_user']['username']}}</a> {{=str(prettydate(a['ANTHOLOGY']['created_on']))}}</i></p>
+            <p>{{=a['_extra']['COUNT(SELECTION.AnthologyID)']}} Quote{{=plural(a['_extra']['COUNT(SELECTION.AnthologyID)'])}}</p>
+          </div>
+        {{pass}}
+        {{count = count + 1}}
+        {{pass}}
+      </div>
+  </div>
+</div><!--/.row -->
+
+{{else:}}
+{{for a in anth:}}
+<div class="row">
+  <div class="col-md-6 col-md-offset-1">
+    <h3>{{=a['ANTHOLOGY']['Name']}}</h3>
+  </div>
+  <div class="col-md-2">
+    <a href="/Pindar/default/add_anthology" class="btn btn-info">
+      <i class="fa fa-plus"></i> New Anthology</a>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-10 col-md-offset-1">
+    <p>{{=a['ANTHOLOGY']['Description']}} &mdash;<i>Created by <a href="/default/users/{{=a['auth_user']['id']}}">{{=a['auth_user']['username']}}</a> {{=str(prettydate(a['ANTHOLOGY']['created_on']))}}</i></p>
+    <p>{{=a['_extra']['COUNT(SELECTION.AnthologyID)']}} Quote{{=plural(a['_extra']['COUNT(SELECTION.AnthologyID)'])}}</p>
+    <br/>
+ </div>
+</div><!--/.row -->
+{{pass}}
+{{pass}}
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+{{block extrajs}}
+<script type="text/javascript" src='/Pindar/static/js/quotify.js'></script>
+<script type="text/javascript" src='/Pindar/static/js/anthologies.js'></script>
+{{end}}

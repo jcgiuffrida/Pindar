@@ -4,6 +4,48 @@
 
 */
 
+// global variables
+var anthResponses = [];
+var anthItems = [];
+var anthSelections = [];
+var anthsToLoad = 2;
+
+// when anthsToLoad = 0, then we can use them
+
+// get anthologies
+if (user !== 0){
+  $.getJSON('/Pindar/api/anthologies?user=' + user, function(response){
+    anthsToLoad -= 1;
+    for (a in response.anthologies){
+      anthResponses.push({ id: response.anthologies[a].ANTHOLOGY.id,
+        name: response.anthologies[a].ANTHOLOGY.Name,
+        quotecount: response.anthologies[a]._extra['COUNT(SELECTION.AnthologyID)'] });
+    }
+    anthResponses.forEach(function(a){
+      anthItems.push('<li><a href="#" class="anthology-' + a.id +
+        '" data-id="' + a.id + '">' + a.name + ' <span class="badge">' +
+        a.quotecount + ' quote' + plural(a.quotecount) + '</span>' +
+        '<div class="pull-left anthology-check"></div></a></li>');
+    });
+  });
+
+  $.getJSON('/Pindar/api/selections', function(response){
+    anthsToLoad -= 1;
+    for (s in response.selections){
+      anthSelections.push({
+        'anthology': response.selections[s].ANTHOLOGY.id,
+        'name': response.selections[s].ANTHOLOGY.Name,
+        'quote': response.selections[s].SELECTION.QuoteID
+      });
+    }
+  });
+} else {
+  anthsToLoad = 0;
+}
+
+
+
+
 
 function parseQuotes(quotesObject, size, max){
   /*
@@ -377,6 +419,7 @@ function reflectTypeChange(el, authorWork, type){
   }
 }
 
+
 // functionality to apply on EVERY page
 $(document).ready(function(){
   // navbar functionality
@@ -409,3 +452,4 @@ $(document).ready(function(){
   });
 
 });
+

@@ -64,16 +64,28 @@
       <div class="collapse navbar-collapse" id="navbar-collapse-1">
         <ul class="nav navbar-nav">
           <li>
-            <a href="{{=URL('default', 'show')}}">Quotes</a>
-          </li>
-          <li>
-            <a href="{{=URL('default', 'authors')}}">Authors</a>
-          </li>
-          <li>
-            <a href="{{=URL('default', 'works')}}">Works</a>
+            <a href="{{=URL('default', 'show')}}"><i class="fa fa-quote-left"></i> Quotes</a>
           </li>
           <li class="dropdown">
-            <a href="/Pindar/default/data/tables" class="dropdown-toggle" data-toggle="dropdown">Manage</a>
+            <a href="{{=URL('default', 'authors')}}" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-book"></i> Sources</a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="{{=URL('default', 'authors')}}"><i class="fa fa-user"></i> Authors</a></li>
+              <li><a href="{{=URL('default', 'works')}}"><i class="fa fa-book"></i> Works</a></li>
+            </ul>
+          </li>
+          <li class="dropdown nav-anthologies">
+            <a href="{{=URL('default', 'anthologies')}}" class="dropdown-toggle" data-toggle="dropdown"><img class="svg" id="wreath-link" src="{{=URL('static', 'images/wreath.png')}}" height="18"> Anthologies</a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="{{=URL('default', 'anthologies')}}">Popular Anthologies</a></li>
+              {{if auth.user:}}
+              <li><a href="{{=URL('default', 'anthologies/mine')}}">My Anthologies</a></li>
+              {{pass}}
+            </ul>
+          </li>
+          {{if auth.user:}}
+          {{if auth.has_membership(group_id=5, user_id=auth.user.id):}}
+          <li class="dropdown">
+            <a href="/Pindar/default/data/tables" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-gear"></i> Manage</a>
             <ul class="dropdown-menu" role="menu">
               <li><a href="{{=URL('manage', 'quotes')}}">Quotes</a></li>
               <li><a href="{{=URL('manage', 'authors')}}">Authors</a></li>
@@ -84,8 +96,11 @@
               <li><a href="{{=URL('manage', 'flags')}}">Flags</a></li>
               <li><a href="{{=URL('manage', 'ratings')}}">Ratings</a></li>
               <li><a href="{{=URL('manage', 'comments')}}">Comments</a></li>
+              <li><a href="{{=URL('manage', 'anthologies')}}">Anthologies</a></li>
             </ul>
           </li>
+          {{pass}}
+          {{pass}}
           <li>
             <a href="{{=URL('default', 'add')}}"><i class="fa fa-plus"></i> Add Quote</a>
           </li>
@@ -94,7 +109,8 @@
           <div class="form-group">
             <div class="btn-group search-box">
               <input type="search" class="form-control"
-              placeholder="Search everything">
+              placeholder="&#xF002; Search everything"
+              style="font-family:Arial, FontAwesome">
               <span class="glyphicon glyphicon-remove" style="display:none;"></span>
             </div>
           </div>
@@ -125,6 +141,16 @@
 
     {{include}}
 
+    {{if auth.user:}}
+    {{if auth.has_membership(group_id=5, user_id=auth.user.id):}}
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        {{=response.toolbar()}}
+      </div>
+    </div>
+    {{pass}}
+    {{pass}}
+
     <!-- Footer ================================================== -->
     <div class="row">
         <footer class="footer col-md-12" id="footer">
@@ -142,6 +168,7 @@
        (Placed at the end of the document so the pages load faster) -->
   <script src="{{=URL('static','js/bootstrap.js')}}"></script>
   <script src="{{=URL('static','js/web2py_bootstrap.js')}}"></script>
+  <script src="{{=URL('static','js/default.js')}}"></script>
   <script src="{{=URL('static','js/tools.js')}}"></script>
   <script src="{{=URL('static','js/hilitor.js')}}"></script><!-- ugh, need to do this for now -->
   <script src="{{=URL('static','js/searchify.js')}}"></script>

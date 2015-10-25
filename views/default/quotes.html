@@ -29,6 +29,9 @@ var requestComments = {{=request_comments}};
 					<p class="lead">
 						{{=sanitize(q.QUOTE.Text)}}
 					</p>
+					<p class="text-right small">
+						Submitted by <a href="/Pindar/default/users/{{=q.auth_user.username}}">{{=q.auth_user.username}}</a>
+					</p>
 					<p class="text-center">
 						<a class="btn btn-primary"
 						href="/Pindar/default/authors/{{=q.AUTHOR_TR.id}}">
@@ -39,9 +42,7 @@ var requestComments = {{=request_comments}};
 							{{=sanitize(q.WORK_TR.WorkName)}}
 						</a>
 					</p>
-					<p class="pull-right small">
-						Submitted by <a href="/Pindar/default/users/{{=q.auth_user.username}}">{{=q.auth_user.username}}</a>
-					</p>
+
 					<div class="object-actions">
 					</div>
 				</div>
@@ -108,9 +109,7 @@ var requestComments = {{=request_comments}};
 		<br>
 		<br>
 		<br>
-
-		{{=response.toolbar()}}
-	</div>
+ </div>
 	<div class="col-md-4 recommendations">
 		<h4>Users who liked this quote also liked:</h4>
 	</div>

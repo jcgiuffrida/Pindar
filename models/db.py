@@ -142,7 +142,6 @@ db.auth_user.PrimaryLanguageID.type = 'reference LANGUAGE'
 db.auth_user.PrimaryLanguageID.requires = IS_IN_DB(db, db.LANGUAGE.id, '%(NativeName)s')
 
 
-
 ###---------------------- QUOTE
 
 db.define_table('QUOTE',
@@ -346,7 +345,55 @@ db.RATING.created_by.readable=True
 db.RATING.created_on.readable=True
 
 
+###---------------------- ANTHOLOGIES
+db.define_table('ANTHOLOGY',
+            Field('Name', 'string', length=128, required=True),
+            Field('Description', 'text'),
+            Field('Active', 'boolean', default=True, readable=False,
+                writable=False),
+            auth_signature)
 
+db.ANTHOLOGY.Name.requires = [IS_NOT_EMPTY(), IS_LENGTH(maxsize=128)]
+db.ANTHOLOGY.Description.requires = IS_LENGTH(maxsize=8192)
+db.ANTHOLOGY.created_by.readable=True
+db.ANTHOLOGY.created_on.readable=True
+
+
+db.define_table('SELECTION',
+            Field('QuoteID', 'reference QUOTE', required=True),
+            Field('AnthologyID', 'reference ANTHOLOGY', required=True),
+            Field('AddedOn', 'datetime', default=request.now,
+                writable=False, readable=True))
+
+db.SELECTION.QuoteID.requires = [IS_NOT_EMPTY(), IS_IN_DB(db, db.QUOTE.id, '%(Text)s')]
+db.SELECTION.AnthologyID.requires = [IS_NOT_EMPTY(), IS_IN_DB(db, db.ANTHOLOGY.id, '%(Name)s')]
+
+
+db.define_table('FOLLOW_ANTHOLOGY',
+            Field('AnthologyID', 'reference ANTHOLOGY', required=True),
+            Field('UserID', auth.settings.table_user, default=auth.user_id,
+        writable=False,readable=True),
+            Field('AddedOn', 'datetime', default=request.now,
+                writable=False, readable=True))
+
+db.FOLLOW_ANTHOLOGY.AnthologyID.requires = [IS_NOT_EMPTY(), IS_IN_DB(db, db.ANTHOLOGY.id, '%(Name)s')]
+db.FOLLOW_ANTHOLOGY.UserID.requires = IS_NOT_EMPTY()
+
+# upon user registration, create default anthology and follow it
+def add_default_anthology(fields, id):
+    fields.update(UserID=id)
+    fields.update(created_by=id)
+    fields.update(Name='Favorite Quotes')
+    fields.update(Description='This anthology is automatically created to ' \
+        'hold any quotes that strike you. Create anthologies to collect ' \
+        'and remember quotes on particular themes or for your own ' \
+        'reference.')
+    anth_id = int(db.ANTHOLOGY.insert( **db.ANTHOLOGY._filter_fields(fields) ))
+    fields.update(AnthologyID = anth_id)
+    db.FOLLOW_ANTHOLOGY.insert( **db.FOLLOW_ANTHOLOGY._filter_fields(fields) )
+
+
+db.auth_user._after_insert.append(add_default_anthology)
 
 
 ## enable record versioning only on important tables
@@ -357,3 +404,4 @@ db.WORK._enable_record_versioning()
 db.WORK_TR._enable_record_versioning()
 db.FLAG._enable_record_versioning()
 db.COMMENT._enable_record_versioning()
+db.ANTHOLOGY._enable_record_versioning()

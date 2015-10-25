@@ -25,6 +25,11 @@ quote_limit = 10
 author_limit = 6
 work_limit = 6
 
+def index():
+    ''' API documentation'''
+    return locals()
+
+
 def check_response(request_vars, check={}, user=False):
     # validation
     # is_integer: ensures it's a nonnegative integer
@@ -790,6 +795,115 @@ def recommend():
     return json.dumps(response)
 
 
+def anthologies():
+    ''' Returns a list of user's anthologies, with number of quotes in each '''
+    response = check_response(request.vars, {})
+    quotecount = db.SELECTION.AnthologyID.count()
+    query = (db.ANTHOLOGY._id > 0) & \
+            (db.ANTHOLOGY.created_by==db.auth_user._id)
+    try:
+        if request.vars.user:
+            query &= (db.auth_user.id==request.vars.user)
+        elif request.vars.username:
+            query &= (db.auth_user.username==request.vars.username)
+        anths = db(query).select(
+            db.ANTHOLOGY.id, db.ANTHOLOGY.Name, db.ANTHOLOGY.Description,
+            db.auth_user.username, quotecount,
+            left=db.SELECTION.on(db.ANTHOLOGY._id==db.SELECTION.AnthologyID),
+            groupby=db.ANTHOLOGY._id, orderby=~quotecount, limitby=(0,10)
+            ).as_list()
+        response.update({'anthologies': sanitize_JSON(anths)})
+    except ValueError:
+        response.update({'msg': 'User not found: use "username" for username and "user" for user id',
+            'status': 403})
+    status = response['status']
+    response.pop('status', None)
+    if not status == 200:
+        raise HTTP(status, json.dumps(response))
+    return json.dumps(response)
+
+
+@auth.requires_login()
+def selections():
+    ''' Returns a list of user's anthologies, with id's of quotes in each
+        Note: this endpoint is verbose '''
+    response = check_response(request.vars, {}, user=True)
+    query = (db.ANTHOLOGY._id > 0) & \
+            (db.ANTHOLOGY.created_by==auth.user)
+    try:
+        selections = db(query).select(
+            db.ANTHOLOGY.id, db.ANTHOLOGY.Name,
+            db.SELECTION.QuoteID,
+            left=db.SELECTION.on(db.ANTHOLOGY._id==db.SELECTION.AnthologyID)
+            ).as_list()
+        response.update({'selections': sanitize_JSON(selections)})
+    except:
+        response.update({'msg': 'oops',
+            'status': 403})
+    status = response['status']
+    response.pop('status', None)
+    if not status == 200:
+        raise HTTP(status, json.dumps(response))
+    return json.dumps(response)
+
+
+@auth.requires_login()
+def create_anthology():
+    ''' Creates an anthology '''
+    response = check_response(request.vars, {'Name': 'required'}, user=True)
+    try:
+        anthID = db.ANTHOLOGY.insert(**db.ANTHOLOGY._filter_fields(request.vars))
+        if anthID:
+            response.update({'id': anthID})
+    except:
+        response.update({'msg': 'oops',
+            'status': 403})
+    status = response['status']
+    response.pop('status', None)
+    if not status == 200:
+        raise HTTP(status, json.dumps(response))
+    return json.dumps(response)
+
+
+@auth.requires_login()
+def anthologize():
+    ''' adds a quote to an anthology (or removes if explicitly requested) '''
+    response = check_response(request.vars, {
+        'quote': ['is_integer', 'required'],
+        'anthology': ['is_integer', 'required']
+        }, user=True)
+    if response['status'] == 200:
+        check = db((db.SELECTION.AnthologyID==request.vars.anthology) &
+            (db.SELECTION.QuoteID==request.vars.quote)).isempty()
+        if check:
+            # anthologize
+            if not request.vars.remove:
+                selectionID = db.SELECTION.insert(
+                    AnthologyID=request.vars.anthology,
+                    QuoteID=request.vars.quote)
+                if selectionID:
+                    response.update({'id': selectionID, 'msg': 'quote anthologized'})
+                else:
+                    response.update({'msg': 'oops', 'status': 503})
+            else:
+                response.update({'msg': 'quote not already anthologized: cannot remove'})
+        else:
+            # already anthologized here
+            if request.vars.remove:
+                db((db.SELECTION.AnthologyID==request.vars.anthology) &
+                    (db.SELECTION.QuoteID==request.vars.quote)).delete()
+                response.update({'msg': 'quote un-anthologized'})
+            else:
+                response.update({'msg': 'quote already anthologized'})
+
+    status = response['status']
+    response.pop('status', None)
+    if not status == 200:
+        raise HTTP(status, json.dumps(response))
+    return json.dumps(response)
+
+
+
 def sanitize_JSON(q):
     try:
         if isinstance(q, dict):
@@ -803,6 +917,5 @@ def sanitize_JSON(q):
     except:
         pass
     return q
-
 
 

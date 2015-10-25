@@ -91,6 +91,24 @@ $.fn.quotify = function(options){
     }
     return $(element); };
 
+  var constructBtnAnthologiesElement = function(size, inAnth){
+    if(typeof(inAnth)==='undefined') inAnth = false;
+    if (size == 'large'){
+      var element = '<div class="btn-group btn-anthologies pull-right">' +
+        '<button type="button" class="btn btn-default dropdown-toggle" ' +
+        'data-toggle="dropdown"><i class="fa fa-bookmark"></i></button>';
+    } else {
+      var element = '<div class="btn-group btn-anthologies pull-right">' +
+        '<a class="dropdown-toggle" data-toggle="dropdown">' +
+        '<i class="fa fa-bookmark"></i></a>';
+    }
+    element += '<ul class="dropdown-menu" role="menu">' +
+      '<li class="anth-label">Anthologize</li>' +
+      '<li class="new-anthology"><a href="#" data-id="0">' +
+      'Create a new anthology...</a></li></ul></div>';
+    return $(element); };
+
+
   var constructEditHistoryElement = function(){
     var element = '<div class="row edit-history" style="display:none;">' +
       '<div class="col-md-12"></div></div>';
@@ -159,7 +177,7 @@ $.fn.quotify = function(options){
         objectActions.append(constructBtnCommentsElement(settings.size));
       }
     }
-    if (settings.auth & settings.size == 'large'){
+    if (settings.auth && settings.size == 'large'){
       objectActions.append(constructBtnEditElement());
       objectResults.append(constructEditHistoryElement());
     }
@@ -167,6 +185,9 @@ $.fn.quotify = function(options){
       settings.size));
     if (settings.size == 'large'){
       objectResults.append(constructFlagElement());
+    }
+    if (settings.objectType == 'quote'){
+      objectActions.append(constructBtnAnthologiesElement(settings.size));
     }
 
 
@@ -197,6 +218,8 @@ $.fn.quotify = function(options){
       });
       object.on('mouseleave', function(){
         objectActions.children('div').hide();
+        // don't hide anthology button if already anthologized
+        objectActions.find('a.already-anthologized').closest('div').show();
       });
       objectActions.children('div').hide();
     }
@@ -644,6 +667,133 @@ $.fn.quotify = function(options){
 
     objectActions.find('.star-ratings-user').on('click.rating', 'span.star',
       submitRating);
+
+
+
+    /********************
+          ANTHOLOGIZE
+    ********************/
+
+    var loadAnthologies = function(){
+      clearTimeout(pendingAnths);
+      if (anthsToLoad !== 0){
+        var pendingAnths = setTimeout(function(){loadAnthologies()}, 100);
+        console.log('waiting...');
+        return;
+      }
+      anthItems.forEach(function(a){
+        object.find('.btn-anthologies ul li.new-anthology').before($(a));
+      });
+
+      // if this quote is anthologized, show that
+      anthSelections.forEach(function(s){
+        if (s.quote == object.data('id')){
+          object.find('.btn-anthologies ul li a.anthology-' + s.anthology)
+            .addClass('anthologized').find('.anthology-check')
+              .html('<i class="fa fa-check"></i>');
+          object.find('.btn-anthologies>a').addClass('already-anthologized')
+            .closest('div').show();
+          object.find('.btn-anthologies>button')
+            .addClass('already-anthologized')
+        }
+      });
+    };
+
+    if (settings.objectType == 'quote'){
+      // fill in user's anthologies, if logged in
+      if (user !== 0){
+        if (anthsToLoad == 0){
+          loadAnthologies();
+        } else {
+          var pendingAnths = setTimeout(function(){loadAnthologies()}, 100);
+          console.log('waiting...');
+        }
+      }
+
+      // if user clicks New Anthology, add the current quote too
+      objectActions.find('.btn-anthologies li.new-anthology a').attr('href',
+        '/Pindar/default/add_anthology?quote=' + object.data('id'));
+
+      // if user clicks an anthology, add the quote to it
+      objectActions.on('click', '.btn-anthologies ul a', function(e){
+        e.preventDefault();
+        e.stopPropagation();  // don't close dropdown
+        var thisLink = $(this);
+        var thisQuote = object.data('id');
+        if ($(this).closest('li').hasClass('new-anthology')){
+          window.location.href = $(this).attr('href');
+          return;
+        }
+
+        // add quote to anthology
+        if (!($(this).hasClass('anthologized'))){
+          $(this).find('.anthology-check')
+            .html('<i class="fa fa-spinner fa-spin"></i>');
+          $.getJSON('/Pindar/api/anthologize?anthology=' + $(this).data('id') +
+            '&quote=' + object.data('id'), function(response) {
+            if (response.msg == 'quote anthologized'){
+              // update count for all quotes on page
+              var currentCount = thisLink.find('span.badge').text()
+                .split(' ')[0];
+              currentCount = Number(currentCount) + 1;
+              $('.object').find('.btn-anthologies .anthology-' +
+                thisLink.data('id')).find('span.badge')
+                .text(currentCount + ' quote' + plural(currentCount));
+              // update this quote's anthology list
+              thisLink.addClass('anthologized').find('.anthology-check')
+                .html('<i class="fa fa-check"></i>');
+              object.find('.btn-anthologies>a').addClass('already-anthologized')
+                .closest('div').show();
+              object.find('.btn-anthologies>button')
+                .addClass('already-anthologized')
+            } else if (response.msg == 'quote already anthologized'){
+              // quote already selected
+              console.log(response.msg);
+            } else {
+              // something went wrong
+              console.log(response.msg);
+            }
+          }).error(function(e){
+            console.log(e.responseText);
+          });
+        } else {
+          // quote already anthologized: undo it
+          $(this).find('.anthology-check')
+            .html('<i class="fa fa-spinner fa-spin"></i>');
+          $.getJSON('/Pindar/api/anthologize?anthology=' + $(this).data('id') +
+            '&quote=' + object.data('id') + '&remove=True', function(response){
+            if (response.msg == 'quote un-anthologized'){
+              // update count for all quotes on page
+              var currentCount = thisLink.find('span.badge').text()
+                .split(' ')[0];
+              currentCount = Number(currentCount) - 1;
+              $('.object').find('.btn-anthologies .anthology-' +
+                thisLink.data('id')).find('span.badge')
+                .text(currentCount + ' quote' + plural(currentCount));
+              // update this quote's anthology list
+              thisLink.removeClass('anthologized').find('.anthology-check')
+                .html('');
+              // if quote is not anthologized elsewhere, remove green
+              var currentAnthologies = object.find('.btn-anthologies ' +
+                'a.anthologized');
+              if (currentAnthologies.length === 0){
+                object.find('.btn-anthologies>a')
+                  .removeClass('already-anthologized');
+                object.find('.btn-anthologies>button')
+                  .removeClass('already-anthologized')
+              }
+            } else {
+              // something went wrong
+              console.log(response.msg);
+            }
+          }).error(function(e){
+            console.log(e.responseText);
+          });
+        }
+        $(this).blur();
+      });
+    }
+
 
 
     /********************

@@ -3,12 +3,14 @@
 # controller for admin tools, letting administrators see, change, and delete the data
 
 
+@auth.requires_membership('overlord')
 def quotes():
     grid = SQLFORM.grid(db.QUOTE, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('QUOTE', ids))])
     return locals()
 
 
+@auth.requires_membership('overlord')
 def works():
     grid1 = SQLFORM.grid(db.WORK, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('WORK', ids))])
@@ -19,7 +21,7 @@ def works():
     return locals()
 
 
-
+@auth.requires_membership('overlord')
 def authors():
     grid1 = SQLFORM.grid(db.AUTHOR, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('AUTHOR', ids))])
@@ -30,6 +32,7 @@ def authors():
     return locals()
 
 
+@auth.requires_membership('overlord')
 def connections():
     grid1 = SQLFORM.grid(db.QUOTE_WORK, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('QUOTE_WORK', ids))])
@@ -38,33 +41,46 @@ def connections():
     return locals()
 
 
+@auth.requires_membership('overlord')
 def languages():
     grid = SQLFORM.grid(db.LANGUAGE, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('LANGUAGE', ids))])
     return locals()
 
 
-#@auth.requires_login()
+@auth.requires_membership('overlord')
 def users():
     grid = SQLFORM.grid(db.auth_user, user_signature=False)
     return locals()
 
 
+@auth.requires_membership('overlord')
 def flags():
     grid = SQLFORM.grid(db.FLAG, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('FLAG', ids))])
     return locals()
 
 
+@auth.requires_membership('overlord')
 def ratings():
     grid = SQLFORM.grid(db.RATING, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('RATING', ids))])
     return locals()
 
 
+@auth.requires_membership('overlord')
 def comments():
     grid = SQLFORM.grid(db.COMMENT, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('COMMENT', ids))])
+    return locals()
+
+
+@auth.requires_membership('overlord')
+def anthologies():
+    grid1 = SQLFORM.grid(db.ANTHOLOGY, user_signature=True,
+        selectable=[('Delete', lambda ids: delete_multiple('ANTHOLOGY', ids))])
+    grid2 = SQLFORM.grid(db.SELECTION, user_signature=True,
+        selectable=[('Delete', lambda ids: delete_multiple('SELECTION', ids))])
     return locals()
 
 
@@ -109,5 +125,10 @@ def delete_multiple(table, ids):
     elif table == 'COMMENT':
         to_delete = db(db.COMMENT.id.belongs(ids))
         to_delete.delete()
-
+    elif table == 'ANTHOLOGY':
+        to_delete = db(db.ANTHOLOGY.id.belongs(ids))
+        to_delete.delete()
+    elif table == 'SELECTION':
+        to_delete = db(db.SELECTION.id.belongs(ids))
+        to_delete.delete()
 

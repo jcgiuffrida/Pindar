@@ -28,21 +28,22 @@ $(document).ready(function(){
   //   API query
   var recommendationsDiv = $('.recommendations');
   $.getJSON('/Pindar/api/recommend?q=' + $('.object').data('id'),
-      function(response) {
-      if (response.quotes.length > 0){
-        for (var i=0; i<1; i++){
-          recommendationsDiv.append($('<div class="col-md-12 column"></div>'));
-        }
-        var quotesArray = parseQuotes(response.quotes);
-        $.each(quotesArray, function(index, value){
-          var q = value;
-          q.quotify({size: 'small'});
-          q.appendTo(recommendationsDiv.find('.column'));
-        });
-      } else {
-        recommendationsDiv.append('<div class="col-md-12"><p>No quotes found. Rate more quotes to start getting recommendations!</p></div>');
+    function(response) {
+    if (response.quotes.length > 0){
+      for (var i=0; i<1; i++){
+        recommendationsDiv.append($('<div class="col-md-12 column"></div>'));
       }
-    });
+      var quotesArray = parseQuotes(response.quotes);
+      $.each(quotesArray, function(index, value){
+        var q = value;
+        q.quotify({size: 'small'});
+        q.appendTo(recommendationsDiv.find('.column'));
+      });
+    } else {
+      recommendationsDiv.append('<div class="col-md-12"><p>No quotes found. Rate more quotes to start getting recommendations!</p></div>');
+    }
+  });
+
 });
 
 

@@ -30,7 +30,15 @@ jQuery(function(){
   }
   hoverMenu(); // first page load
   jQuery(window).resize(hoverMenu); // on resize event
-  jQuery('ul.nav li.dropdown a').click(function(){window.location=jQuery(this).attr('href');});
+  jQuery('ul.nav li.dropdown a').click(function(event){
+    // window.location=jQuery(this).attr('href');
+    event.stopPropagation();
+    if(event.originalEvent.ctrlKey || event.originalEvent.metaKey){
+      window.open(jQuery(this).attr('href'), "_blank");
+    } else {
+      window.location.href=jQuery(this).attr('href');
+    }
+  });
 
   // fix a bug that hides diagnostics
   $("div[id^=totop] div").removeClass('hidden').css('width', '100%');

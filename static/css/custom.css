@@ -3,6 +3,8 @@
 /*  ~general
 /*****/
 
+
+
 body {
   background-color: #e8e8e8;
 }
@@ -85,7 +87,12 @@ ul.nav li.dropdown:hover ul.dropdown-menu {
   color: #777;
 }
 
-/* search */
+svg {
+  fill: currentColor;
+}
+
+
+/* search highlighting */
 hi {
   background-color: #a0ffff;
   color: #000;
@@ -115,6 +122,19 @@ hi {
   font-size: 18px;
 }
 
+/* better panels */
+.panel-group { margin-bottom: 5px;}
+
+.panel-heading a {
+  display: block;
+}
+
+.panel-heading a:hover,
+.panel-heading a:active {
+  text-decoration: none;
+}
+
+
 /*****
 /*  ~object
 /*****/
@@ -142,20 +162,39 @@ hi {
 }
 
 .object-actions .btn-goto-comments,
-.object-actions .btn-goto-flag>a {
+.object-actions .btn-goto-flag>a,
+.object-actions .btn-anthologies>a {
   cursor: pointer;
   color: #000;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 .object-actions .btn-goto-comments:hover,
-.object-actions .btn-goto-flag>a:hover {
+.object-actions .btn-goto-flag>a:hover,
+.object-actions .btn-anthologies>a:hover {
   color: #175fdd;
 }
 .object-actions .btn-goto-flag>a:hover,
-.object-actions .btn-goto-flag>a:active {
+.object-actions .btn-goto-flag>a:active,
+.object-actions .btn-anthologies>a:hover,
+.object-actions .btn-anthologies>a:active {
   text-decoration: none;
 }
-.object-actions .btn-goto-flag.open .dropdown-toggle {
+.object-actions .btn-goto-flag.open .dropdown-toggle,
+.object-actions .btn-anthologies.open .dropdown-toggle {
   box-shadow: none;
+}
+
+.object-actions .btn-anthologies ul li:first-child {
+  display: block;
+  padding: 3px 20px;
+  clear: both;
+  line-height: 1.42857143;
+  color: #333;
+  white-space: nowrap;
+  text-align: center;
+  border-bottom: 1px solid #333;
+  font-style: italic;
 }
 
 /* rating stars */
@@ -251,6 +290,58 @@ span.star:before {
   content: "\f005";
   color: #175fdd;
 }
+
+
+
+/* anthology selections */
+.btn-anthologies ul li>a.anthologized {
+  background-color: #ddd;
+}
+
+.btn-anthologies ul li>a.anthologized:hover,
+.btn-anthologies ul li>a.anthologized:focus {
+  background-color: #bbb;
+  color: #333;
+}
+
+.btn-anthologies ul li>a:focus {
+  background-color: #fff;
+}
+
+.btn-anthologies ul li .anthology-check {
+  color: #3fad46;
+  margin-left: -18px;
+}
+
+.btn-anthologies a.already-anthologized {
+  color: #3fad46;
+}
+
+.btn-anthologies button.already-anthologized {
+  color: #3fad46;
+}
+
+
+/* anthologies page */
+.anthology {
+  border: 2px solid #ddd;
+  background-color: #fff;
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 20px;
+  cursor: default;
+}
+
+.anthology.hover {
+  background-color: #eee;
+  cursor: pointer;
+}
+
+
+.anthology .badge {
+  font-size: 0.6em;
+}
+
 
 
 

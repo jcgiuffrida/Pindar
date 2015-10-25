@@ -273,7 +273,8 @@ def works():
     if auth.user:
         lang = auth.user.PrimaryLanguageID
     else:
-        lang = 1  # default is english# what work?
+        lang = 1  # default is english
+    # what work?
     if request.args(0)=='all':
         if request.vars['e']:
             response.flash='Work ' + request.vars['e'] + ' was not found'
@@ -349,9 +350,61 @@ def add():
             init_author_name = search.AUTHOR_TR.DisplayName
     return locals()
 
+# page to show anthologies
+def anthologies():
+    # show only user's anthologies
+    quotecount = db.SELECTION.AnthologyID.count()
+    if request.args(0) == 'mine':
+        anths = db((db.ANTHOLOGY._id > 0) &
+            (db.ANTHOLOGY.created_by==db.auth_user.id) &
+            (db.auth_user.id==auth.user)).select(
+            db.ANTHOLOGY.ALL, db.auth_user.username, db.auth_user.id, quotecount,
+            left=db.SELECTION.on(db.ANTHOLOGY._id==db.SELECTION.AnthologyID),
+            groupby=db.ANTHOLOGY._id, orderby=~quotecount,
+            limitby=(0,10)).as_list()
+        mine = True
+        return locals()
+
+    # show all anthologies
+    if request.args(0)=='all':
+        if request.vars['e']:
+            response.flash='Sorry, anthology ' + request.vars['e'] + ' was not found'
+        anths = db((db.ANTHOLOGY._id > 0) &
+            (db.ANTHOLOGY.created_by==db.auth_user.id)).select(
+            db.ANTHOLOGY.ALL, db.auth_user.username, db.auth_user.id, quotecount,
+            left=db.SELECTION.on(db.ANTHOLOGY._id==db.SELECTION.AnthologyID),
+            groupby=db.ANTHOLOGY._id, orderby=~quotecount,
+            limitby=(0,10)).as_list()
+        return locals()
+
+    # if a specific anthology is requested, show it
+    a = db.ANTHOLOGY(request.args(0))
+    # if anthology is invalid, show all anthologies and an error message
+    if not a:
+        if not request.args(0):
+            redirect(URL('default', 'anthologies/all'))
+        else:
+            redirect(URL('Pindar/default', 'anthologies', 'all?e='+request.args(0)))
+    try:
+        anth = db((db.ANTHOLOGY._id==request.args(0)) &
+            (db.ANTHOLOGY.created_by==db.auth_user.id)).select(
+            db.ANTHOLOGY.ALL, db.auth_user.username, db.auth_user.id, quotecount,
+            left=db.SELECTION.on(db.ANTHOLOGY._id==db.SELECTION.AnthologyID),
+            groupby=db.ANTHOLOGY._id, orderby=~quotecount).as_list()
+        anth_id = anth[0]['ANTHOLOGY']['id']
+    except IndexError:
+        redirect(URL('Pindar/default', 'anthologies', 'all?e='+request.args(0)))
+    except KeyError:
+        redirect(URL('Pindar/default', 'anthologies', 'all?e='+request.args(0)))
+    return locals()
 
 
-
+# page to add anthologies
+@auth.requires_login()
+def add_anthology():
+    if request.vars.quote:
+        quote = request.vars.quote
+    return locals()
 
 
 

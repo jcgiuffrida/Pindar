@@ -1,0 +1,62 @@
+{{extend 'layout.html'}}
+{{block head}} {{end}}
+
+{{if 'quote' in locals():}}
+<script>
+  var quote = {{=quote}};
+</script>
+{{pass}}
+
+<div class="row">
+  <div class="col-md-7 col-md-offset-1">
+    <h3>New Anthology</h3>
+    <form class="form-horizontal add-anthology-form" role="form"
+    autocomplete="off">
+      <div class="form-group">
+        <label for="ANTHOLOGY-Name" class="col-md-3 control-label">
+            Name of anthology
+        </label>
+        <div class="col-md-9">
+          <div class="input-group">
+            <input type="text" class="form-control" id="ANTHOLOGY-Name"
+            placeholder="" name="Name" style="font-weight:bold;"></input>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="ANTHOLOGY-Description" class="col-md-3 control-label">
+            Description
+        </label>
+        <div class="col-md-9">
+          <textarea class="form-control" id="ANTHOLOGY-Description" rows="3"
+          placeholder="(Optional)" name="Description" aria-describedby="help-ANTHOLOGY-Description"></textarea>
+          <span id="help-ANTHOLOGY-Description" class="help-block">Describe what sort of quotes will be contained in this anthology.</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-md-2 col-md-offset-3">
+          <button type="submit" class="btn btn-primary" id="anthology-submit">
+          Create Anthology</button>
+        </div>
+        <div class="col-md-2 col-md-offset-1">
+          <button type="button" class="btn btn-default" id="anthology-cancel">
+          Cancel</button>
+        </div>
+      </div>
+    </form>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+ </div>
+  <div class="col-md-4 recommendations">
+    <h4>Sidebar</h4>
+  </div>
+</div><!--/.row -->
+{{block extrajs}}
+<script src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
+<script type="text/javascript" src='/Pindar/static/js/add_anthology.js'></script>
+{{end}}

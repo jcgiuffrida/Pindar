@@ -1,0 +1,545 @@
+{{extend 'layout.html'}}
+{{block head}}
+<script>
+  // shamelessly copied from http://plenar.io/api-docs
+  $('.collapse').collapse('hide');
+  $('.collapse').on('show.bs.collapse', function () {
+    window.location.hash = $(this).attr('id');
+  });
+
+  $(document).ready(function() {
+    var anchor = window.location.hash.replace("#", "");
+    $('#' + anchor).collapse('show');
+  });
+</script>
+{{end}}
+
+
+<div class="row">
+  <div class='col-md-10 col-md-offset-1'>
+    <h2 id="docs">For developers</h2>
+    <p><strong></strong> The Pindar RESTful API can be used to perform queries on our data.</p>
+
+    <p>A few things to know:</p>
+
+    <ul>
+      <li>All API responses are in <a href='http://www.json.org/'>JSON format</a>.</li>
+      <li>All methods are accessed via: <code>/api/[endpoint]</code></li>
+    </ul>
+
+    <h2 id='endpoints'>Endpoints</h2>
+    <p>The current API endpoints are:</p>
+
+    <h3>Queries about the data</h3>
+    <div class="panel-group" id="accordion-api-datasets">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a data-toggle="collapse" data-parent="#accordion-api-datasets" href="#collapse-api-datasets" id="api-datasets">
+            <span class='label label-info'>GET</span>
+            <strong><code>/v1/api/datasets/</code></strong>
+            <p class='pull-right'>list datasets and metadata available</p>
+            <div class='clearfix'></div>
+          </a>
+        </div>
+        <div id="collapse-api-datasets" class="panel-collapse collapse">
+          <div class="panel-body">
+            <p>This is the “data about the data” endpoint. It contains a record for each dataset.</p>
+
+            <p><strong>Query Parameters</strong></p>
+            <p>All query parameters are optional.</p>
+            <table class='table table-bordered'>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Default value</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong><code>dataset_name</code></strong></td>
+                  <td>none</td>
+                  <td>Machine version of the dataset name. Supports the <code>__like</code> and <code>__in</code> operators for fetching multiple.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p><strong>Response</strong></p>
+            <table class='table table-bordered'>
+              <thead>
+                <tr>
+                  <th>Parameter</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong><code>description</code></strong></td>
+                  <td>Verbose, official description of the dataset.</td>
+                </tr>
+                <tr>
+                  <td><strong><code>source_url</code></strong></td>
+                  <td>If available, the URL where the data was originally sourced.</td>
+                </tr>
+                <tr>
+                  <td><strong><code>obs_from</code></strong></td>
+                  <td>Oldest date available in the dataset.</td>
+                </tr>
+                <tr>
+                  <td><strong><code>obs_to</code></strong></td>
+                  <td>Newest date available in the dataset.</td>
+                </tr>
+                <tr>
+                  <td><strong><code>human_name</code></strong></td>
+                  <td>Human friendly name for the dataset.</td>
+                </tr>
+                <tr>
+                  <td><strong><code>dataset_name</code></strong></td>
+                  <td>Machine name for the dataset. Values are passed into the queries below as <code>dataset_name</code>.</td>
+                </tr>
+                <tr>
+                  <td><strong><code>update_freq</code></strong></td>
+                  <td>Update frequency.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class='well examples'>
+              <p><strong>Example</strong></p>
+              <p>
+                <a href='/v1/api/datasets'>http://plenar.io/v1/api/datasets</a><br />
+                Returns a list of datasets available in Plenario
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-group" id="accordion-api-datasets">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a data-toggle="collapse" data-parent="#accordion-api-datasets" href="#collapse-api-datasets" id="api-datasets">
+            <span class='label label-info'>GET</span>
+            <strong><code>/api/quote_query/</code></strong>
+            <p class='pull-right'>list datasets and metadata available</p>
+            <div class='clearfix'></div>
+          </a>
+        </div>
+        <div id="collapse-api-datasets" class="panel-collapse collapse">
+          <div class="panel-body">
+            <p>This is the “data about the data” endpoint. It contains a record for each dataset.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-group" id="accordion-api-datasets">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a data-toggle="collapse" data-parent="#accordion-api-datasets" href="#collapse-api-datasets" id="api-datasets">
+            <span class='label label-info'>GET</span>
+            <strong><code>/api/author_query/</code></strong>
+            <p class='pull-right'>list datasets and metadata available</p>
+            <div class='clearfix'></div>
+          </a>
+        </div>
+        <div id="collapse-api-datasets" class="panel-collapse collapse">
+          <div class="panel-body">
+            <p>This is the “data about the data” endpoint. It contains a record for each dataset.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-group" id="accordion-api-datasets">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a data-toggle="collapse" data-parent="#accordion-api-datasets" href="#collapse-api-datasets" id="api-datasets">
+            <span class='label label-info'>GET</span>
+            <strong><code>/api/work_query/</code></strong>
+            <p class='pull-right'>list datasets and metadata available</p>
+            <div class='clearfix'></div>
+          </a>
+        </div>
+        <div id="collapse-api-datasets" class="panel-collapse collapse">
+          <div class="panel-body">
+            <p>This is the “data about the data” endpoint. It contains a record for each dataset.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-group" id="accordion-api-datasets">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a data-toggle="collapse" data-parent="#accordion-api-datasets" href="#collapse-api-datasets" id="api-datasets">
+            <span class='label label-info'>GET</span>
+            <strong><code>/api/language_query/</code></strong>
+            <p class='pull-right'>list datasets and metadata available</p>
+            <div class='clearfix'></div>
+          </a>
+        </div>
+        <div id="collapse-api-datasets" class="panel-collapse collapse">
+          <div class="panel-body">
+            <p>This is the “data about the data” endpoint. It contains a record for each dataset.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-group" id="accordion-api-datasets">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a data-toggle="collapse" data-parent="#accordion-api-datasets" href="#collapse-api-datasets" id="api-datasets">
+            <span class='label label-info'>GET</span>
+            <strong><code>/api/get_comments/</code></strong>
+            <p class='pull-right'>list datasets and metadata available</p>
+            <div class='clearfix'></div>
+          </a>
+        </div>
+        <div id="collapse-api-datasets" class="panel-collapse collapse">
+          <div class="panel-body">
+            <p>This is the “data about the data” endpoint. It contains a record for each dataset.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-group" id="accordion-api-datasets">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a data-toggle="collapse" data-parent="#accordion-api-datasets" href="#collapse-api-datasets" id="api-datasets">
+            <span class='label label-info'>GET</span>
+            <strong><code>/api/recommend/</code></strong>
+            <p class='pull-right'>list datasets and metadata available</p>
+            <div class='clearfix'></div>
+          </a>
+        </div>
+        <div id="collapse-api-datasets" class="panel-collapse collapse">
+          <div class="panel-body">
+            <p>This is the “data about the data” endpoint. It contains a record for each dataset.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-group" id="accordion-api-datasets">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a data-toggle="collapse" data-parent="#accordion-api-datasets" href="#collapse-api-datasets" id="api-datasets">
+            <span class='label label-info'>GET</span>
+            <strong><code>/api/anthologies/</code></strong>
+            <p class='pull-right'>list datasets and metadata available</p>
+            <div class='clearfix'></div>
+          </a>
+        </div>
+        <div id="collapse-api-datasets" class="panel-collapse collapse">
+          <div class="panel-body">
+            <p>This is the “data about the data” endpoint. It contains a record for each dataset.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-group" id="accordion-api-datasets">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a data-toggle="collapse" data-parent="#accordion-api-datasets" href="#collapse-api-datasets" id="api-datasets">
+            <span class='label label-info'>GET</span>
+            <strong><code>/api/datasets/</code></strong>
+            <p class='pull-right'>list datasets and metadata available</p>
+            <div class='clearfix'></div>
+          </a>
+        </div>
+        <div id="collapse-api-datasets" class="panel-collapse collapse">
+          <div class="panel-body">
+            <p>This is the “data about the data” endpoint. It contains a record for each dataset.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-group" id="accordion-api-datasets">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a data-toggle="collapse" data-parent="#accordion-api-datasets" href="#collapse-api-datasets" id="api-datasets">
+            <span class='label label-info'>GET</span>
+            <strong><code>/api/datasets/</code></strong>
+            <p class='pull-right'>list datasets and metadata available</p>
+            <div class='clearfix'></div>
+          </a>
+        </div>
+        <div id="collapse-api-datasets" class="panel-collapse collapse">
+          <div class="panel-body">
+            <p>This is the “data about the data” endpoint. It contains a record for each dataset.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <h3>Aggregate data</h3>
+    <div class="panel-group" id="accordion-api-timeseries">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <a data-toggle="collapse" data-parent="#accordion-api-timeseries" href="#collapse-api-timeseries" id="api-timeseries">
+            <span class='label label-info'>GET</span>
+            <strong><code>/v1/api/timeseries/</code></strong>
+            <p class='pull-right'>query aggregate counts of available data bounded by a time window and geography</p>
+            <div class='clearfix'></div>
+          </a>
+        </div>
+        <div id="collapse-api-timeseries" class="panel-collapse collapse">
+          <div class="panel-body">
+                  <p>
+                      This endpoint contains a record for every row in every dataset with
+                      brief temporal and spatial information about the row. This can give a user of the platform a quick overview about what is available within
+                      their constraints.
+                  </p>
+
+                  <p><strong>Query parameters</strong></p>
+                  <p>All query parameters are optional</p>
+                  <table class='table table-bordered'>
+                    <thead>
+                      <tr>
+                        <th>Parameter</th>
+                        <th>Default value</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong><code>agg</code></strong></td>
+                        <td>day</td>
+                        <td>
+                          <p>Time resolution to aggregate observation counts by.</p>
+
+                          <p>Supported values:</p>
+                          <ul>
+                            <li>day</li>
+                            <li>week</li>
+                            <li>month</li>
+                            <li>quarter</li>
+                            <li>year</li>
+                          </ul>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong><code>obs_date__ge</code></strong></td>
+                        <td>90 days ago</td>
+                        <td>Obversations greater than or equal to a given date. Dates must be formatted as <strong>YYYY-MM-DD</strong></td>
+                      </tr>
+                      <tr>
+                        <td><strong><code>obs_date__le</code></strong></td>
+                        <td>today's date</td>
+                        <td>Obversations less than or equal to a given date. Dates must be formatted as <strong>YYYY-MM-DD</strong></td>
+                      </tr>
+                      <tr>
+                        <td><strong><code>dataset_name</code></strong></td>
+                        <td>none</td>
+                        <td>
+                          <p>Machine version of the dataset name as you get it from the <code>/v1/api/datasets</code> endpoint. If not provided, returns all available datasets.</p>
+                          <p>More than one dataset can be requested by using <code>dataset_name__in</code>  and listing multiple comma separated dataset names.</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong><code>census_block</code></strong></td>
+                        <td>none</td>
+                        <td>
+                          <p>Census block <a href='https://www.census.gov/geo/reference/codes/cou.html'>FIPS code</a>. Supports the <code>__like</code> operator for querying states, counties, tracts and blocks.</p>
+
+                          <p><img src='/static/images/fips-code.png' alt='FIPS codes' class='img-responsive'/></p>
+                          <p><strong>Example:</strong> <code>census_block__like=17031241400%</code> will fetch census tract '17031241400'</p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong><code>location_geom__within</code></strong></td>
+                        <td>none</td>
+                        <td>
+                          <p>A URL encoded <a href='http://geojson.org/'>GeoJSON</a> polygon representing the area of interest.</p>
+
+                          <p><strong>Example GeoJSON</strong> before it is <a href='http://meyerweb.com/eric/tools/dencoder/'>encoded as a URL parameter</a>:</p>
+                          <pre>
+  {
+  "type": "Feature",
+  "properties": {},
+  "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+          [
+              [
+                  -87.6933217048645,
+                  41.825060359418075
+              ],
+              [
+                  -87.6933217048645,
+                  41.87671893034394
+              ],
+              [
+                  -87.610924243927,
+                  41.87671893034394
+              ],
+              [
+                  -87.610924243927,
+                  41.825060359418075
+              ],
+              [
+                  -87.6933217048645,
+                  41.825060359418075
+              ]
+          ]
+      ]
+  }
+  }
+                          </pre>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><strong><code>data_type</code></strong></td>
+                        <td>json</td>
+                        <td>Response data format. Current options are <code>json</code> and <code>csv</code>. </td>
+                      </tr>
+
+                    </tbody>
+                  </table>
+
+                  <p><strong>Response</strong></p>
+                  <p>The API responds with a list of datasets with a dense matrix of counts grouped by temporal aggregation.</p>
+                  <table class='table table-bordered'>
+                    <thead>
+                      <tr>
+                        <th>Parameter</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><strong><code>dataset_name</code></strong></td>
+                        <td>Machine version of the dataset name</td>
+                      </tr>
+                      <tr>
+                        <td><strong><code>items</code></strong></td>
+                        <td>
+                          <table class='table table-bordered'>
+                            <thead>
+                              <tr>
+                                <th>Parameter</th>
+                                <th>Description</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td><strong><code>count</code></strong></td>
+                                <td>Record count</td>
+                              </tr>
+                              <tr>
+                                <td><strong><code>datetime</code></strong></td>
+                                <td>Temporal aggregation group</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  <div class='well examples'>
+                    <p><strong>Examples</strong></p>
+
+                    <p><a href='/v1/api/timeseries/?agg=year&dataset_name=crimes_2001_to_present&obs_date__ge=2015-1-1'>http://plenar.io/v1/api/timeseries/?agg=year&dataset_name=crimes_2001_to_present&obs_date__ge=2015-1-1</a>
+                    <br />Count of all Chicago crime reports since Jan 1st 2015, aggregated by year</p>
+
+                    <p><a href='/v1/api/timeseries/?obs_date__ge=2007-11-12&obs_date__le=2008-11-12&dataset_name__in=crimes_2001_to_present,cdph_environmental_complaints&agg=day'>http://plenar.io/v1/api/timeseries/?obs_date__ge=2007-11-12&obs_date__le=2008-11-12&dataset_name__in=crimes_2001_to_present,cdph_environmental_complaints&agg=day</a>
+                    <br />Count of crime and environmental complaints that were observed after November 12, 2007 but before November 12, 2008, aggregated by day</p>
+
+                    <p><a href='/v1/api/timeseries/?obs_date__le=2014%2F08%2F20&obs_date__ge=2014%2F02%2F21&agg=week&data_type=csv'>http://plenar.io/v1/api/timeseries/?obs_date__le=2014%2F08%2F20&obs_date__ge=2014%2F02%2F21&agg=week&data_type=csv</a>
+                    <br />
+                    Count available datasets from Feb 21, 2014 to Aug 20, 2014, aggregated by week in CSV format. You could also call this a <strong>time series matrix</strong>.
+                    </p>
+
+                    <p><a href='/v1/api/timeseries/?obs_date__le=2014%2F08%2F20&obs_date__ge=2014%2F02%2F21&location_geom__within=%7B%22type%22%3A%22Feature%22%2C%22properties%22%3A%7B%7D%2C%22geometry%22%3A%7B%22type%22%3A%22Polygon%22%2C%22coordinates%22%3A%5B%5B%5B-87.65692949295044%2C41.86853817536259%5D%2C%5B-87.65692949295044%2C41.89716623689334%5D%2C%5B-87.62053728103638%2C41.89716623689334%5D%2C%5B-87.62053728103638%2C41.86853817536259%5D%2C%5B-87.65692949295044%2C41.86853817536259%5D%5D%5D%7D%7D&agg=week'>http://plenar.io/v1/api/timeseries/?obs_date__le=2014%2F08%2F20&obs_date__ge=2014%2F02%2F21&location_geom__within=%7B%22type%22%3A%22Feature%22%2C%22properties%22%3A%7B%7D%2C%22geometry%22%3A%7B%22type%22%3A%22Polygon%22%2C%22coordinates%22%3A%5B%5B%5B-87.65692949295044%2C41.86853817536259%5D%2C%5B-87.65692949295044%2C41.89716623689334%5D%2C%5B-87.62053728103638%2C41.89716623689334%5D%2C%5B-87.62053728103638%2C41.86853817536259%5D%2C%5B-87.65692949295044%2C41.86853817536259%5D%5D%5D%7D%7D&agg=week</a>
+                    <br />
+                    All available datasets in a bounding box (downtown Chicago) from Feb 21, 2014 to Aug 20, 2014, aggregated by week.
+                    </p>
+                  </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <h2 id='responses'>Response format</h2>
+    <p>All JSON API calls return their data in the <code>objects</code> block. Additional information is returned in the <code>meta</code> block:</p>
+
+    <table class='table table-bordered'>
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong><code>status</code></strong></td>
+          <td><strong>ok</strong> if query was successful, <strong>error</strong> if not.</td>
+        </tr>
+        <tr>
+          <td><strong><code>query</code></strong></td>
+          <td>Original query parameters passed in.</td>
+        </tr>
+        <tr>
+          <td><strong><code>message</code></strong></td>
+          <td>If <code>status</code> is <strong>error</strong>, a detailed message as to what went wrong.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    Here's an example response from the <code>/v1/api/timeseries/</code> endpoint:
+
+    <pre>
+  {
+  "meta":{
+    "status":"ok",
+    "query":{
+       "agg":"week",
+       "dataset_name__in":"cdph_environmental_complaints",
+       "obs_date__ge":"2007-12-12",
+       "obs_date__le":"2008-01-12"
+    },
+    "message":""
+  },
+  "objects":[
+    {
+       "items":[
+          {
+             "count":8,
+             "datetime":"2007-12-10T00:00:00"
+          },
+          {
+             "count":8,
+             "datetime":"2007-12-17T00:00:00"
+          },
+          {
+             "count":5,
+             "datetime":"2007-12-24T00:00:00"
+          },
+          {
+             "count":7,
+             "datetime":"2007-12-31T00:00:00"
+          },
+          {
+             "count":22,
+             "datetime":"2008-01-07T00:00:00"
+          }
+       ],
+       "dataset_name":"cdph_environmental_complaints"
+    }
+  ]
+  }
+    </pre>
+  </div>
+</div><!--/.row -->
+{{block extrajs}}
+{{end}}
