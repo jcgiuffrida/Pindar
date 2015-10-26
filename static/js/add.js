@@ -10,6 +10,8 @@ $(document).ready(function(){
   if (initAuthor !== ''){
     $('.author-lookup').data('author-id', initAuthor);
     $('.author-lookup input').val(initAuthorName)
+    $('.author-lookup').addClass('has-success');
+    $('.author-lookup .glyphicon-remove').show();
   } else {
     // $('.author-lookup').hide();
     $('.work-lookup').hide();
@@ -19,7 +21,14 @@ $(document).ready(function(){
 
   if (initWork !== ''){
     $('.work-lookup').data('work-id', initWork);
-    $('.work-lookup input').val(initWorkName);
+    if (initWorkName == 'Attributed'){
+      $('.work-lookup input').val('(Attributed)');
+    } else {
+      $('.work-lookup input').val(initWorkName);
+    }
+    $('.work-lookup').addClass('has-success');
+    $('.work-lookup .glyphicon-remove').show();
+    $('.work-buttons').hide();
   } else {
     $('.add-quote').hide();
   }
@@ -143,6 +152,13 @@ $(document).ready(function(){
     }
   });
 
+  // if user clears author lookup while a work is being added, clear all
+  $('.author-lookup').on('click', '.glyphicon-remove', function(){
+    $('.add-work').fadeOut('fast');
+    clear_work();
+    validator.resetForm();
+  });
+
   // button handling
   $('.add-form').on('click', 'button', function(){
     // open wikipedia link in new window or tab
@@ -162,6 +178,7 @@ $(document).ready(function(){
         $('.work-lookup').data('work-id', attributed.WORK.id);
         $('.work-lookup').data('work-tr-id', attributed.WORK_TR.id);
         $('.work-lookup input').val('(Attributed)');
+        $('.work-lookup').addClass('has-success');
         $('.add-quote').fadeIn('slow');
         $('.work-lookup .glyphicon-remove').show();
       });

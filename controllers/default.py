@@ -9,6 +9,7 @@ import collections
 def show():
     if request.vars.search:
         search = request.vars.search
+    session.rand=random.randint(1, 1000)
     return locals()
 
 
@@ -342,18 +343,18 @@ def add():
         init_work = init_work_query.WORK.id
         init_work_name = init_work_query.WORK_TR.WorkName
         if not request.vars.author:
-            search = db((db.WORK_AUTHOR.WorkID==init_work) &
+            search_author = db((db.WORK_AUTHOR.WorkID==init_work) &
                 (db.AUTHOR.id==db.WORK_AUTHOR.AuthorID) &
                 (db.AUTHOR_TR.AuthorID==db.AUTHOR.id)).select(
                 db.AUTHOR_TR.DisplayName, db.AUTHOR.id,
                 limitby=(0,1))[0]
-            init_author = search.AUTHOR.id
-            init_author_name = search.AUTHOR_TR.DisplayName
+            init_author = search_author.AUTHOR.id
+            init_author_name = search_author.AUTHOR_TR.DisplayName
     return locals()
 
 # page to show anthologies
 def anthologies():
-    # show only user's anthologies
+    # show multiple anthologies
     followcount = db.FOLLOW_ANTHOLOGY.AnthologyID.count()
     if request.args(0) == 'all' or request.args(0) == 'mine':
         query = (db.ANTHOLOGY._id > 0) & \
@@ -364,8 +365,9 @@ def anthologies():
             db.ANTHOLOGY.ALL, db.auth_user.username, db.auth_user.id,
             followcount,
             left=db.FOLLOW_ANTHOLOGY.on(db.ANTHOLOGY._id==db.FOLLOW_ANTHOLOGY.AnthologyID),
-            groupby=db.ANTHOLOGY._id, orderby=~followcount,
-            limitby=(0,10)).as_list()
+            groupby=db.ANTHOLOGY._id,
+            orderby=~followcount|~db.ANTHOLOGY.created_on,limitby=(0,10)
+            ).as_list()
         if request.args(0) == 'mine':
             mine = True
         else:
@@ -411,6 +413,57 @@ def anthologies():
                     for i in authors.most_common():
                         a['top_authors'].append(i[0])
 
+        if request.args(0) == 'mine':
+            # add anthologies user is following
+            query = (db.ANTHOLOGY._id > 0) & \
+                    (db.ANTHOLOGY.created_by==db.auth_user.id) & \
+                    (db.FOLLOW_ANTHOLOGY.AnthologyID==db.ANTHOLOGY.id) & \
+                    (db.ANTHOLOGY.created_by!=auth.user) & \
+                    (db.FOLLOW_ANTHOLOGY.UserID==auth.user)
+            following_anths = db(query).select(
+                db.ANTHOLOGY.ALL, db.auth_user.username, db.auth_user.id,
+                followcount,
+                left=db.FOLLOW_ANTHOLOGY.on(db.ANTHOLOGY._id==db.FOLLOW_ANTHOLOGY.AnthologyID),
+                groupby=db.ANTHOLOGY._id,
+                orderby=~followcount|~db.ANTHOLOGY.created_on,limitby=(0,10)
+                ).as_list()
+
+            if len(following_anths) > 0:
+                # return quotes in each anthology
+                query = (db.QUOTE.id==db.SELECTION.QuoteID) & \
+                        (db.QUOTE._id==db.QUOTE_WORK.QuoteID) & \
+                        (db.QUOTE_WORK.WorkID==db.WORK._id) & \
+                        (db.WORK._id==db.WORK_TR.WorkID) & \
+                        (db.WORK_AUTHOR.WorkID==db.WORK._id) & \
+                        (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) & \
+                        (db.AUTHOR._id==db.AUTHOR_TR.AuthorID)
+                for a in following_anths:
+                    anthID = a['ANTHOLOGY']['id']
+                    q = query & (db.SELECTION.AnthologyID==anthID)
+                    quotes = db(q).select(
+                            db.QUOTE.Text, db.QUOTE._id, db.SELECTION.AddedOn,
+                            db.AUTHOR_TR.DisplayName, db.WORK_TR.WorkName,
+                            orderby=~db.SELECTION.AddedOn).as_list()
+                    a['quotecount'] = len(quotes)
+                    # compile list of top authors
+                    authors = collections.Counter()
+                    for h in quotes:
+                        h['SELECTION']['AddedOn'] = str(h['SELECTION']['AddedOn'])
+                        if h['AUTHOR_TR']['DisplayName'] in authors:
+                            authors[h['AUTHOR_TR']['DisplayName']] += 1
+                        else:
+                            authors[h['AUTHOR_TR']['DisplayName']] = 1
+                    if len(quotes) > 5:
+                        a['quotes'] = quotes[0:5]
+                    else:
+                        a['quotes'] = quotes
+                    a['top_authors'] = []
+                    if len(authors) > 5:
+                        for i in authors.most_common()[0:5]:
+                            a['top_authors'].append(i[0])
+                    else:
+                        for i in authors.most_common():
+                            a['top_authors'].append(i[0])
         return locals()
 
     # if a specific anthology is requested, show it

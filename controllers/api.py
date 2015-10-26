@@ -218,10 +218,14 @@ def quote_query():
                 # introduce randomness
                 for row in init_query:
                     if not row._extra['AVG(RATING.Rating)']:
-                        row._extra['AVG(RATING.Rating)'] = 0.1
-                # seed ensures pagination works
-                random.seed(datetime.now().hour * len(init_query))
-                init_query = init_query.sort(lambda row: (float(row._extra['AVG(RATING.Rating)']) * random.uniform(0.5, 1)), reverse=True)
+                        row._extra['AVG(RATING.Rating)'] = 0.05
+                # random seed for each session ensures pagination works,
+                # but quotes still sort differently on page refresh
+                if session.rand:
+                    random.seed(session.rand)
+                else:
+                    random.seed(datetime.now().hour * len(init_query))
+                init_query = init_query.sort(lambda row: ((float(row._extra['AVG(RATING.Rating)']) * random.uniform(0.5, 1)) if float(row._extra['AVG(RATING.Rating)']) > 0.05 else (4 * random.uniform(0.5, 1))), reverse=True)
             else:
                 response.update({'msg': 'invalid sort parameter'})
 
@@ -944,6 +948,30 @@ def follow_anthology():
             else:
                 response.update({'msg': 'anthology already followed'})
 
+    status = response['status']
+    response.pop('status', None)
+    if not status == 200:
+        raise HTTP(status, json.dumps(response))
+    return json.dumps(response)
+
+
+@auth.requires_login()
+def delete_anthology():
+    ''' deletes an anthology '''
+    response = check_response(request.vars, {'anthology': 'required'},
+        user=True)
+    try:
+        check = db((db.ANTHOLOGY.id==request.vars.anthology) &
+            (db.ANTHOLOGY.created_by==auth.user)).isempty()
+        if check:
+            response.update({'msg': 'anthology does not exist'})
+        else:
+            db((db.ANTHOLOGY.id==request.vars.anthology) &
+                (db.ANTHOLOGY.created_by==auth.user)).delete()
+            response.update({'msg': 'anthology deleted'})
+    except:
+        response.update({'msg': 'oops',
+            'status': 403})
     status = response['status']
     response.pop('status', None)
     if not status == 200:

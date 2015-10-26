@@ -3,3 +3,5 @@ sessions/
 errors/
 databases/
 *.pyc
+backups/
+models/0.py

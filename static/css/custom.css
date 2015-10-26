@@ -418,7 +418,9 @@ span.star:before {
   font-weight: bold;
 }
 
-
+#WORK_TR-WorkName {
+  font-weight: bold;
+}
 
 /****
 /* ~quote page

@@ -333,7 +333,7 @@ function reflectTypeChange(el, authorWork, type){
           .text('Description of book');
         $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
           .text('Publication year');
-        $('#WORK-YearPublished').closest('div').show()
+        $('#WORK-YearWritten').closest('div').show()
           .siblings('label').eq(1).show();
         break;
       case "Poem":
@@ -347,7 +347,7 @@ function reflectTypeChange(el, authorWork, type){
           .text('Description');
         $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
           .text('Publication year');
-        $('#WORK-YearPublished').closest('div').hide()
+        $('#WORK-YearWritten').closest('div').hide()
           .siblings('label').eq(1).hide();
         break;
       case "Song":
@@ -358,7 +358,7 @@ function reflectTypeChange(el, authorWork, type){
           .text('Description of song');
         $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
           .text('Year released');
-        $('#WORK-YearPublished').closest('div').hide()
+        $('#WORK-YearWritten').closest('div').hide()
           .siblings('label').eq(1).hide();
         break;
       case "Speech":
@@ -369,7 +369,7 @@ function reflectTypeChange(el, authorWork, type){
           .text('Location and audience of speech');
         $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
           .text('Year');
-        $('#WORK-YearPublished').closest('div').hide()
+        $('#WORK-YearWritten').closest('div').hide()
           .siblings('label').eq(1).hide();
         break;
       case "Private Letter":
@@ -380,7 +380,7 @@ function reflectTypeChange(el, authorWork, type){
           .text('Description');
         $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
           .text('Year');
-        $('#WORK-YearPublished').closest('div').hide()
+        $('#WORK-YearWritten').closest('div').hide()
           .siblings('label').eq(1).hide();
         break;
       case "In Conversation":
@@ -391,7 +391,7 @@ function reflectTypeChange(el, authorWork, type){
           .text('Description');
         $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
           .text('Year');
-        $('#WORK-YearPublished').closest('div').hide()
+        $('#WORK-YearWritten').closest('div').hide()
           .siblings('label').eq(1).hide();
         break;
       case "Film":
@@ -402,7 +402,7 @@ function reflectTypeChange(el, authorWork, type){
           .text('Description');
         $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
           .text('Year Released');
-        $('#WORK-YearPublished').closest('div').hide()
+        $('#WORK-YearWritten').closest('div').hide()
           .siblings('label').eq(1).hide();
         break;
       default:
@@ -413,7 +413,7 @@ function reflectTypeChange(el, authorWork, type){
           .text('Description');
         $('#WORK-YearPublished').closest('div').siblings('label').eq(0)
           .text('Year');
-        $('#WORK-YearPublished').closest('div').hide()
+        $('#WORK-YearWritten').closest('div').hide()
           .siblings('label').eq(1).hide();
     }
   }

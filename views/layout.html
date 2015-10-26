@@ -176,7 +176,8 @@
       <script src="{{=URL('static','js/dd_belatedpng.js')}}"></script>
       <script> DD_belatedPNG.fix('img, .png_bg'); //fix any <img> or .png_bg background-images </script>
       <![endif]-->
-  {{if 'search' in locals() and len(search) > 1:}}
+  {{if 'search' in locals():}}
+  {{if len(search) > 1:}}
   <script>
     var searchOnLoad = false;
     // initiate search and hide the default view
@@ -187,6 +188,7 @@
       input.focus();
     });
   </script>
+  {{pass}}
   {{pass}}
   {{block tail}}{{end}}
   {{if response.google_analytics_id:}}

@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-## if SSL/HTTPS is properly configured and you want all HTTP requests to
-## be redirected to HTTPS, uncomment the line below:
-request.requires_https()
+if REQUIRE_HTTPS:
+    request.requires_https()
 
-## local
-# db = DAL('mysql://bunny:rochester@localhost/pindar',pool_size=1,
-#   check_reserved=['mysql', 'postgres'],
-#   driver_args={"unix_socket":"/tmp/mysql.sock"})
+## connect to db
+db = DAL(DB_LOGIN, pool_size=1, check_reserved=['mysql', 'postgres'],
+    driver_args=DB_ARGS)
 
-## deployment
-db = DAL('mysql://pindar:rochester@pindar.mysql.pythonanywhere-services.com/pindar$default',
-  pool_size=1, check_reserved=['mysql', 'postgres'])
 
 ## by default give a view/generic.extension to all actions from localhost
 ## none otherwise. a pattern can be 'controller/function.extension'
@@ -94,9 +89,9 @@ auth_signature = db.Table(db,'auth_signature',
 
 ## configure email
 mail = auth.settings.mailer
-mail.settings.server = 'logging' or 'smtp.gmail.com:587'
-mail.settings.sender = 'you@gmail.com'
-mail.settings.login = 'username:password'
+mail.settings.server = EMAIL_SERVER
+mail.settings.sender = EMAIL_SENDER
+mail.settings.login = EMAIL_LOGIN
 
 ## configure auth policy
 auth.settings.registration_requires_verification = False
