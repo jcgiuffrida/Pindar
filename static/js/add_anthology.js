@@ -33,7 +33,7 @@ $(document).ready(function(){
               '<a href="/Pindar/default/show">Start adding some quotes</a>' +
               '<span id="closeflash"> × </span>').slideDown();
             // if user wants to add a quote, add it now
-            if (quote !== undefined){
+            if (typeof quote !== 'undefined'){
               $.getJSON('/Pindar/api/anthologize?anthology=' + response.id +
               '&quote=' + quote, function(response) {
                 // pass

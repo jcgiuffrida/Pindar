@@ -329,22 +329,46 @@ span.star:before {
   border-radius: 15px;
   padding: 15px;
   margin-bottom: 20px;
-  cursor: default;
 }
 
-.anthology.hover {
-  background-color: #eee;
-  cursor: pointer;
+.anthology>a,
+.anthology>a {
+  color: #333;
 }
 
+.anthology>a:hover,
+.anthology>a:active,
+.anthology>a:focus {
+  text-decoration:none;
+  color: #4582ec;
+}
 
 .anthology .badge {
   font-size: 0.6em;
 }
 
+.anthology .anthology-quotes .text {
+  white-space: nowrap;
+  overflow-x: hidden;
+  font-size: 0.9em;
+}
 
+.anthology .anthology-quotes .author {
+    background-color: #ddd;
+    padding: 10px 10px 8px 10px;
+    margin-top: -10px;
+    margin-right: -15px;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+}
 
+.anthology-badge {
+  font-size: 0.7em;
+}
 
+.follow-anthology {
+  margin-right: 20px;
+}
 
 /* search bar */
 

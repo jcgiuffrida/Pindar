@@ -19,14 +19,33 @@
         {{for a in anths:}}
         {{if count % 2 == 0:}}
           <div class="anthology" data-id="{{=a['ANTHOLOGY']['id']}}">
-            <h3>{{=a['ANTHOLOGY']['Name']}}
-              <span class="badge pull-right">{{=a['_extra']['COUNT(SELECTION.AnthologyID)']}} Quote{{=plural(a['_extra']['COUNT(SELECTION.AnthologyID)'])}}</span>
-            </h3>
+            <a href="/Pindar/default/anthologies/{{=a['ANTHOLOGY']['id']}}">
+              <h3>
+                <img class="svg" id="wreath-link" src="{{=URL('static', 'images/wreath.png')}}" height="25">
+                {{=a['ANTHOLOGY']['Name']}}
+                <span class="badge pull-right">{{=a['_extra']['COUNT(FOLLOW_ANTHOLOGY.AnthologyID)']}} Follower{{=plural(a['_extra']['COUNT(FOLLOW_ANTHOLOGY.AnthologyID)'])}}</span>
+              </h3>
+            </a>
             <p class="description">{{=a['ANTHOLOGY']['Description']}}</p>
-            <p class="text-right">&mdash;<i>Created by <a href="/Pindar/default/users/{{=a['auth_user']['username']}}">{{=a['auth_user']['username']}}</a> {{=str(prettydate(a['ANTHOLOGY']['created_on']))}}</i></p>
-            <div class="anthology-quotes">
-              <ul class="list-group">
-              </ul>
+            {{if len(a['top_authors']):}}
+            <p class="top-authors">Most common authors:
+              {{=", ".join(a['top_authors'])}}
+            </p>
+            {{pass}}
+            <p class="pull-left"><b>{{=a['quotecount']}} quote{{=plural(a['quotecount'])}}</b></p>
+            <p class="text-right">&mdash;<i>Created{{if not 'mine' in locals():}} by <a href="/Pindar/default/users/{{=a['auth_user']['username']}}">{{=a['auth_user']['username']}}</a>{{pass}} {{=str(prettydate(a['ANTHOLOGY']['created_on']))}}</i></p>
+            <div class="anthology-quotes list-group">
+              {{for q in a['quotes']:}}
+              <a class="list-group-item" href="/Pindar/default/quotes/{{=q['QUOTE']['id']}}">
+                <div class="author pull-right">{{=q['AUTHOR_TR']['DisplayName']}}</div>
+                <div class="text">{{=q['QUOTE']['Text'][0:100]}}</div>
+              </a>
+              {{pass}}
+              {{if a['quotecount'] > 5:}}
+              <li class="list-group-item">
+                <div class="text-center">{{=a['quotecount'] - 5}} more quote{{=plural(a['quotecount'] - 5)}}</div>
+              </li>
+              {{pass}}
             </div>
           </div>
         {{pass}}
@@ -37,12 +56,35 @@
         {{count = 0}}
         {{for a in anths:}}
         {{if count % 2 == 1:}}
-          <div class="anthology">
-            <h3>{{=a['ANTHOLOGY']['Name']}}
-              <span class="badge pull-right">{{=a['_extra']['COUNT(SELECTION.AnthologyID)']}} Quote{{=plural(a['_extra']['COUNT(SELECTION.AnthologyID)'])}}</span>
-            </h3>
-            <p>{{=a['ANTHOLOGY']['Description']}} &mdash;<i>Created by <a href="/default/users/{{=a['auth_user']['id']}}">{{=a['auth_user']['username']}}</a> {{=str(prettydate(a['ANTHOLOGY']['created_on']))}}</i></p>
-            <p>{{=a['_extra']['COUNT(SELECTION.AnthologyID)']}} Quote{{=plural(a['_extra']['COUNT(SELECTION.AnthologyID)'])}}</p>
+          <div class="anthology" data-id="{{=a['ANTHOLOGY']['id']}}">
+            <a href="/Pindar/default/anthologies/{{=a['ANTHOLOGY']['id']}}">
+              <h3>
+                <img class="svg" id="wreath-link" src="{{=URL('static', 'images/wreath.png')}}" height="25">
+                {{=a['ANTHOLOGY']['Name']}}
+                <span class="badge pull-right">{{=a['_extra']['COUNT(FOLLOW_ANTHOLOGY.AnthologyID)']}} Follower{{=plural(a['_extra']['COUNT(FOLLOW_ANTHOLOGY.AnthologyID)'])}}</span>
+              </h3>
+            </a>
+            <p class="description">{{=a['ANTHOLOGY']['Description']}}</p>
+            {{if len(a['top_authors']):}}
+            <p class="top-authors">Most common authors:
+              {{=", ".join(a['top_authors'])}}
+            </p>
+            {{pass}}
+            <p class="pull-left"><b>{{=a['quotecount']}} quote{{=plural(a['quotecount'])}}</b></p>
+            <p class="text-right">&mdash;<i>Created{{if not 'mine' in locals():}} by <a href="/Pindar/default/users/{{=a['auth_user']['username']}}">{{=a['auth_user']['username']}}</a>{{pass}} {{=str(prettydate(a['ANTHOLOGY']['created_on']))}}</i></p>
+            <div class="anthology-quotes list-group">
+              {{for q in a['quotes']:}}
+              <a class="list-group-item" href="/Pindar/default/quotes/{{=q['QUOTE']['id']}}">
+                <div class="author pull-right">{{=q['AUTHOR_TR']['DisplayName']}}</div>
+                <div class="text">{{=q['QUOTE']['Text'][0:100]}}</div>
+              </a>
+              {{pass}}
+              {{if a['quotecount'] > 5:}}
+              <li class="list-group-item">
+                <div class="text-center">{{=a['quotecount'] - 5}} more quote{{=plural(a['quotecount'] - 5)}}</div>
+              </li>
+              {{pass}}
+            </div>
           </div>
         {{pass}}
         {{count = count + 1}}
@@ -52,10 +94,17 @@
 </div><!--/.row -->
 
 {{else:}}
-{{for a in anth:}}
 <div class="row">
-  <div class="col-md-6 col-md-offset-1">
-    <h3>{{=a['ANTHOLOGY']['Name']}}</h3>
+  <div class="col-md-8 col-md-offset-1">
+    <h3><img class="svg" id="wreath-link" src="{{=URL('static', 'images/wreath.png')}}" height="30">
+      {{if 'user_is_following' in locals():}}
+      <button type="button" class="btn btn-success pull-right follow-anthology following">
+        <i class="fa fa-check"></i> Following</button>
+      {{else:}}
+      <button type="button" class="btn btn-info pull-right follow-anthology">Follow</button>
+      {{pass}}
+      {{=a['ANTHOLOGY']['Name']}}
+      <span class="badge anthology-badge">{{=a['_extra']['COUNT(FOLLOW_ANTHOLOGY.AnthologyID)']}} Follower{{=plural(a['_extra']['COUNT(FOLLOW_ANTHOLOGY.AnthologyID)'])}}</span></h3>
   </div>
   <div class="col-md-2">
     <a href="/Pindar/default/add_anthology" class="btn btn-info">
@@ -63,13 +112,21 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-md-10 col-md-offset-1">
-    <p>{{=a['ANTHOLOGY']['Description']}} &mdash;<i>Created by <a href="/default/users/{{=a['auth_user']['id']}}">{{=a['auth_user']['username']}}</a> {{=str(prettydate(a['ANTHOLOGY']['created_on']))}}</i></p>
-    <p>{{=a['_extra']['COUNT(SELECTION.AnthologyID)']}} Quote{{=plural(a['_extra']['COUNT(SELECTION.AnthologyID)'])}}</p>
-    <br/>
- </div>
+  <div class="col-md-8 col-md-offset-1">
+    <div class="anthology" data-id="{{=a['ANTHOLOGY']['id']}}">
+
+      <p class="description">{{=a['ANTHOLOGY']['Description']}}</p>
+      {{if len(a['top_authors']):}}
+      <p class="top-authors">Most common authors:
+        {{=", ".join(a['top_authors'])}}
+      </p>
+      {{pass}}
+      <p class="pull-left quotecount"><b>{{=a['quotecount']}} quote{{=plural(a['quotecount'])}}</b></p>
+      <p class="text-right">&mdash;<i>Created{{if not 'mine' in locals():}} by <a href="/Pindar/default/users/{{=a['auth_user']['username']}}">{{=a['auth_user']['username']}}</a>{{pass}} {{=str(prettydate(a['ANTHOLOGY']['created_on']))}}</i></p>
+    </div>
+  </div>
 </div><!--/.row -->
-{{pass}}
+<div class="row anthologized-quotes"></div>
 {{pass}}
 
 <br>

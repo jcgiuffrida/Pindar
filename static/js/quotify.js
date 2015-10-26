@@ -717,7 +717,10 @@ $.fn.quotify = function(options){
       // if user clicks an anthology, add the quote to it
       objectActions.on('click', '.btn-anthologies ul a', function(e){
         e.preventDefault();
-        e.stopPropagation();  // don't close dropdown
+        if ($('.anthology').length == 0){
+          // don't close dropdown (don't apply to anthology pages)
+          e.stopPropagation();
+        }
         var thisLink = $(this);
         var thisQuote = object.data('id');
         if ($(this).closest('li').hasClass('new-anthology')){

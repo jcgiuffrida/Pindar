@@ -395,6 +395,14 @@ def add_default_anthology(fields, id):
 
 db.auth_user._after_insert.append(add_default_anthology)
 
+# upon anthology creation, follow it
+def follow_new_anthology(fields, id):
+    fields.update(AnthologyID=id)
+    fields.update(UserID=auth.user)
+    follow_id = int(db.FOLLOW_ANTHOLOGY.insert( **db.FOLLOW_ANTHOLOGY._filter_fields(fields) ))
+
+db.ANTHOLOGY._after_insert.append(follow_new_anthology)
+
 
 ## enable record versioning only on important tables
 db.QUOTE._enable_record_versioning()

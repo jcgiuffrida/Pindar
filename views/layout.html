@@ -83,7 +83,7 @@
             </ul>
           </li>
           {{if auth.user:}}
-          {{if auth.has_membership(group_id=5, user_id=auth.user.id):}}
+          {{if auth.has_membership(role='overlord', user_id=auth.user.id):}}
           <li class="dropdown">
             <a href="/Pindar/default/data/tables" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-gear"></i> Manage</a>
             <ul class="dropdown-menu" role="menu">
@@ -142,7 +142,7 @@
     {{include}}
 
     {{if auth.user:}}
-    {{if auth.has_membership(group_id=5, user_id=auth.user.id):}}
+    {{if auth.has_membership(role='overlord', user_id=auth.user.id):}}
     <div class="row">
       <div class="col-md-8 col-md-offset-2">
         {{=response.toolbar()}}

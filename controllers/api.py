@@ -19,6 +19,7 @@ import gluon.http
 import re
 from gluon.tools import prettydate
 import random
+from datetime import datetime
 
 # these need to be the same as the API limits in searchify.js
 quote_limit = 10
@@ -107,6 +108,7 @@ def quote_query():
     #   maxDate   = maximum date
     #   sort      = (rating, ~rating, dateSubmitted, ~dateSubmitted)
     #               default is rating
+    #   anthology = anthology that contains the quote
     '''
 
     response = check_response(request.vars,
@@ -134,6 +136,9 @@ def quote_query():
                 lookup = lookup.split(' ')
                 for word in lookup:
                     query &= (db.QUOTE.Text.like('%' + word + '%') | db.WORK_TR.WorkName.like('%' + word + '%') | db.AUTHOR_TR.DisplayName.like('%' + word + '%'))
+            if request.vars.anthology:
+                query &= ((db.SELECTION.QuoteID==db.QUOTE.id) &
+                    (db.SELECTION.AnthologyID==request.vars.anthology))
             init_query = db(query).select(
                 db.QUOTE.Text, db.QUOTE.QuoteLanguageID, db.QUOTE._id,
                 db.QUOTE.IsOriginalLanguage, db.QUOTE.created_on,
@@ -214,6 +219,8 @@ def quote_query():
                 for row in init_query:
                     if not row._extra['AVG(RATING.Rating)']:
                         row._extra['AVG(RATING.Rating)'] = 0.1
+                # seed ensures pagination works
+                random.seed(datetime.now().hour * len(init_query))
                 init_query = init_query.sort(lambda row: (float(row._extra['AVG(RATING.Rating)']) * random.uniform(0.5, 1)), reverse=True)
             else:
                 response.update({'msg': 'invalid sort parameter'})
@@ -796,9 +803,11 @@ def recommend():
 
 
 def anthologies():
-    ''' Returns a list of user's anthologies, with number of quotes in each '''
+    ''' Returns a list of anthologies, with number of quotes in each '''
     response = check_response(request.vars, {})
     quotecount = db.SELECTION.AnthologyID.count()
+    # followcount = db.FOLLOW_ANTHOLOGY.AnthologyID.count()
+    # for some reason this double left join doesn't work
     query = (db.ANTHOLOGY._id > 0) & \
             (db.ANTHOLOGY.created_by==db.auth_user._id)
     try:
@@ -816,6 +825,7 @@ def anthologies():
     except ValueError:
         response.update({'msg': 'User not found: use "username" for username and "user" for user id',
             'status': 403})
+
     status = response['status']
     response.pop('status', None)
     if not status == 200:
@@ -902,6 +912,43 @@ def anthologize():
         raise HTTP(status, json.dumps(response))
     return json.dumps(response)
 
+
+@auth.requires_login()
+def follow_anthology():
+    ''' follows an anthology (or removes if explicitly requested) '''
+    response = check_response(request.vars, {
+        'anthology': ['is_integer', 'required']
+        }, user=True)
+    if response['status'] == 200:
+        check = db((db.FOLLOW_ANTHOLOGY.AnthologyID==request.vars.anthology) &
+            (db.FOLLOW_ANTHOLOGY.UserID==auth.user)).isempty()
+        if check:
+            # follow
+            if not request.vars.remove:
+                followID = db.FOLLOW_ANTHOLOGY.insert(
+                    AnthologyID=request.vars.anthology,
+                    UserID=auth.user)
+                if followID:
+                    response.update({'id': followID,
+                        'msg': 'anthology followed'})
+                else:
+                    response.update({'msg': 'oops', 'status': 503})
+            else:
+                response.update({'msg': 'quote not already followed; cannot remove'})
+        else:
+            # already followed; remove
+            if request.vars.remove:
+                db((db.FOLLOW_ANTHOLOGY.AnthologyID==request.vars.anthology) &
+                    (db.FOLLOW_ANTHOLOGY.UserID==auth.user)).delete()
+                response.update({'msg': 'anthology unfollowed'})
+            else:
+                response.update({'msg': 'anthology already followed'})
+
+    status = response['status']
+    response.pop('status', None)
+    if not status == 200:
+        raise HTTP(status, json.dumps(response))
+    return json.dumps(response)
 
 
 def sanitize_JSON(q):

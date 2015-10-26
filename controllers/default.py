@@ -3,6 +3,7 @@ import json
 from gluon.tools import prettydate
 import gluon.http
 import random
+import collections
 
 
 def show():
@@ -156,7 +157,7 @@ def quotes():
     # if quote is invalid, return to home
     if not q:
         redirect(URL('default', 'show'))
-    if auth.user:
+    if auth.user and auth.user.PrimaryLanguageID is not None:
         lang = auth.user.PrimaryLanguageID
     else:
         lang = 1  # default is english
@@ -353,28 +354,63 @@ def add():
 # page to show anthologies
 def anthologies():
     # show only user's anthologies
-    quotecount = db.SELECTION.AnthologyID.count()
-    if request.args(0) == 'mine':
-        anths = db((db.ANTHOLOGY._id > 0) &
-            (db.ANTHOLOGY.created_by==db.auth_user.id) &
-            (db.auth_user.id==auth.user)).select(
-            db.ANTHOLOGY.ALL, db.auth_user.username, db.auth_user.id, quotecount,
-            left=db.SELECTION.on(db.ANTHOLOGY._id==db.SELECTION.AnthologyID),
-            groupby=db.ANTHOLOGY._id, orderby=~quotecount,
+    followcount = db.FOLLOW_ANTHOLOGY.AnthologyID.count()
+    if request.args(0) == 'all' or request.args(0) == 'mine':
+        query = (db.ANTHOLOGY._id > 0) & \
+                (db.ANTHOLOGY.created_by==db.auth_user.id)
+        if request.args(0) == 'mine':
+            query &= (db.auth_user.id==auth.user)
+        anths = db(query).select(
+            db.ANTHOLOGY.ALL, db.auth_user.username, db.auth_user.id,
+            followcount,
+            left=db.FOLLOW_ANTHOLOGY.on(db.ANTHOLOGY._id==db.FOLLOW_ANTHOLOGY.AnthologyID),
+            groupby=db.ANTHOLOGY._id, orderby=~followcount,
             limitby=(0,10)).as_list()
-        mine = True
-        return locals()
+        if request.args(0) == 'mine':
+            mine = True
+        else:
+            if request.vars['e']:
+                response.flash='Sorry, anthology ' + request.vars['e'] + ' was not found'
 
-    # show all anthologies
-    if request.args(0)=='all':
-        if request.vars['e']:
-            response.flash='Sorry, anthology ' + request.vars['e'] + ' was not found'
-        anths = db((db.ANTHOLOGY._id > 0) &
-            (db.ANTHOLOGY.created_by==db.auth_user.id)).select(
-            db.ANTHOLOGY.ALL, db.auth_user.username, db.auth_user.id, quotecount,
-            left=db.SELECTION.on(db.ANTHOLOGY._id==db.SELECTION.AnthologyID),
-            groupby=db.ANTHOLOGY._id, orderby=~quotecount,
-            limitby=(0,10)).as_list()
+        if len(anths) > 0:
+            # return quotes in each anthology
+            # db-heavy, but max 10 requests because of the limit on the previous
+            #   query
+            query = (db.QUOTE.id==db.SELECTION.QuoteID) & \
+                    (db.QUOTE._id==db.QUOTE_WORK.QuoteID) & \
+                    (db.QUOTE_WORK.WorkID==db.WORK._id) & \
+                    (db.WORK._id==db.WORK_TR.WorkID) & \
+                    (db.WORK_AUTHOR.WorkID==db.WORK._id) & \
+                    (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) & \
+                    (db.AUTHOR._id==db.AUTHOR_TR.AuthorID)
+            for a in anths:
+                anthID = a['ANTHOLOGY']['id']
+                q = query & (db.SELECTION.AnthologyID==anthID)
+                quotes = db(q).select(
+                        db.QUOTE.Text, db.QUOTE._id, db.SELECTION.AddedOn,
+                        db.AUTHOR_TR.DisplayName, db.WORK_TR.WorkName,
+                        orderby=~db.SELECTION.AddedOn).as_list()
+                a['quotecount'] = len(quotes)
+                # compile list of top authors
+                authors = collections.Counter()
+                for h in quotes:
+                    h['SELECTION']['AddedOn'] = str(h['SELECTION']['AddedOn'])
+                    if h['AUTHOR_TR']['DisplayName'] in authors:
+                        authors[h['AUTHOR_TR']['DisplayName']] += 1
+                    else:
+                        authors[h['AUTHOR_TR']['DisplayName']] = 1
+                if len(quotes) > 5:
+                    a['quotes'] = quotes[0:5]
+                else:
+                    a['quotes'] = quotes
+                a['top_authors'] = []
+                if len(authors) > 5:
+                    for i in authors.most_common()[0:5]:
+                        a['top_authors'].append(i[0])
+                else:
+                    for i in authors.most_common():
+                        a['top_authors'].append(i[0])
+
         return locals()
 
     # if a specific anthology is requested, show it
@@ -386,12 +422,52 @@ def anthologies():
         else:
             redirect(URL('Pindar/default', 'anthologies', 'all?e='+request.args(0)))
     try:
-        anth = db((db.ANTHOLOGY._id==request.args(0)) &
+        a = db((db.ANTHOLOGY._id==request.args(0)) &
             (db.ANTHOLOGY.created_by==db.auth_user.id)).select(
-            db.ANTHOLOGY.ALL, db.auth_user.username, db.auth_user.id, quotecount,
-            left=db.SELECTION.on(db.ANTHOLOGY._id==db.SELECTION.AnthologyID),
-            groupby=db.ANTHOLOGY._id, orderby=~quotecount).as_list()
-        anth_id = anth[0]['ANTHOLOGY']['id']
+            db.ANTHOLOGY.ALL, db.auth_user.username, db.auth_user.id,
+            followcount,
+            left=db.FOLLOW_ANTHOLOGY.on(db.ANTHOLOGY._id==db.FOLLOW_ANTHOLOGY.AnthologyID),
+            groupby=db.ANTHOLOGY._id, orderby=~followcount).as_list()[0]
+        anthID = a['ANTHOLOGY']['id']
+        # is user following anthology?
+        if auth.user:
+            userfollow = db((db.FOLLOW_ANTHOLOGY.AnthologyID==anthID) &
+                            (db.FOLLOW_ANTHOLOGY.UserID==auth.user)).select(
+                            db.FOLLOW_ANTHOLOGY.UserID)
+            if len(userfollow) > 0:
+                user_is_following = True
+
+        # get quotes
+        query = (db.QUOTE.id==db.SELECTION.QuoteID) & \
+                    (db.QUOTE._id==db.QUOTE_WORK.QuoteID) & \
+                    (db.QUOTE_WORK.WorkID==db.WORK._id) & \
+                    (db.WORK._id==db.WORK_TR.WorkID) & \
+                    (db.WORK_AUTHOR.WorkID==db.WORK._id) & \
+                    (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) & \
+                    (db.AUTHOR._id==db.AUTHOR_TR.AuthorID)
+        q = query & (db.SELECTION.AnthologyID==anthID)
+        quotes = db(q).select(
+                db.QUOTE.Text, db.QUOTE._id, db.SELECTION.AddedOn,
+                db.AUTHOR_TR.DisplayName, db.WORK_TR.WorkName,
+                orderby=~db.SELECTION.AddedOn).as_list()
+        a['quotecount'] = len(quotes)
+        # compile list of top authors
+        authors = collections.Counter()
+        for h in quotes:
+            h['SELECTION']['AddedOn'] = str(h['SELECTION']['AddedOn'])
+            if h['AUTHOR_TR']['DisplayName'] in authors:
+                authors[h['AUTHOR_TR']['DisplayName']] += 1
+            else:
+                authors[h['AUTHOR_TR']['DisplayName']] = 1
+        a['quotes'] = quotes
+        a['top_authors'] = []
+        if len(authors) > 5:
+            for i in authors.most_common()[0:5]:
+                a['top_authors'].append(i[0])
+        else:
+            for i in authors.most_common():
+                a['top_authors'].append(i[0])
+
     except IndexError:
         redirect(URL('Pindar/default', 'anthologies', 'all?e='+request.args(0)))
     except KeyError:
