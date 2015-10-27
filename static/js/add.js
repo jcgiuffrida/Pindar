@@ -315,6 +315,7 @@ $(document).ready(function(){
             $('.author-lookup').data('author-id', response.AuthorID).
               data('author-tr-id', response.AuthorTrID);
             $('.author-lookup').addClass('has-success');
+            $('.work-lookup').removeClass('has-success');
             $('.work-lookup').fadeIn('fast').find('input').focus();
             clear_author();
             $('.' + button).removeClass('disabled');
@@ -453,6 +454,7 @@ function clear_author() {
   $('#AUTHOR_TR-WikipediaLink').val('');
   $('#AUTHOR-YearBorn').val('');
   $('#AUTHOR-YearDied').val('');
+  $('#AUTHOR-Type').val(1);
 }
 
 function clear_work() {
@@ -462,6 +464,7 @@ function clear_work() {
   $('#WORK_TR-WikipediaLink').val('');
   $('#WORK-YearPublished').val('');
   $('#WORK-YearWritten').val('');
+  $('#WORK-Type').val(1);
 }
 
 (function ($) {
