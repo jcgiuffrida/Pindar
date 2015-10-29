@@ -44,6 +44,18 @@ if (user !== 0){
 }
 
 
+// clean search input
+function cleanSearchInput(input){
+  var inputs = input.split(' ');
+  var cleanedInputs = [];
+  inputs.forEach(function(i){
+    if (i.length > 1){
+      cleanedInputs.push(i);
+    }
+  });
+  return cleanedInputs.join(" ");
+}
+
 
 
 

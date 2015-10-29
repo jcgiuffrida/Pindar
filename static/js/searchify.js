@@ -10,7 +10,7 @@ $.fn.searchify = function(options){
   var settings = $.extend({
     type: 'quotes',
     searchInput: $('#textQuery'),
-    searchFunction: function(){ return 'lookup=' + settings.searchInput.val(); },
+    searchFunction: function(){ return 'lookup=' + cleanSearchInput(settings.searchInput.val()); },
     objectsToShow: 30,
     cols: 2,
     pagination: true,
@@ -65,7 +65,7 @@ $.fn.searchify = function(options){
       return function(){
         el.on('input', function(){
           // show search or default sections as appropriate
-          if (el.val().length < 2){
+          if (cleanSearchInput(el.val()).length < 2){
             if (searchDiv.is(':visible')){
               searchDiv.hide().empty();
               defaultDiv.show();
@@ -283,11 +283,11 @@ $.fn.searchify = function(options){
         if (settings.isAdvanced){
           var myHilitor = new Hilitor('search-advanced-quotes');
           myHilitor.setMatchType("open");
-          myHilitor.apply($('#textQuery').val());
+          myHilitor.apply(cleanSearchInput($('#textQuery').val()));
         } else {
           var myHilitor = new Hilitor('search-quotes');
           myHilitor.setMatchType("open");
-          myHilitor.apply($('#textQuery').val());
+          myHilitor.apply(cleanSearchInput($('#textQuery').val()));
         }
       }
     });
