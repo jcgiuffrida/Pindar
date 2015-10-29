@@ -9,7 +9,11 @@ import collections
 def show():
     if request.vars.search:
         search = request.vars.search
-    session.rand=random.randint(1, 1000)
+    session.rand=random.randint(1, 10)
+    # this number should be proportionate to average hourly traffic
+    # so that caching is effective but quotes are still fairly random
+    if request.vars['e']:
+        response.flash='Quote ' + request.vars['e'] + ' was not found'
     return locals()
 
 
@@ -157,7 +161,7 @@ def quotes():
     q = db.QUOTE(request.args(0))
     # if quote is invalid, return to home
     if not q:
-        redirect(URL('default', 'show'))
+        redirect(URL('default', 'show?e='+request.args(0)))
     if auth.user and auth.user.PrimaryLanguageID is not None:
         lang = auth.user.PrimaryLanguageID
     else:

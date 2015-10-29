@@ -438,6 +438,7 @@ $(document).ready(function(){
 
   // clear search boxes
   $('.search-box .glyphicon-remove').hide();
+  $('.search-box .glyphicon-refresh').hide();
   $(document).on('.search-box input', 'input', function(){
     var val = $(this).val();
     if (val.length > 0){

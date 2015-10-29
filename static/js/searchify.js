@@ -31,7 +31,7 @@ $.fn.searchify = function(options){
   }
 
   var countBadge = searchDiv.parent('div').find('.results-count');
-
+  var showSpinner;
 
   // pagination variables
   var objectsStorage = [];
@@ -71,6 +71,8 @@ $.fn.searchify = function(options){
               defaultDiv.show();
               updateCountBadge("");
             }
+            settings.searchInput.siblings('.glyphicon-refresh').hide();
+            clearTimeout(showSpinner);
           } else {;
             // first, check that no searches are already running
             var query = settings.searchFunction();
@@ -146,7 +148,10 @@ $.fn.searchify = function(options){
       searching = true;
       setTimeout(function(){searching=false;}, 400);
       lastSearched = newQuery;
-      runSearch(newQuery);
+      // kill search if user has cleared the search field
+      if (settings.searchInput.val().length > 1){
+        runSearch(newQuery);
+      }
     }
   }
 
@@ -156,6 +161,12 @@ $.fn.searchify = function(options){
     objectsQuery = query;
     objectsOffset = 0;
     objectsRetrieved = 0;
+    // show spinner, but only if search hasn't returned within 100 ms
+    if (!settings.isDefault){
+      showSpinner = setTimeout(function(){
+        settings.searchInput.siblings('.glyphicon-refresh').show();
+      }, 400);
+    }
     if (settings.type == 'quotes'){
       makeQuotesQuery(objectsQuery);
     } else if (settings.type == 'authors'){
@@ -177,6 +188,8 @@ $.fn.searchify = function(options){
       settings.searchInput.off('input');
     }
     window.clearInterval(searchInterval);
+    settings.searchInput.siblings('.glyphicon-refresh').hide();
+    clearTimeout(showSpinner);
   });
 
   searchDiv.on('wake', function(){
@@ -204,6 +217,8 @@ $.fn.searchify = function(options){
   if (settings.isDefault){
    if (settings.searchOnLoad){
       searchDiv.trigger('search'); // load the default div with stuff
+      searchDiv.html('<div class="text-center">' +
+        '<i class="fa fa-spinner fa-2x fa-spin"></i></div>');
       searchInterval = window.setInterval(function(){
         if (lastSearched != settings.searchFunction()){
           searchDiv.trigger('search');
@@ -261,6 +276,8 @@ $.fn.searchify = function(options){
         if (!(settings.isDefault && settings.searchInput.val())){
           updateCountBadge();
         }
+        settings.searchInput.siblings('.glyphicon-refresh').hide();
+        clearTimeout(showSpinner);
 
         // highlight search terms
         if (settings.isAdvanced){
@@ -307,6 +324,8 @@ $.fn.searchify = function(options){
       if (!(settings.isDefault && settings.searchInput.val())){
         updateCountBadge();
       }
+      settings.searchInput.siblings('.glyphicon-refresh').hide();
+      clearTimeout(showSpinner);
       }
     });
   }
@@ -343,6 +362,8 @@ $.fn.searchify = function(options){
       if (!(settings.isDefault && settings.searchInput.val())){
         updateCountBadge();
       }
+      settings.searchInput.siblings('.glyphicon-refresh').hide();
+      clearTimeout(showSpinner);
       }
     });
   }

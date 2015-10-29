@@ -385,6 +385,7 @@ def add_default_anthology(fields, id):
         'reference.')
     anth_id = int(db.ANTHOLOGY.insert( **db.ANTHOLOGY._filter_fields(fields) ))
     fields.update(AnthologyID = anth_id)
+    fields.update(UserID = id)
     db.FOLLOW_ANTHOLOGY.insert( **db.FOLLOW_ANTHOLOGY._filter_fields(fields) )
 
 
@@ -392,9 +393,10 @@ db.auth_user._after_insert.append(add_default_anthology)
 
 # upon anthology creation, follow it
 def follow_new_anthology(fields, id):
-    fields.update(AnthologyID=id)
-    fields.update(UserID=auth.user)
-    follow_id = int(db.FOLLOW_ANTHOLOGY.insert( **db.FOLLOW_ANTHOLOGY._filter_fields(fields) ))
+    if auth.user:
+        fields.update(AnthologyID=id)
+        fields.update(UserID=auth.user)
+        follow_id = int(db.FOLLOW_ANTHOLOGY.insert( **db.FOLLOW_ANTHOLOGY._filter_fields(fields) ))
 
 db.ANTHOLOGY._after_insert.append(follow_new_anthology)
 

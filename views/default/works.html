@@ -8,12 +8,15 @@
 
 			<br>
 			{{for w in work:}} <!-- formality -->
-			{{try:}}
-				{{rating = ratings[0]['_extra']['AVG(RATING.Rating)']}}
-				{{rating_count = ratings[0]['_extra']['COUNT(RATING.Rating)']}}
-			{{except:}}
-				{{rating = 0}}
+			{{if len(ratings) == 0:}}
 				{{rating_count = 0}}
+			{{else:}}
+				{{rating_count = ratings[0]['_extra']['COUNT(RATING.Rating)']}}
+			{{pass}}
+			{{if rating_count == 0:}}
+				{{rating = 0}}
+			{{else:}}
+				{{rating = ratings[0]['_extra']['AVG(RATING.Rating)']}}
 			{{pass}}
 			<div class="object work" data-work-tr-id="{{=w.WORK_TR.id}}"
 			data-work-id="{{=w.WORK.id}}" data-id="{{=w.WORK_TR.id}}"
@@ -194,6 +197,7 @@
 						placeholder="&#xF002; Search works"
               style="font-family:Arial, FontAwesome">
 						<span class="glyphicon glyphicon-remove"></span>
+						<span class="glyphicon glyphicon-refresh"></span>
 					</div>
 				</div>
 			</div>

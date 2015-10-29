@@ -78,6 +78,7 @@ $(document).ready(function(){
     $('.author-lookup').data('author-id', '');
     $('.author-lookup').data('author-tr-id', '');
     $('.author-lookup').removeClass('has-success');
+    $('#QUOTE-QuoteLanguageID').val(1); // different author, different language
     if ($('.author-lookup input').val().length < 2){
       if ($('.author-results').is(':visible')){
         $('.author-results').hide();
@@ -292,8 +293,11 @@ $(document).ready(function(){
       QuoteLanguageID: "What language is the quote in?"
     },
     submitHandler: function(form) {
+      var buttonText = $('#' + button).html();
+      $('#' + button).html(buttonText +
+        ' <i class="fa fa-spinner fa-spin"></i>');
       if (button == 'author-submit'){
-        $('.' + button).addClass('disabled');
+        $('#' + button).addClass('disabled');
 
         $.getJSON('/Pindar/api/author_submit?' +
           'FirstName=' + $('#AUTHOR_TR-FirstName').val() +
@@ -318,13 +322,14 @@ $(document).ready(function(){
             $('.work-lookup').removeClass('has-success');
             $('.work-lookup').fadeIn('fast').find('input').focus();
             clear_author();
-            $('.' + button).removeClass('disabled');
+            $('#' + button).removeClass('disabled');
+            $('#' + button).html(buttonText);
             // tell reader it worked
             $('.flash.alert').html('Added ' + authorName + ' as a new author<span id="closeflash"> × </span>')
               .slideDown();
         });
       } else if (button == 'work-submit'){
-        $('.' + button).addClass('disabled');
+        $('#' + button).addClass('disabled');
 
         $.getJSON('/Pindar/api/work_submit?' +
           'WorkName=' + $('#WORK_TR-WorkName').val() +
@@ -346,13 +351,14 @@ $(document).ready(function(){
             $('.work-lookup').addClass('has-success');
             $('.add-quote').fadeIn('fast').find('textarea').focus();
             clear_work();
-            $('.' + button).removeClass('disabled');
+            $('#' + button).removeClass('disabled');
+            $('#' + button).html(buttonText);
             // tell reader it worked
             $('.flash.alert').html('Added ' + workName + ' as a new work<span id="closeflash"> × </span>')
               .slideDown();
         });
       } else if (button == 'quote-submit'){
-        $('.' + button).addClass('disabled');
+        $('#' + button).addClass('disabled');
 
         $.getJSON('/Pindar/api/quote_submit?' +
           'Text=' + $('#QUOTE-Text').val().sanitize() +
@@ -366,7 +372,8 @@ $(document).ready(function(){
             clear_author();
             clear_work();
             $('#QUOTE-Text').focus();
-            $('.' + button).removeClass('disabled');
+            $('#' + button).removeClass('disabled');
+            $('#' + button).html(buttonText);
             // tell reader it worked
             $('.flash.alert').html('Quote added! <a href="/Pindar/default/quotes/' + response.QuoteID + '">View quote</a><span id="closeflash"> × </span>')
               .slideDown();
@@ -455,6 +462,8 @@ function clear_author() {
   $('#AUTHOR-YearBorn').val('');
   $('#AUTHOR-YearDied').val('');
   $('#AUTHOR-Type').val(1);
+  reflectTypeChange($('.add-author'), 'author',
+      'Person');
 }
 
 function clear_work() {
@@ -465,6 +474,8 @@ function clear_work() {
   $('#WORK-YearPublished').val('');
   $('#WORK-YearWritten').val('');
   $('#WORK-Type').val(1);
+  reflectTypeChange($('.add-work'), 'work',
+      'Book');
 }
 
 (function ($) {

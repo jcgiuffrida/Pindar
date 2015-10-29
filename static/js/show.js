@@ -30,19 +30,19 @@ $(document).ready(function(){
     searchFunction: defaultFunction,
     cols: 1,
     isDefault: true,
-    searchOnLoad: (typeof searchOnLoad != 'undefined' ? searchOnLoad : true)
+    searchOnLoad: (typeof searchOnLoad !== 'undefined' ? searchOnLoad : true)
   });
   $('.default-content .show-authors').searchify({
     type: 'authors',
     searchFunction: defaultFunction,
     isDefault: true,
-    searchOnLoad: (typeof searchOnLoad != 'undefined' ? searchOnLoad : true)
+    searchOnLoad: (typeof searchOnLoad !== 'undefined' ? searchOnLoad : true)
   });
   $('.default-content .show-works').searchify({
     type: 'works',
     searchFunction: defaultFunction,
     isDefault: true,
-    searchOnLoad: (typeof searchOnLoad != 'undefined' ? searchOnLoad : true)
+    searchOnLoad: (typeof searchOnLoad !== 'undefined' ? searchOnLoad : true)
   });
   $('#sortOrder').on('change', function(){
     if ($('.default-content .show-quotes').is(':visible')){

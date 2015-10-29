@@ -87,6 +87,20 @@ ul.nav li.dropdown:hover ul.dropdown-menu {
   color: #777;
 }
 
+.search-box .glyphicon-refresh {
+  position: absolute;
+  right: 24px;
+  top: 0;
+  bottom: 0;
+  height: 14px;
+  margin: auto;
+  font-size: 14px;
+  color: #aaa;
+  -webkit-animation: spin 800ms infinite linear;
+  animation: spin 800ms infinite linear;
+}
+
+
 svg {
   fill: currentColor;
 }
@@ -408,7 +422,7 @@ span.star:before {
   cursor: pointer;
 }
 .author-results a.disabled {
-  cursor: ;
+  cursor: default;
 }
 .work-results a.disabled {
   cursor: default;

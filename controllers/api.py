@@ -225,7 +225,7 @@ def quote_query():
                     random.seed(session.rand)
                 else:
                     random.seed(datetime.now().hour * len(init_query))
-                init_query = init_query.sort(lambda row: ((float(row._extra['AVG(RATING.Rating)']) * random.uniform(0.5, 1)) if float(row._extra['AVG(RATING.Rating)']) > 0.05 else (4 * random.uniform(0.5, 1))), reverse=True)
+                init_query = init_query.sort(lambda row: ((float(row._extra['AVG(RATING.Rating)']) * random.uniform(0.5, 1)) if float(row._extra['AVG(RATING.Rating)']) > 0.05 else (3 * random.uniform(0.5, 1))), reverse=True)
             else:
                 response.update({'msg': 'invalid sort parameter'})
 
