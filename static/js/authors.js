@@ -20,16 +20,20 @@ $(document).ready(function(){
   $('.object').quotify({objectType: 'author', size: 'large'});
 
   var defaultFunction = function(){ return ''; };
-  $('.search-authors').searchify({type: 'authors'});
+  $('.search-authors').searchify({
+    type: 'authors'
+  });
   $('.show-authors').searchify({
     type: 'authors',
     isDefault: true,
-    searchFunction: defaultFunction
+    searchFunction: defaultFunction,
   });
   $('.quotes-by-author').searchify({
     type: 'quotes',
     isDefault: true,
     cols: 2,
+    searchInput: null,
+    objectsToShow: 10,
     searchFunction: function(){
       return 'author=' + $('.object').data('author-tr-id') +
         '&sort=' + $('#sortOrder').val();
@@ -39,9 +43,15 @@ $(document).ready(function(){
     type: 'works',
     isDefault: true,
     showAuthor: false,
+    searchInput: null,
     searchFunction: function(){
       return 'author=' + $('.object').data('author-tr-id');
     }
+  });
+
+  // on changing sort order, trigger search
+  $('#sortOrder').on('change', function(){
+    $('.quotes-by-author').trigger('search');
   });
 
 

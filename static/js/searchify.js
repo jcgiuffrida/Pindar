@@ -7,18 +7,46 @@
 // okay, here we go
 $.fn.searchify = function(options){
 
+  /* okay. so:
+    with all the default settings, searchify runs on any div, as long as
+    a text input #textQuery exists on the page. the default type is quotes.
+    so $('.my-div').searchify() creates a text search on quotes.
+
+    to have a default search, we need to make sure it is the same before and
+    after advanced searches - if the order changes, it's weird. so to have
+    a default set of results, have two divs - one that isDefault and will not
+    be tied to search, another with isDefault = false and tied to your
+    #textQuery.
+
+    Default objects: these only run a search on page load, or if order is
+    changed. they are NOT tied to text search boxes. however, their search
+    function COULD be complex, e.g. quotes from a specific author.
+
+    additionally, you could have advanced search. this typically does not
+    have a Default div - just a simple div, searchified, with isAdvanced=true.
+    advanced search does not search on text input, only on clicking a button.
+
+
+  */
+
   var settings = $.extend({
     type: 'quotes',
-    searchInput: $('#textQuery'),
+    searchInput: $('#textQuery'), // make null when there is none
     searchFunction: function(){ return 'lookup=' + cleanSearchInput(settings.searchInput.val()); },
-    objectsToShow: 30,
-    cols: 2,
-    pagination: true,
-    isDefault: false,
-    isAdvanced: false,
-    showAuthor: true,
-    highlightTerms: false,
-    searchOnLoad: true,
+    objectsToShow: 5, // objects to show at first, and with each "More" button
+    cols: 2,           // how many columns should quotes be in?
+    pagination: true,  // paginate results; if not, cannot see objects past
+                       // objectsToShow
+    isDefault: false,  // true, if this object shows default content underneath
+                       // another object with text search. default objects
+                       // run one search on page load, and only run add'l
+                       // searches when sort order is changed
+    isAdvanced: false, // advanced search, with filters etc.
+                       // advanced search objects MUST have a search box
+    showAuthor: true,  // show the author of the quotes?
+    highlightTerms: false,  // highlight search terms in results?
+    searchOnLoad: true, // make this false for default divs when page loads
+                        // with a search pending
     advancedSearchButton: $('.run-advanced-search'),
     clearAdvancedSearchButton: $('.clear-advanced-search')
   }, options);
@@ -26,6 +54,7 @@ $.fn.searchify = function(options){
   var searchDiv = $(this);
   if (settings.isDefault){
     var defaultDiv = $('');
+    searchInput = null; // no search input for default divs
   } else {
     var defaultDiv = searchDiv.parent('div').find('.default').first();
   }
@@ -40,7 +69,7 @@ $.fn.searchify = function(options){
   var objectsQuery = '';
   var objectsRetrieved = 0;
   // these need to be the same as the API limits in api.py
-  var quotesAPILimit = 10, authorsAPILimit = 6, worksAPILimit = 6;
+  var quotesAPILimit = 30, authorsAPILimit = 30, worksAPILimit = 30;
 
   // search variables
   var searching = false;
@@ -49,6 +78,9 @@ $.fn.searchify = function(options){
   var searchInterval = undefined;
 
   var objectsFadeQueue = [];
+
+  // hilitor
+  var myHilitor;
 
 
 
@@ -59,7 +91,7 @@ $.fn.searchify = function(options){
     '-more">Show more ' + objects + '</button></div>');
   }
 
-  // this is the master function
+  // this function creates searches from typing in a search box
   function handleSearchInput(el){
     if (!settings.isAdvanced){
       return function(){
@@ -67,15 +99,20 @@ $.fn.searchify = function(options){
           // show search or default sections as appropriate
           if (cleanSearchInput(el.val()).length < 2){
             if (searchDiv.is(':visible')){
+              console.log('hiding search div because input is too short');
               searchDiv.hide().empty();
               defaultDiv.show();
               updateCountBadge("");
             }
             settings.searchInput.siblings('.glyphicon-refresh').hide();
             clearTimeout(showSpinner);
-          } else {;
+          } else {
+            console.log('input long enough; running search');
             // first, check that no searches are already running
             var query = settings.searchFunction();
+            console.log('search box holds ' + settings.searchInput.val());
+            console.log('cleaned input is ' + cleanSearchInput(settings.searchInput.val()));
+            console.log('query is ' + settings.searchFunction());
             if (searching){
               clearTimeout(pendingSearch); // cancel any other timers
               // check every 200 ms for permission to search
@@ -91,11 +128,12 @@ $.fn.searchify = function(options){
         });
 
         // frequently check the input field, in case it's lagging behind search
-        searchInterval = window.setInterval(function(){
-          if (lastSearched != settings.searchFunction()){
-            el.trigger('input');
-          }
-        }, 750);
+        // searchInterval = window.setInterval(function(){
+        //   if (lastSearched != settings.searchFunction()){
+        //     el.trigger('input');
+        //     console.log('triggering extra search');
+        //   }
+        // }, 750);
       };
     } else {
       return function(){
@@ -127,7 +165,7 @@ $.fn.searchify = function(options){
     }
   }
 
-  // this adds a search to the queue
+  // this runs the search, or adds a search to the queue
   function queueSearch(query){
     if (searching){
       clearTimeout(pendingSearch);
@@ -140,7 +178,8 @@ $.fn.searchify = function(options){
     }
   }
 
-  // this periodically checks for new input
+  // this pairs with queueSearch() to check back if currently searching,
+  // or block other searches for 400 ms
   function checkTimer(newQuery){
     if (searching){
       pendingSearch = setTimeout(function(){checkTimer(newQuery)}, 100);
@@ -149,15 +188,23 @@ $.fn.searchify = function(options){
       setTimeout(function(){searching=false;}, 400);
       lastSearched = newQuery;
       // kill search if user has cleared the search field
-      if (settings.searchInput.val().length > 1){
+      if (settings.searchInput){
+        if (cleanSearchInput(settings.searchInput.val()).length > 1){
+          console.log('there is text in search box, so running a search');
+          runSearch(newQuery);
+        }
+      } else {
+        console.log('no search box, but still running a search');
         runSearch(newQuery);
       }
     }
   }
 
 
-  // routing function
+  // routing function: this actually initiates the search and routes to
+  // the appropriate query function
   function runSearch(query){
+    console.log('running search');
     objectsQuery = query;
     objectsOffset = 0;
     objectsRetrieved = 0;
@@ -176,26 +223,34 @@ $.fn.searchify = function(options){
     }
   }
 
+  // when search is triggered from outside searchify, run search
   searchDiv.on('search', function(){
     var query = settings.searchFunction();
     queueSearch(query);
   });
 
+  // inactivate search from outside searchify
   searchDiv.on('sleep', function(){
     if (settings.isAdvanced){
       settings.advancedSearchButton.off('click');
-    } else {
+    } else if (settings.searchInput){
       settings.searchInput.off('input');
     }
     window.clearInterval(searchInterval);
-    settings.searchInput.siblings('.glyphicon-refresh').hide();
+    if (settings.searchInput){
+      settings.searchInput.siblings('.glyphicon-refresh').hide();
+    }
     clearTimeout(showSpinner);
   });
 
+  // re-activate search from outside searchify
   searchDiv.on('wake', function(){
-    handleSearchInput(settings.searchInput)();
+    if (settings.searchInput){
+      handleSearchInput(settings.searchInput)();
+    }
   });
 
+  // auxiliary function to update the count badge
   function updateCountBadge(count){
     if (count !== undefined){
       countBadge.text(count);
@@ -213,39 +268,51 @@ $.fn.searchify = function(options){
     return true;
   }
 
-  // this initiates everything
+  // turn search on
   if (settings.isDefault){
-   if (settings.searchOnLoad){
+    // the searchify object is not meant to be searched after page load
+    if (settings.searchOnLoad){
+      // user has requested page to search upon loading
       searchDiv.trigger('search'); // load the default div with stuff
       searchDiv.html('<div class="text-center">' +
         '<i class="fa fa-spinner fa-2x fa-spin"></i></div>');
-      searchInterval = window.setInterval(function(){
-        if (lastSearched != settings.searchFunction()){
-          searchDiv.trigger('search');
-        }
-      }, 1500);
+      // searchInterval = window.setInterval(function(){
+      //   if (lastSearched != settings.searchFunction()){
+      //     searchDiv.trigger('search');
+      //     console.log('triggering search because of 1500ms check');
+      //   }
+      // }, 1500);
     } else {
-      // need to delay the search
+      // not default; user sees default on page load, so delay this
       setTimeout(function(){
         searchDiv.trigger('search'); // load the default div with stuff
-        searchInterval = window.setInterval(function(){
-          if (lastSearched != settings.searchFunction()){
-            searchDiv.trigger('search');
-          }
-        }, 1500);
+        // searchInterval = window.setInterval(function(){
+        //   if (lastSearched != settings.searchFunction()){
+        //     searchDiv.trigger('search');
+        //     console.log('triggering search because of 1500ms check');
+        //   }
+        // }, 1500);
       }, 500);
     }
-  } else {
+  } else if (settings.searchInput) {
+    // not default; if user types in search box, run search
+    console.log('we\'re handling search input');
     handleSearchInput(settings.searchInput)();
+  } else {
+    // no input field; no searching
   }
 
 
 
   function makeQuotesQuery(query){
+    console.log('hitting /Pindar/api/quote_query?' + query);
     $.getJSON('/Pindar/api/quote_query?' + query,
       function(response) {
-        if (query == settings.searchFunction()){
-        if (!(settings.isDefault && settings.searchInput.val())){
+        if (query == settings.searchFunction()){ // if most recent search
+        // unless this is default AND there's text in the box,
+        // switch from default div to search div
+        if (!(settings.isDefault && settings.searchInput && cleanSearchInput(settings.searchInput.val()).length)){
+          console.log('showing quotes search div' + '\n\n\n');
           defaultDiv.hide();
           searchDiv.empty().show();
         }
@@ -273,21 +340,23 @@ $.fn.searchify = function(options){
         } else {
           searchDiv.html('<div class="col-md-12"><p>No quotes found.</p></div>');
         }
-        if (!(settings.isDefault && settings.searchInput.val())){
+        // unless this is default AND there's text in the box,
+        // update count badge
+        if (!(settings.isDefault && settings.searchInput &&
+          cleanSearchInput(settings.searchInput.val()).length)){
           updateCountBadge();
         }
-        settings.searchInput.siblings('.glyphicon-refresh').hide();
+        if (settings.searchInput){
+          settings.searchInput.siblings('.glyphicon-refresh').hide();
+        }
         clearTimeout(showSpinner);
 
         // highlight search terms
-        if (settings.isAdvanced){
-          var myHilitor = new Hilitor('search-advanced-quotes');
+        if (settings.highlightTerms && settings.searchInput &&
+          cleanSearchInput(settings.searchInput.val()).length){
+          myHilitor = new Hilitor(searchDiv[0].id);
           myHilitor.setMatchType("open");
-          myHilitor.apply(cleanSearchInput($('#textQuery').val()));
-        } else {
-          var myHilitor = new Hilitor('search-quotes');
-          myHilitor.setMatchType("open");
-          myHilitor.apply(cleanSearchInput($('#textQuery').val()));
+          myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
         }
       }
     });
@@ -295,10 +364,17 @@ $.fn.searchify = function(options){
   }
 
   function makeAuthorsQuery(query){
+    console.log('hitting /Pindar/api/author_query?' + query);
     $.getJSON('/Pindar/api/author_query?' + query,
       function(response) {
       if (query == settings.searchFunction()){
-      if (!(settings.isDefault && settings.searchInput.val())){
+      // show search div, but only if:
+      //   a) it's not visible,
+      //   b) this is not the default searchify, and
+      //   c) there is still text in the search box (user hasn't deleted it)
+      if (!(settings.isDefault && settings.searchInput &&
+        cleanSearchInput(settings.searchInput.val()).length)){
+        console.log('showing authors search div' + '\n\n\n');
         defaultDiv.hide();
         searchDiv.empty().show();
       }
@@ -321,21 +397,38 @@ $.fn.searchify = function(options){
       } else {
         searchDiv.html('<div class="col-md-12"><p>No authors found.</p></div>');
       }
+      // unless this is default AND there's text in the box,
+      // update count badge
       if (!(settings.isDefault && settings.searchInput.val())){
         updateCountBadge();
       }
-      settings.searchInput.siblings('.glyphicon-refresh').hide();
+      if (settings.searchInput){
+        settings.searchInput.siblings('.glyphicon-refresh').hide();
+      }
       clearTimeout(showSpinner);
+
+      // highlight search terms
+      if (settings.highlightTerms && settings.searchInput &&
+        cleanSearchInput(settings.searchInput.val()).length){
+        myHilitor = new Hilitor(searchDiv[0].id);
+        myHilitor.setMatchType("open");
+        myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
+      }
       }
     });
   }
 
 
   function makeWorksQuery(query){
+    console.log('hitting /Pindar/api/work_query?' + query);
     $.getJSON('/Pindar/api/work_query?' + query,
       function(response) {
       if (query == settings.searchFunction()){
-      if (!(settings.isDefault && settings.searchInput.val())){
+      // unless this is default AND there's text in the box,
+      // update count badge
+      if (!(settings.isDefault && settings.searchInput &&
+        cleanSearchInput(settings.searchInput.val()).length)){
+        console.log('showing works search div' + '\n\n\n');
         defaultDiv.hide();
         searchDiv.empty().show();
       }
@@ -359,11 +452,24 @@ $.fn.searchify = function(options){
       } else {
         searchDiv.html('<div class="col-md-12"><p>No works found.</p></div>');
       }
-      if (!(settings.isDefault && settings.searchInput.val())){
+      // unless this is default AND there's text in the box,
+      // update count badge
+      if (!(settings.isDefault && settings.searchInput &&
+        cleanSearchInput(settings.searchInput.val()).length)){
         updateCountBadge();
       }
-      settings.searchInput.siblings('.glyphicon-refresh').hide();
+      if (settings.searchInput){
+        settings.searchInput.siblings('.glyphicon-refresh').hide();
+      }
       clearTimeout(showSpinner);
+
+      // highlight search terms
+      if (settings.highlightTerms && settings.searchInput &&
+        cleanSearchInput(settings.searchInput.val()).length){
+        myHilitor = new Hilitor(searchDiv[0].id);
+        myHilitor.setMatchType("open");
+        myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
+      }
       }
     });
   }
@@ -467,6 +573,7 @@ $.fn.searchify = function(options){
 
   function replenishObjects(){
     if (moreObjectsExist){
+      console.log('replenishing objects');
       searchDiv.find('.btn-' + settings.type + '-more').
         html('<span class="text-center"><i class="fa fa-spinner fa-spin">' +
         '</i></span>').addClass('disabled');
@@ -486,6 +593,9 @@ $.fn.searchify = function(options){
             objectsRetrieved += 1;
           });
           showMoreObjects();
+          if (settings.highlightTerms){
+            myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
+          }
           updateCountBadge();
           searchDiv.find('.btn-' + settings.type + '-more').
             html('Show more ' + settings.type).removeClass('disabled');
@@ -507,6 +617,9 @@ $.fn.searchify = function(options){
             objectsRetrieved += 1;
           });
           showMoreObjects();
+          if (settings.highlightTerms){
+            myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
+          }
           updateCountBadge();
           searchDiv.find('.btn-' + settings.type + '-more').
             html('Show more ' + settings.type).removeClass('disabled');
@@ -528,6 +641,9 @@ $.fn.searchify = function(options){
             objectsRetrieved += 1;
           });
           showMoreObjects();
+          if (settings.highlightTerms){
+            myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
+          }
           updateCountBadge();
           searchDiv.find('.btn-' + settings.type + '-more').
             html('Show more ' + settings.type).removeClass('disabled');
@@ -542,7 +658,7 @@ $.fn.searchify = function(options){
 
 
   searchDiv.on('click', '.btn-' + settings.type + '-more', function(){
-    if ((objectsStorage.length < settings.objectsToShow) & moreObjectsExist){
+    if ((objectsStorage.length < settings.objectsToShow) && moreObjectsExist){
       // replenish objects
       replenishObjects();
     } else {

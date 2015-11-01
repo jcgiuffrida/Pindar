@@ -75,6 +75,8 @@ $(document).ready(function(){
     type: 'quotes',
     isDefault: true,
     cols: 2,
+    searchInput: null,
+    objectsToShow: 10,
     searchFunction: function(){
       return 'anthology=' + $('.anthology').data('id');
     }

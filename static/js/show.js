@@ -6,8 +6,7 @@ var advancedVisible = false;
 
 $(document).ready(function(){
   var quotesFunction = function(){
-    return 'lookup=' + cleanSearchInput($('#textQuery').val()) +
-      '&sort=' + $('#sortOrder').val();
+    return 'lookup=' + $('#textQuery').val() + '&sort=' + $('#sortOrder').val();
   };
   var defaultFunction = function(){ return 'sort=' + $('#sortOrder').val(); };
   var advancedQuotesFunction = function(){
@@ -23,7 +22,8 @@ $(document).ready(function(){
   $('.default-content .search-quotes').searchify({
     searchFunction: quotesFunction,
     highlightTerms: true,
-    cols: 1
+    cols: 1,
+    objectsToShow: 10
   });
   $('.default-content .search-authors').searchify({type: 'authors'});
   $('.default-content .search-works').searchify({type: 'works'});
@@ -31,6 +31,7 @@ $(document).ready(function(){
     searchFunction: defaultFunction,
     cols: 1,
     isDefault: true,
+    objectsToShow: 10,
     searchOnLoad: (typeof searchOnLoad !== 'undefined' ? searchOnLoad : true)
   });
   $('.default-content .show-authors').searchify({
@@ -125,7 +126,6 @@ $(document).ready(function(){
             'works': item['_extra']['COUNT(WORK_AUTHOR.WorkID)'] - 1
           });
         });
-        console.log(myResults);
         return {
           results: myResults
         };
@@ -161,7 +161,6 @@ $(document).ready(function(){
             'author': item.AUTHOR_TR.DisplayName
           });
         });
-        console.log(myResults);
         return {
           results: myResults
         };

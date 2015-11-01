@@ -22,9 +22,9 @@ import random
 from datetime import datetime
 
 # these need to be the same as the API limits in searchify.js
-quote_limit = 10
-author_limit = 6
-work_limit = 6
+quote_limit = 30
+author_limit = 30
+work_limit = 30
 
 def index():
     ''' API documentation'''

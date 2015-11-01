@@ -34,10 +34,18 @@ $(document).ready(function(){
     type: 'quotes',
     isDefault: true,
     cols: 2,
+    searchInput: null,
+    objectsToShow: 10,
     searchFunction: function(){
       return 'work=' + $('.object').data('work-tr-id') +
         '&sort=' + $('#sortOrder').val();
     }
   });
+
+  // on changing sort order, trigger search
+  $('#sortOrder').on('change', function(){
+    $('.quotes-by-work').trigger('search');
+  });
+
 });
 
