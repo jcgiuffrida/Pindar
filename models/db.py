@@ -400,6 +400,24 @@ def follow_new_anthology(fields, id):
 
 db.ANTHOLOGY._after_insert.append(follow_new_anthology)
 
+###---------------------- CONNECTIONS
+
+db.define_table('CONNECTION',
+            Field('Quote1', 'reference QUOTE', required=True),
+            Field('Quote2', 'reference QUOTE', required=True),
+            Field('Summary', 'text'),
+            Field('Strength', 'integer'),
+            Field('Description', 'text'),
+            auth_signature)
+
+db.CONNECTION.Quote1.requires = [IS_NOT_EMPTY(), IS_IN_DB(db, db.QUOTE.id, '%(Text)s')]
+db.CONNECTION.Quote2.requires = [IS_NOT_EMPTY(), IS_IN_DB(db, db.QUOTE.id, '%(Text)s')]
+db.CONNECTION.Summary.requires = IS_LENGTH(maxsize=128)
+db.CONNECTION.Description.requires = IS_LENGTH(maxsize=8192)
+db.CONNECTION.created_by.readable=True
+
+
+
 
 ## enable record versioning only on important tables
 db.QUOTE._enable_record_versioning()

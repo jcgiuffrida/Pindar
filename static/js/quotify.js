@@ -9,8 +9,11 @@ the tools.js 'Parse' functions and turns it into a fully functioning object.
 
 $.fn.quotify = function(options){
 
-  var settings = $.extend({ size: 'small',
-    auth: !!user, objectType: 'quote' }, options);
+  var settings = $.extend({
+    size: 'small',
+    auth: !!user,
+    objectType: 'quote'
+  }, options);
 
   /********************
           ELEMENT CONSTRUCTORS
@@ -226,10 +229,13 @@ $.fn.quotify = function(options){
 
 
     // on clicking quote, take user to quote page
-    object.on('click', '.text', function(){
-      window.location.href = '/Pindar/default/quotes/' +
-        object.data('id');
-    });
+    // object.on('click', '.text', function(){
+    //   window.location.href = '/Pindar/default/quotes/' +
+    //     object.data('id');
+    // });
+
+    object.find('.text').wrap('<a class="text-link" ' +
+      'href="/Pindar/default/quotes/' + object.data('id') + '"></a>');
 
     // handlers
     object.on('clear.quotify', clear);
@@ -678,7 +684,6 @@ $.fn.quotify = function(options){
       clearTimeout(pendingAnths);
       if (anthsToLoad !== 0){
         var pendingAnths = setTimeout(function(){loadAnthologies()}, 100);
-        console.log('waiting...');
         return;
       }
       anthItems.forEach(function(a){
@@ -706,7 +711,6 @@ $.fn.quotify = function(options){
           loadAnthologies();
         } else {
           var pendingAnths = setTimeout(function(){loadAnthologies()}, 100);
-          console.log('waiting...');
         }
       }
 

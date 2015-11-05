@@ -12,6 +12,47 @@ var requestComments = {{=request_comments}};
 {{end}}
 
 
+<div class="modal fade" id="connectionModal" tabindex="-1" role="dialog" aria-labelledby="connectionModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="connectionModalLabel">Connect Quotes</h4>
+      </div>
+      <div class="modal-body">
+      	<div class="quote1">
+      		<h4>Connect quote A... <small class="source"></small></h4>
+      		<p class="text"></p>
+      	</div>
+      	<div class="quote2">
+      		<h4>...to quote B <small class="source"></small></h4>
+      		<p class="text"></p>
+      	</div>
+      	<hr>
+        <form>
+          <div class="form-group">
+          	<label class="control-label">Please select an option:</label>
+          	<div class="list-group"></div>
+          </div>
+          <div class="form-group">
+            <label for="Summary" class="control-label">Summary:*</label>
+            <input type="text" class="form-control" id="Summary" aria-describedby="help-Summary"></input>
+						<span id="help-Summary" class="help-block">You can edit this text to clarify what connects these two quotes.</span>
+          </div>
+          <div class="form-group">
+            <label for="Description" class="control-label">Description:*</label>
+            <textarea class="form-control" id="Description" aria-describedby="help-Description"></textarea>
+						<span id="help-Description" class="help-block">Please add a short note explaining this connection.</span>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-submit disabled">Create Connection</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="row">
 	<div class="col-md-7 col-md-offset-1">
@@ -19,7 +60,8 @@ var requestComments = {{=request_comments}};
 		data-comments="{{=comment_count}}"
 		data-rating="{{if not rating == None:}}{{=rating}}{{else:}}0{{pass}}"
 		data-rating-count="{{if not rating_count == None:}}{{=rating_count}}{{else:}}0{{pass}}"
-		data-rating-user="{{=rating_user}}">
+		data-rating-user="{{=rating_user}}"
+		data-creator="{{=q.QUOTE.created_by}}">
 			<!-- panel for the quote itself -->
 			<div class="object-data panel panel-default">
 				<div class="panel-heading">
@@ -103,6 +145,36 @@ var requestComments = {{=request_comments}};
 				{{pass}}
 			</div><!--/.object-results -->
 		</div><!--/.object -->
+		<hr>
+		<div class="connections">
+			<div class="col-md-8">
+				<h3>Connected Quotes</h3>
+			</div>
+			<div class="col-md-3">
+				<br>
+				<button type="button" class="btn btn-info btn-connections">
+      		<i class="fa fa-chain"></i> Connect a Quote</a>
+    	</div>
+    	<div class="col-md-12 description-show">
+    		<p class="small">Pindar users have marked that this quote is linked to the following quotes&mdash;for instance, that the following quotes are influenced by it, allude to it, or talk about a similar theme.</p>
+			</div>
+			<div class="form-group search-box col-md-6" style="display:none">
+				<input type="search" class="form-control authors" id="textQuery"
+				placeholder="&#xF002; Search quotes"
+          style="font-family:Arial, FontAwesome">
+				<span class="glyphicon glyphicon-remove"></span>
+				<span class="glyphicon glyphicon-refresh"></span>
+			</div>
+			<div class="col-md-6 description-search" style="display:none">
+    		<p class="small">Search for quotes to connect to this one&mdash;for instance, quotes that are influenced by this one, or allude to it, or talk about a similar theme.</p>
+			</div>
+			<div class="row">
+				<div class="col-md-12 show-connections"></div>
+				<div id="search-connections" class="col-md-12 search-connections search" style="display:none;"></div>
+			</div>
+		</div>
+
+
 		<br>
 		<br>
 		<br>

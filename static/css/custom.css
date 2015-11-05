@@ -17,6 +17,10 @@ pre {
   white-space: pre-wrap;
 }
 
+.no-js {
+
+}
+
 .form-group .col-md-1, .form-group .col-md-2,
 .form-group .col-md-3, .form-group .col-md-4,
 .form-group .col-md-5, .form-group .col-md-6,
@@ -41,6 +45,8 @@ pre {
   border-radius: 10px;
   color: #333;
   cursor: pointer;
+  opacity: 0.85;
+  z-index: 1000;
 }
 
 /*****
@@ -159,6 +165,17 @@ hi {
   padding: 5px;
   font-size: 1.1em;
 }
+
+.object a.text-link {
+  color: #333;
+}
+
+.object a.text-link:hover,
+.object a.text-link:active {
+  text-decoration: none;
+}
+
+
 
 /* object panels */
 .object .panel {
@@ -333,6 +350,48 @@ span.star:before {
 
 .btn-anthologies button.already-anthologized {
   color: #3fad46;
+}
+
+
+/* connections */
+.quote-connections {
+  margin-top: 20px;
+  text-align: center;
+  color: #333;
+}
+
+.btn-show-connections {
+  position: relative;
+  top: -20px;
+}
+
+.connections-detail {
+  margin-top: -20px;
+}
+
+.connections .search-box .glyphicon-remove {
+  right: 24px;
+}
+
+.connections .search-box .glyphicon-refresh {
+  right: 40px;
+}
+
+.connections .search-connections .panel:hover {
+  cursor: pointer;
+}
+
+#connectionModal .quote1, #connectionModal .quote2 {
+  margin-bottom: 20px;
+}
+
+#connectionModal .source {
+  margin-left: 10px;
+}
+
+#connectionModal .text {
+  padding: 0 20px;
+  text-align: justify;
 }
 
 

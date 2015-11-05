@@ -48,7 +48,8 @@ $.fn.searchify = function(options){
     searchOnLoad: true, // make this false for default divs when page loads
                         // with a search pending
     advancedSearchButton: $('.run-advanced-search'),
-    clearAdvancedSearchButton: $('.clear-advanced-search')
+    clearAdvancedSearchButton: $('.clear-advanced-search'),
+    onReturn: null     // function callback to run on each object
   }, options);
 
   var searchDiv = $(this);
@@ -323,6 +324,7 @@ $.fn.searchify = function(options){
             searchDiv.append($('<div class="col-md-' + colWidth +
               ' column"></div>'));
           }
+          console.log(response.quotes.length + ' quotes received from server');
           var quotesArray = parseQuotes(response.quotes);
           // console.log(quotesArray.length + ' quotes');
           if (quotesArray.length == quotesAPILimit){
@@ -479,10 +481,14 @@ $.fn.searchify = function(options){
   function appendQuotes(){
     var columns = searchDiv.find('.column');
     var minHeight = undefined;
+    console.log(objectsStorage.length + ' objects in storage');
     for (var i=0; i<settings.objectsToShow; i++){
       if (!!objectsStorage.length){
         var q = objectsStorage.shift();
         q.quotify({size: 'small'});
+        if (settings.onReturn){
+          settings.onReturn(q);
+        }
         // append to shortest column
         minHeight = [50000,-1];
         for (var c=0;c<columns.length;c++){
@@ -495,6 +501,7 @@ $.fn.searchify = function(options){
         // objectsFadeQueue.push(q);
       }
     }
+    console.log(objectsStorage.length + ' objects now in storage');
     // for (var q=0; q<objectsFadeQueue.length; q++){
     //   objectsFadeQueue[q].hide();
     // }
@@ -561,6 +568,10 @@ $.fn.searchify = function(options){
       appendWorks();
     }
 
+    if (settings.highlightTerms){
+      myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
+    }
+
     if (!!objectsStorage.length | moreObjectsExist){
       if (!searchDiv.find('.btn-' + settings.type + '-more').length){
         searchDiv.append(buildBtnShowMore(settings.type));
@@ -593,9 +604,6 @@ $.fn.searchify = function(options){
             objectsRetrieved += 1;
           });
           showMoreObjects();
-          if (settings.highlightTerms){
-            myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
-          }
           updateCountBadge();
           searchDiv.find('.btn-' + settings.type + '-more').
             html('Show more ' + settings.type).removeClass('disabled');
@@ -617,9 +625,6 @@ $.fn.searchify = function(options){
             objectsRetrieved += 1;
           });
           showMoreObjects();
-          if (settings.highlightTerms){
-            myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
-          }
           updateCountBadge();
           searchDiv.find('.btn-' + settings.type + '-more').
             html('Show more ' + settings.type).removeClass('disabled');
@@ -641,9 +646,6 @@ $.fn.searchify = function(options){
             objectsRetrieved += 1;
           });
           showMoreObjects();
-          if (settings.highlightTerms){
-            myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
-          }
           updateCountBadge();
           searchDiv.find('.btn-' + settings.type + '-more').
             html('Show more ' + settings.type).removeClass('disabled');

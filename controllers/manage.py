@@ -33,7 +33,7 @@ def authors():
 
 
 @auth.requires_membership('overlord')
-def connections():
+def auxiliary_tables():
     grid1 = SQLFORM.grid(db.QUOTE_WORK, user_signature=False,
         selectable=[('Delete', lambda ids: delete_multiple('QUOTE_WORK', ids))])
     grid2 = SQLFORM.grid(db.WORK_AUTHOR, user_signature=False,
@@ -83,6 +83,12 @@ def anthologies():
         selectable=[('Delete', lambda ids: delete_multiple('SELECTION', ids))])
     return locals()
 
+@auth.requires_membership('overlord')
+def connections():
+    grid1 = SQLFORM.grid(db.CONNECTION, user_signature=True,
+        selectable=[('Delete', lambda ids: delete_multiple('CONNECTION', ids))])
+    return locals()
+
 
 def delete_multiple(table, ids):
     ''' allows us to make bulk changes'''
@@ -130,5 +136,8 @@ def delete_multiple(table, ids):
         to_delete.delete()
     elif table == 'SELECTION':
         to_delete = db(db.SELECTION.id.belongs(ids))
+        to_delete.delete()
+    elif table == 'CONNECTION':
+        to_delete = db(db.CONNECTION.id.belongs(ids))
         to_delete.delete()
 

@@ -59,17 +59,15 @@ function cleanSearchInput(input){
 
 
 
-function parseQuotes(quotesObject, size, max){
+function parseQuotes(quotesObject, size){
   /*
     takes a JSON quotes object from /api/text_query
     returns a 2xN grid of quote tiles
     improve: add parameters for # columns, features to show
   */
   if(typeof(size)==='undefined') size = "small";
-  if(typeof(max)==='undefined') max = 12;
   var quotes = [];
   for (c in quotesObject){
-    if (c >= max){ break; }
     object = '';
     q = quotesObject[c];
     /*if (parseInt(c) % columns === 0 | parseInt(c) === 0){
@@ -77,7 +75,8 @@ function parseQuotes(quotesObject, size, max){
     }*/
     object += '<div class="object" data-id="' + q.QUOTE.id +
       '" data-rating="' + q._extra['AVG(RATING.Rating)'] +
-      '" data-rating-count="' + q._extra['COUNT(RATING.Rating)'] + '">';
+      '" data-rating-count="' + q._extra['COUNT(RATING.Rating)'] +
+      '" data-creator="' + q.QUOTE.created_by + '">';
     object += '<div class="object-data panel panel-default">';
     object += '<div class="panel-body"><p class="text">';
     if (q.QUOTE.Text.length > 750){
@@ -103,7 +102,7 @@ function parseQuotes(quotesObject, size, max){
 }
 
 
-function parseAuthors(authorsObject, unwrapped, max){
+function parseAuthors(authorsObject, unwrapped){
   /*
     takes a JSON authors object from /api/author_query
     unwrapped = without the wrapper divs (ready to insert into a list-group)
@@ -111,7 +110,6 @@ function parseAuthors(authorsObject, unwrapped, max){
     improve: add parameter for features to show
   */
   if(typeof(unwrapped)==='undefined') unwrapped = false;
-  if(typeof(max)==='undefined') max = 10;
   var authors = undefined;
   if (!unwrapped){
     authors = '<div class="row"><div class="list-group">';
@@ -119,7 +117,6 @@ function parseAuthors(authorsObject, unwrapped, max){
     authors = [];
   }
   for (c in authorsObject){
-    if (c >= max){ break; }
     a = authorsObject[c];
     object = '<a class="list-group-item" ' +
       'data-author-id="' + a.AUTHOR.id +
@@ -152,7 +149,7 @@ function parseAuthors(authorsObject, unwrapped, max){
 }
 
 
-function parseWorks(worksObject, unwrapped, author, max){
+function parseWorks(worksObject, unwrapped, author){
   /*
     takes a JSON works object from /api/work_query
     unwrapped = without the wrapper divs (ready to insert into a list group)
@@ -162,7 +159,6 @@ function parseWorks(worksObject, unwrapped, author, max){
   */
   if(typeof(unwrapped)==='undefined') unwrapped = false;
   if(typeof(author)==='undefined') author = true;
-  if(typeof(max)==='undefined') max = 10;
   var works = undefined;
   if (!unwrapped){
     works = '<div class="row"><div class="list-group">';
@@ -170,7 +166,6 @@ function parseWorks(worksObject, unwrapped, author, max){
     works = [];
   }
   for (c in worksObject){
-    if (c >= max){ break; }
     w = worksObject[c];
     object = '<a class="list-group-item" ' +
       'data-work-id="' + w.WORK.id +

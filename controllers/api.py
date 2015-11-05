@@ -112,7 +112,8 @@ def quote_query():
     '''
 
     response = check_response(request.vars,
-        {'lookup': 'length_2_128', 'quote': 'is_integer'})
+        {'lookup': 'length_2_128', 'quote': 'is_integer',
+        'exclude': 'is_integer'})
     if response['status'] == 200:
         #try:
             # should disqualify query if it's just the '%' character
@@ -142,6 +143,7 @@ def quote_query():
             init_query = db(query).select(
                 db.QUOTE.Text, db.QUOTE.QuoteLanguageID, db.QUOTE._id,
                 db.QUOTE.IsOriginalLanguage, db.QUOTE.created_on,
+                db.QUOTE.created_by,
                 db.AUTHOR_TR.DisplayName, db.AUTHOR_TR._id,
                 db.AUTHOR.YearBorn, db.AUTHOR.YearDied,
                 db.WORK_TR.WorkName, db.WORK_TR._id,
@@ -155,6 +157,9 @@ def quote_query():
             # filters
             if request.vars.quote:
                 init_query = init_query.find(lambda row: row.QUOTE.id==int(request.vars.quote))
+            if request.vars.exclude:
+                init_query = init_query.find(lambda row:
+                    row.QUOTE.id != int(request.vars.exclude))
             if request.vars.author:
                 author_list = (request.vars.author).split(',')
                 if isinstance(author_list, str):
@@ -774,6 +779,7 @@ def recommend():
             init_query = db(query).select(
                 db.QUOTE.Text, db.QUOTE.QuoteLanguageID, db.QUOTE._id,
                 db.QUOTE.IsOriginalLanguage, db.QUOTE.created_on,
+                db.QUOTE.created_by,
                 db.AUTHOR_TR.DisplayName, db.AUTHOR_TR._id,
                 db.AUTHOR.YearBorn, db.AUTHOR.YearDied,
                 db.WORK_TR.WorkName, db.WORK_TR._id,
@@ -977,6 +983,139 @@ def delete_anthology():
     if not status == 200:
         raise HTTP(status, json.dumps(response))
     return json.dumps(response)
+
+
+def connections():
+    response = check_response(request.vars,
+        {'q': ['is_integer', 'required']})
+    if response['status'] == 200:
+        try:
+            # get connected quotes
+            filter_query = db(((db.CONNECTION.Quote1==request.vars.q) |
+                            (db.CONNECTION.Quote2==request.vars.q)) &
+                            (db.CONNECTION.created_by==db.auth_user.id)).select(
+                            db.CONNECTION.ALL, db.auth_user.username,
+                            orderby=~db.CONNECTION.Strength).as_list()
+            conns = {}
+            for c in filter_query:
+                if str(c['CONNECTION']['Quote1']) != request.vars.q:
+                    connected_quote = c['CONNECTION']['Quote1']
+                else:
+                    connected_quote = c['CONNECTION']['Quote2']
+                obj = {
+                    'Summary': c['CONNECTION']['Summary'],
+                    'Description': c['CONNECTION']['Description'],
+                    'Strength': c['CONNECTION']['Strength'],
+                    'AddedBy': c['auth_user']['username'],
+                    'AddedOn': str(prettydate(c['CONNECTION']['created_on'],T)),
+                    'id': c['CONNECTION']['id']
+                }
+                if connected_quote in conns.keys():
+                    conns[connected_quote]['connections'].append(obj)
+                    conns[connected_quote]['score'] += obj['Strength']
+                else:
+                    conns[connected_quote] = {
+                        'connections': [obj],
+                        'score': obj['Strength']
+                    }
+
+            r = db.RATING.Rating.avg()
+            s = db.RATING.Rating.count()
+            query = (db.QUOTE._id==db.QUOTE_WORK.QuoteID) & \
+                (db.QUOTE_WORK.WorkID==db.WORK._id) & \
+                (db.WORK._id==db.WORK_TR.WorkID) & \
+                (db.WORK_AUTHOR.WorkID==db.WORK._id) & \
+                (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) & \
+                (db.AUTHOR._id==db.AUTHOR_TR.AuthorID)
+
+            init_query = db(query).select(
+                db.QUOTE.Text, db.QUOTE.QuoteLanguageID, db.QUOTE._id,
+                db.QUOTE.IsOriginalLanguage, db.QUOTE.created_on,
+                db.QUOTE.created_by,
+                db.AUTHOR_TR.DisplayName, db.AUTHOR_TR._id,
+                db.AUTHOR.YearBorn, db.AUTHOR.YearDied,
+                db.WORK_TR.WorkName, db.WORK_TR._id,
+                db.WORK.YearPublished, db.WORK.YearWritten,
+                r, s,
+                left=db.RATING.on(db.RATING.QuoteID==db.QUOTE._id),
+                groupby=db.QUOTE._id)
+            for h in init_query:
+                    h.QUOTE.created_on = str(h.QUOTE.created_on)
+
+            # filter by connections
+            init_query = init_query.find(lambda row:
+                row.QUOTE.id in conns.keys())
+
+            # sort by connection score, limit to 5
+            init_query = init_query.sort(lambda row: conns[row.QUOTE.id]['score'], reverse=True)
+
+            init_query = init_query.find(lambda row: True,
+                limitby=(0, 30))
+
+            display_quotes = init_query.as_list()
+            for q in display_quotes:
+                q['connections'] = conns[q['QUOTE']['id']]['connections']
+                q['score'] = conns[q['QUOTE']['id']]['score']
+            response.update({'quotes': sanitize_JSON(display_quotes)})
+
+        except:
+            response.update({'msg': 'oops', 'status': 503})
+    status = response['status']
+    response.pop('status', None)
+    if not status == 200:
+        raise HTTP(status, json.dumps(response))
+    return json.dumps(response)
+
+
+@auth.requires_login()
+def connect():
+    ''' creates a link between two quotes '''
+    response = check_response(request.vars, {
+        'Quote1': ['is_integer', 'required'],
+        'Quote2': ['is_integer', 'required'],
+        'Summary': 'required',
+        'Strength': ['is_integer', 'required']
+        }, user=True)
+    if response['status'] == 200:
+        connectionID = db.CONNECTION.insert(
+            Quote1=request.vars.Quote1,
+            Quote2=request.vars.Quote2,
+            Summary=request.vars.Summary,
+            Description=request.vars.Description,
+            Strength=request.vars.Strength)
+        if connectionID:
+            response.update({'id': connectionID, 'msg': 'connection made'})
+        else:
+            response.update({'msg': 'oops', 'status': 503})
+
+    status = response['status']
+    response.pop('status', None)
+    if not status == 200:
+        raise HTTP(status, json.dumps(response))
+    return json.dumps(response)
+
+
+def rate_connection():
+    response = check_response(request.vars,
+        {'id': ['is_integer', 'required'], 'change': 'required'},
+        user=True)
+    if response['status'] == 200:
+        try:
+            row = db((db.CONNECTION.id==request.vars.id)
+                ).select().first()
+            new = row.Strength + int(request.vars.change)
+            if new < 1:
+                new = 1 # cannot rate below 1
+            row.update_record(Strength=new)
+            response.update({'msg': 'strength is now ' + str(row.Strength)})
+        except:
+            response.update({'msg': 'oops', 'status': 503})
+    status = response['status']
+    response.pop('status', None)
+    if not status == 200:
+        raise HTTP(status, json.dumps(response))
+    return json.dumps(response)
+
 
 
 def sanitize_JSON(q):

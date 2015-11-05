@@ -325,7 +325,7 @@ $(document).ready(function(){
             $('#' + button).removeClass('disabled');
             $('#' + button).html(buttonText);
             // tell reader it worked
-            $('.flash.alert').html('Added ' + authorName + ' as a new author<span id="closeflash"> × </span>')
+            $('.flash.alert').html('Added ' + authorName + ' as a new author<span id="closeflash" class="pull-left"><b> × </b></span>')
               .slideDown();
         });
       } else if (button == 'work-submit'){
@@ -354,7 +354,7 @@ $(document).ready(function(){
             $('#' + button).removeClass('disabled');
             $('#' + button).html(buttonText);
             // tell reader it worked
-            $('.flash.alert').html('Added ' + workName + ' as a new work<span id="closeflash"> × </span>')
+            $('.flash.alert').html('Added ' + workName + ' as a new work<span id="closeflash" class="pull-left"><b> × </b></span>')
               .slideDown();
         });
       } else if (button == 'quote-submit'){
@@ -375,7 +375,7 @@ $(document).ready(function(){
             $('#' + button).removeClass('disabled');
             $('#' + button).html(buttonText);
             // tell reader it worked
-            $('.flash.alert').html('Quote added! <a href="/Pindar/default/quotes/' + response.QuoteID + '">View quote</a><span id="closeflash"> × </span>')
+            $('.flash.alert').html('Quote added! <a href="/Pindar/default/quotes/' + response.QuoteID + '">View quote</a><span id="closeflash" class="pull-left"><b> × </b></span>')
               .slideDown();
         });
       }

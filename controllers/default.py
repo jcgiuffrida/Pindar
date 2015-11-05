@@ -96,7 +96,7 @@ def call():
     return service()
 
 
-#@auth.requires_signature()
+@auth.requires_membership('overlord')
 def data():
     """
     http://..../[app]/default/data/tables
