@@ -171,7 +171,8 @@ hi {
 }
 
 .object a.text-link:hover,
-.object a.text-link:active {
+.object a.text-link:active,
+.object a.text-link:focus {
   text-decoration: none;
 }
 
@@ -194,15 +195,22 @@ hi {
 
 .object-actions .btn-goto-comments,
 .object-actions .btn-goto-flag>a,
-.object-actions .btn-anthologies>a {
+.object-actions .btn-anthologies>a,
+.object-actions .btn-goto-connections>a {
   cursor: pointer;
   color: #000;
   padding-left: 5px;
   padding-right: 5px;
 }
+
+.object-actions .btn-goto-comments.positive>a,
+.object-actions .btn-goto-connections.positive>a {
+  color: #175fdd;
+}
 .object-actions .btn-goto-comments:hover,
 .object-actions .btn-goto-flag>a:hover,
-.object-actions .btn-anthologies>a:hover {
+.object-actions .btn-anthologies>a:hover,
+.object-actions .btn-goto-connections>a:hover {
   color: #175fdd;
 }
 .object-actions .btn-goto-flag>a:hover,
@@ -216,6 +224,7 @@ hi {
   box-shadow: none;
 }
 
+/* anthologies drop-down */
 .object-actions .btn-anthologies ul li:first-child {
   display: block;
   padding: 3px 20px;

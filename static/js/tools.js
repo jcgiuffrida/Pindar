@@ -81,9 +81,9 @@ function parseQuotes(quotesObject, size){
       '" data-creator="' + q.QUOTE.created_by + '">';
     object += '<div class="object-data panel panel-default">';
     object += '<div class="panel-body"><p class="text">';
-    if (q.QUOTE.Text.length > 750){
-      object += q.QUOTE.Text.slice(0, q.QUOTE.Text.indexOf(' ', 740)) +
-        ' ...';
+    if (q.QUOTE.Text.length > 1000){
+      object += q.QUOTE.Text.slice(0, q.QUOTE.Text.indexOf(' ', 990)) +
+        ' ... <a href="/Pindar/default/quotes/' + q.QUOTE.id + '">(Read more)</a>';
     } else {
       object += q.QUOTE.Text;
     }

@@ -79,19 +79,30 @@ $.fn.quotify = function(options){
       '<div class="ratings-count"></div></div>';
     return $(element); };
 
-  var constructBtnCommentsElement = function(size, comment_count){
-    if(typeof(comment_count)==='undefined') comment_count = 0;
+  var constructBtnCommentsElement = function(size, commentCount){
+    if(typeof(commentCount)==='undefined') commentCount = 0;
     if (size == 'large'){
       var element = '<button type="button" class="btn btn-default btn-comments">'+
         '<i class="fa fa-comments"></i> <span class="badge" ';
-      if (comment_count == 0){
+      if (commentCount == 0){
         element += 'style="display:none;"';
       }
-      element += '>' + comment_count + '</span></button>';
+      element += '>' + commentCount + '</span></button>';
     } else {
-      var element = '<div><a class="btn-goto-comments">' +
-        '<i class="fa fa-comments"></i></a></div>';
+      var element = '<div class="btn-goto-comments';
+      if (commentCount > 0){
+        element += ' positive';
+      }
+      element += '"><a href="#"><i class="fa fa-comments"></i></a></div>';
     }
+    return $(element); };
+
+  var constructBtnConnectionsElement = function(connectionsCount){
+    var element = '<div class="pull-right btn-goto-connections';
+    if (connectionsCount > 0){
+      element += ' positive';
+    }
+    element += '"><a href="#"><i class="fa fa-link"></i></a></div>';
     return $(element); };
 
   var constructBtnAnthologiesElement = function(size, inAnth){
@@ -171,13 +182,11 @@ $.fn.quotify = function(options){
     objectActions.append(constructRateElement(settings.objectType,
       settings.size));
     if (settings.objectType == 'quote'){
-      if (settings.size == 'large'){
-        objectActions.append(constructBtnCommentsElement(
+      objectActions.append(constructBtnCommentsElement(
            settings.size, object.data('comments')));
+      if (settings.size == 'large'){
         objectResults.append(constructCommentsElement(settings.auth,
           settings.objectType, object.data('id')));
-      } else {
-        objectActions.append(constructBtnCommentsElement(settings.size));
       }
     }
     if (settings.auth && settings.size == 'large'){
@@ -191,6 +200,10 @@ $.fn.quotify = function(options){
     }
     if (settings.objectType == 'quote'){
       objectActions.append(constructBtnAnthologiesElement(settings.size));
+      if (settings.size == 'small'){
+        objectActions.append(constructBtnConnectionsElement(
+          object.data('connections')));
+      }
     }
 
 
@@ -220,11 +233,9 @@ $.fn.quotify = function(options){
         objectActions.children('div').show();
       });
       object.on('mouseleave', function(){
-        objectActions.children('div').hide();
-        // don't hide anthology button if already anthologized
-        objectActions.find('a.already-anthologized').closest('div').show();
+        objectActions.children('div').not(objectActions.find('.positive, a.already-anthologized').closest('div')).hide();
       });
-      objectActions.children('div').hide();
+      objectActions.children('div').not(objectActions.find('.positive, a.already-anthologized').closest('div')).hide();
     }
 
 
@@ -554,11 +565,11 @@ $.fn.quotify = function(options){
     });
 
     // go to object page with comments open
-    objectActions.on('click.quotify', '.btn-goto-comments', function(e){
+    objectActions.on('click.quotify', '.btn-goto-comments>a', function(e){
       e.preventDefault();
       window.location.href = '/Pindar/default/' + settings.objectType +
         's/' + object.data('id') + '?comments=true';
-    })
+    });
 
     // submit a comment
     objectResults.on('click', '.mycomment .submit', function(e){
@@ -801,6 +812,17 @@ $.fn.quotify = function(options){
       });
     }
 
+
+    /********************
+          CONNECTIONS
+    ********************/
+
+    // go to object page when click on connections
+    objectActions.on('click.quotify', '.btn-goto-connections>a', function(e){
+      e.preventDefault();
+      window.location.href = '/Pindar/default/' + settings.objectType +
+        's/' + object.data('id') + '#connections';
+    });
 
 
     /********************

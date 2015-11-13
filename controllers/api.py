@@ -1069,6 +1069,9 @@ def _get_quotes(addl_query=True):
     # base query
     r = db.RATING.Rating.avg()
     s = db.RATING.id.count()
+    t = db.CONNECTION.id.count()
+    u = db.COMMENT.id.count()
+    v = db.SELECTION.id.count()
     base_query = (db.QUOTE._id==db.QUOTE_WORK.QuoteID) & \
         (db.QUOTE_WORK.WorkID==db.WORK._id) & \
         (db.WORK._id==db.WORK_TR.WorkID) & \
@@ -1091,6 +1094,29 @@ def _get_quotes(addl_query=True):
     for h in init_query:
             h.QUOTE.created_on = str(h.QUOTE.created_on)
 
+    # this is really cool and i have to investigate further
+    # q = db(base_query & addl_query).select(db.QUOTE._id)
+
+    # extract comment, anthology, and connection counts
+    connections = db(base_query).select(
+        db.QUOTE._id, t, 
+        left=(db.CONNECTION.on((db.CONNECTION.Quote1==db.QUOTE._id) | 
+            (db.CONNECTION.Quote2==db.QUOTE._id))),
+        groupby=db.QUOTE._id, cacheable=True, cache=(cache.ram, 60)).as_list()
+    comments = db(db.QUOTE._id > 0).select(
+        db.QUOTE._id, u, 
+        left=(db.COMMENT.on(db.COMMENT.QuoteID==db.QUOTE._id)),
+        groupby=db.QUOTE._id, cacheable=True, cache=(cache.ram, 60)).as_list()
+    selections = db(db.QUOTE._id > 0).select(
+        db.QUOTE._id, v, 
+        left=(db.SELECTION.on(db.SELECTION.QuoteID==db.QUOTE._id)),
+        groupby=db.QUOTE._id, cacheable=True, cache=(cache.ram, 60)).as_list()
+
+    # by default, all Rows items are in the same order: fill in extra info
+    for i in range(0, len(init_query)):
+        init_query[i]['_extra']['connections'] = connections[i]['_extra']['COUNT(CONNECTION.id)']
+        init_query[i]['_extra']['comments'] = comments[i]['_extra']['COUNT(COMMENT.id)']
+        init_query[i]['_extra']['selections'] = selections[i]['_extra']['COUNT(SELECTION.id)']
     return init_query
 
 
