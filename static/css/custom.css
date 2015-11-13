@@ -193,7 +193,7 @@ hi {
   display: inline-block;
 }
 
-.object-actions .btn-goto-comments,
+.object-actions .btn-goto-comments>a,
 .object-actions .btn-goto-flag>a,
 .object-actions .btn-anthologies>a,
 .object-actions .btn-goto-connections>a {
@@ -203,15 +203,12 @@ hi {
   padding-right: 5px;
 }
 
-.object-actions .btn-goto-comments.positive>a,
-.object-actions .btn-goto-connections.positive>a {
-  color: #175fdd;
-}
 .object-actions .btn-goto-comments:hover,
 .object-actions .btn-goto-flag>a:hover,
 .object-actions .btn-anthologies>a:hover,
 .object-actions .btn-goto-connections>a:hover {
   color: #175fdd;
+  text-decoration: none;
 }
 .object-actions .btn-goto-flag>a:hover,
 .object-actions .btn-goto-flag>a:active,
@@ -222,6 +219,11 @@ hi {
 .object-actions .btn-goto-flag.open .dropdown-toggle,
 .object-actions .btn-anthologies.open .dropdown-toggle {
   box-shadow: none;
+}
+
+.object-actions .btn-goto-connections .fa-link {
+  position: relative;
+  top: 2px;
 }
 
 /* anthologies drop-down */

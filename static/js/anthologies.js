@@ -78,7 +78,8 @@ $(document).ready(function(){
     searchInput: null,
     objectsToShow: 10,
     searchFunction: function(){
-      return 'anthology=' + $('.anthology').data('id');
+      return 'anthology=' + $('.anthology').data('id') + 
+      '&sort=' + $('#sortOrder').val();
     }
   });
 
@@ -90,5 +91,11 @@ $(document).ready(function(){
       plural(currentCount) + '</b>');
     $(this).closest('.object').fadeOut();
   });
+
+  // on changing sort order, trigger search
+  $('#sortOrder').on('change', function(){
+    $('.anthologized-quotes').trigger('search');
+  });
+
 
 });

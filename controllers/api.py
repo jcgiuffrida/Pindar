@@ -127,7 +127,8 @@ def quote_query():
             # form query
             query = True
             if request.vars.lookup:
-                request.vars.sort = 'rating' # no sort when there's a query
+                if request.vars.sort == 'magic':
+                    request.vars.sort = 'rating' # no sort when there's a query
                 lookup = request.vars.lookup
                 lookup = lookup.split(' ')
                 for word in lookup:
@@ -205,6 +206,9 @@ def quote_query():
                 sort = request.vars.sort
             else:
                 sort = 'magic'
+            for row in init_query:
+                if not row._extra['AVG(RATING.Rating)']:
+                    row._extra['AVG(RATING.Rating)'] = 0.05
             if sort == 'rating':
                 init_query = init_query.sort(lambda row: float(row._extra['AVG(RATING.Rating)']) + random.uniform(0.0, 0.0009), reverse=True)
             elif sort == '~rating':
@@ -213,12 +217,16 @@ def quote_query():
                 init_query = init_query.sort(lambda row: row.QUOTE.created_on, reverse=True)
             elif sort == '~dateSubmitted':
                 init_query = init_query.sort(lambda row: row.QUOTE.created_on)
+            elif sort == 'connected':
+                init_query = init_query.sort(lambda row: row._extra['connections'] + random.uniform(0.0, 1), reverse=True)
+            elif sort == 'anthologized':
+                init_query = init_query.sort(lambda row: row._extra['selections'] + random.uniform(0.0, 1), reverse=True)
             elif sort == 'magic':
                 # introduce randomness
                 for row in init_query:
-                    if not row._extra['AVG(RATING.Rating)']:
-                        row._extra['AVG(RATING.Rating)'] = 0.05
-                init_query = init_query.sort(lambda row: ((float(row._extra['AVG(RATING.Rating)']) * random.uniform(0.5, 1)) if float(row._extra['AVG(RATING.Rating)']) > 0.05 else (3 * random.uniform(0.5, 1))), reverse=True)
+                    if row._extra['AVG(RATING.Rating)'] == 0.05:
+                        row._extra['AVG(RATING.Rating)'] = 3
+                init_query = init_query.sort(lambda row: float(row._extra['AVG(RATING.Rating)']) * random.uniform(0.5, 1), reverse=True)
             else:
                 response.update({'msg': 'invalid sort parameter'})
 

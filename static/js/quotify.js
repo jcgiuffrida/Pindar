@@ -89,20 +89,23 @@ $.fn.quotify = function(options){
       }
       element += '>' + commentCount + '</span></button>';
     } else {
-      var element = '<div class="btn-goto-comments';
-      if (commentCount > 0){
-        element += ' positive';
+      if (commentCount == 0){
+        var element = '<div class="btn-goto-comments"><a href="#">';  
+      } else {
+        var element = '<div class="btn-goto-comments positive"><a href="#">' + commentCount + ' ';
       }
-      element += '"><a href="#"><i class="fa fa-comments"></i></a></div>';
+      element += '<i class="fa fa-comments"></i></a></div>';
     }
     return $(element); };
 
   var constructBtnConnectionsElement = function(connectionsCount){
-    var element = '<div class="pull-right btn-goto-connections';
+    var element = '';
     if (connectionsCount > 0){
-      element += ' positive';
+      element += '<div class="pull-right btn-goto-connections positive"><a href="#">' + connectionsCount + ' ';
+    } else {
+      element += '<div class="pull-right btn-goto-connections"><a href="#">';
     }
-    element += '"><a href="#"><i class="fa fa-link"></i></a></div>';
+    element += '<i class="fa fa-link"></i></a></div>';
     return $(element); };
 
   var constructBtnAnthologiesElement = function(size, inAnth){

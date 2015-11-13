@@ -6,9 +6,13 @@ import random
 import collections
 
 
+response.google_analytics_id='UA-69792269-1'
+
+
 def show():
     if request.vars.search:
         search = request.vars.search
+    # on every page load, change rand
     session.rand=random.randint(1, 10)
     # this number should be proportionate to average hourly traffic
     # so that caching is effective but quotes are still fairly random
