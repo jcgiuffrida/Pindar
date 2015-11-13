@@ -57,7 +57,7 @@ var requestComments = {{=request_comments}};
 <div class="row">
 	<div class="col-md-7 col-md-offset-1">
 		<div class="object quote" data-id="{{=q.QUOTE.id}}"
-		data-comments="{{=comment_count}}"
+		data-comments="{{=comment_count}}" data-connections="{{=connection_count}}"
 		data-rating="{{if not rating == None:}}{{=rating}}{{else:}}0{{pass}}"
 		data-rating-count="{{if not rating_count == None:}}{{=rating_count}}{{else:}}0{{pass}}"
 		data-rating-user="{{=rating_user}}"
@@ -146,7 +146,7 @@ var requestComments = {{=request_comments}};
 			</div><!--/.object-results -->
 		</div><!--/.object -->
 		<hr>
-		<div class="connections">
+		<div class="connections" id="connections">
 			<div class="col-md-8">
 				<h3>Connected Quotes</h3>
 			</div>
@@ -169,7 +169,10 @@ var requestComments = {{=request_comments}};
     		<p class="small">Search for quotes to connect to this one&mdash;for instance, quotes that are influenced by this one, or allude to it, or talk about a similar theme.</p>
 			</div>
 			<div class="row">
-				<div class="col-md-12 show-connections"></div>
+				<div class="col-md-12 show-connections">
+          <div class="text-center spinner">
+          <i class="fa fa-spinner fa-2x fa-spin"></i></div>
+        </div>
 				<div id="search-connections" class="col-md-12 search-connections search" style="display:none;"></div>
 			</div>
 		</div>
@@ -184,6 +187,8 @@ var requestComments = {{=request_comments}};
  </div>
 	<div class="col-md-4 recommendations">
 		<h4>Users who liked this quote also liked:</h4>
+    <div class="text-center spinner">
+      <i class="fa fa-spinner fa-2x fa-spin"></i></div>
 	</div>
 </div><!--/.row -->
 {{block extrajs}}

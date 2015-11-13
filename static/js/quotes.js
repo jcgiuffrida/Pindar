@@ -29,6 +29,7 @@ $(document).ready(function(){
   var recommendationsDiv = $('.recommendations');
   $.getJSON('/Pindar/api/recommend?q=' + $('.quote').data('id'),
     function(response) {
+      recommendationsDiv.find('.spinner').remove();
     if (response.quotes.length > 0){
       for (var i=0; i<1; i++){
         recommendationsDiv.append($('<div class="col-md-12 column"></div>'));
@@ -236,6 +237,7 @@ $(document).ready(function(){
     }
     $('#connectionModal').data('strength', strength);
     // fill in options
+    $('#connectionModal .list-group').empty();
     // if same author...
     if (quote1.author === quote2.author){
       $('#connectionModal .list-group').append('<a href="#" ' +

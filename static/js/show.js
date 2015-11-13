@@ -38,13 +38,15 @@ $(document).ready(function(){
     type: 'authors',
     searchFunction: defaultFunction,
     isDefault: true,
-    searchOnLoad: (typeof searchOnLoad !== 'undefined' ? searchOnLoad : true)
+    searchOnLoad: (typeof searchOnLoad !== 'undefined' ? searchOnLoad : true),
+    data: init_authors
   });
   $('.default-content .show-works').searchify({
     type: 'works',
     searchFunction: defaultFunction,
     isDefault: true,
-    searchOnLoad: (typeof searchOnLoad !== 'undefined' ? searchOnLoad : true)
+    searchOnLoad: (typeof searchOnLoad !== 'undefined' ? searchOnLoad : true),
+    data: init_works
   });
   $('#sortOrder').on('change', function(){
     if ($('.default-content .show-quotes').is(':visible')){

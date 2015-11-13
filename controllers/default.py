@@ -14,6 +14,40 @@ def show():
     # so that caching is effective but quotes are still fairly random
     if request.vars['e']:
         response.flash='Quote ' + request.vars['e'] + ' was not found'
+
+    # make initial queries
+    # get initial works search
+    lang = 1
+    quotecount = db.QUOTE_WORK.QuoteID.count()
+    query = (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) & \
+            (db.WORK_AUTHOR.WorkID==db.WORK._id) & \
+            (db.WORK._id==db.WORK_TR.WorkID) & \
+            (db.WORK_TR.LanguageID==lang) & \
+            (db.AUTHOR._id==db.AUTHOR_TR.AuthorID)
+    init_query = db(query).select(
+            db.WORK_TR.WorkName, db.WORK_TR.id,
+            db.WORK_TR.WorkSubtitle, db.WORK.YearPublished,
+            db.WORK.id, db.AUTHOR_TR.DisplayName,
+            db.AUTHOR_TR.id, db.WORKTYPE.TypeName, quotecount,
+            left=(db.QUOTE_WORK.on(db.WORK.id==db.QUOTE_WORK.WorkID),
+                db.WORKTYPE.on(db.WORK.Type==db.WORKTYPE._id)),
+            groupby=db.WORK.id, orderby=~quotecount)
+    init_query = init_query.find(lambda row: row['_extra']['COUNT(QUOTE_WORK.QuoteID)'] > 0 or row.WORK_TR.WorkName != 'Attributed')
+    init_query = init_query.find(lambda row: True,
+        limitby=(0, 30))
+    init_works = sanitize_JSON(init_query.as_list())
+
+    # get initial author search
+    lang = 1
+    workcount = db.WORK_AUTHOR.WorkID.count()
+    query = (db.AUTHOR_TR.LanguageID==lang) & (db.AUTHOR_TR.AuthorID==db.AUTHOR.id)
+    init_query = db(query).select( db.AUTHOR_TR.DisplayName, db.AUTHOR_TR.id,
+        db.AUTHOR.YearBorn, db.AUTHOR.YearDied, db.AUTHOR.id, workcount,
+        left=db.WORK_AUTHOR.on(db.AUTHOR.id==db.WORK_AUTHOR.AuthorID),
+        groupby=db.AUTHOR.id, orderby=~workcount, limitby=(0, 30))
+
+    init_authors = sanitize_JSON(init_query.as_list())
+
     return locals()
 
 
@@ -168,6 +202,9 @@ def quotes():
         lang = 1  # default is english
     # get comments
     comment_count = db((db.COMMENT.QuoteID==request.args(0))).count()
+    # get connections
+    connection_count = db((db.CONNECTION.Quote1==request.args(0)) | 
+        (db.CONNECTION.Quote2==request.args(0))).count()
     # get avg and count of ratings
     rating_query = db(db.RATING.QuoteID==request.args(0))
     sum_ratings = rating_query.select(
@@ -221,6 +258,18 @@ def authors():
             response.flash='Author ' + request.vars['e'] + ' was not found'
         if request.vars.search:
             search = request.vars.search
+        
+        # get initial author search
+        lang = 1
+        workcount = db.WORK_AUTHOR.WorkID.count()
+        query = (db.AUTHOR_TR.LanguageID==lang) & (db.AUTHOR_TR.AuthorID==db.AUTHOR.id)
+        init_query = db(query).select( db.AUTHOR_TR.DisplayName, db.AUTHOR_TR.id,
+            db.AUTHOR.YearBorn, db.AUTHOR.YearDied, db.AUTHOR.id, workcount,
+            left=db.WORK_AUTHOR.on(db.AUTHOR.id==db.WORK_AUTHOR.AuthorID),
+            groupby=db.AUTHOR.id, orderby=~workcount, limitby=(0, 30))
+
+        init_query = sanitize_JSON(init_query.as_list())
+
         return locals()
     a = db.AUTHOR_TR(request.args(0))
 
@@ -286,6 +335,27 @@ def works():
             response.flash='Work ' + request.vars['e'] + ' was not found'
         if request.vars.search:
             search = request.vars.search
+
+        # get initial works search
+        lang = 1
+        quotecount = db.QUOTE_WORK.QuoteID.count()
+        query = (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) & \
+                (db.WORK_AUTHOR.WorkID==db.WORK._id) & \
+                (db.WORK._id==db.WORK_TR.WorkID) & \
+                (db.WORK_TR.LanguageID==lang) & \
+                (db.AUTHOR._id==db.AUTHOR_TR.AuthorID)
+        init_query = db(query).select(
+                db.WORK_TR.WorkName, db.WORK_TR.id,
+                db.WORK_TR.WorkSubtitle, db.WORK.YearPublished,
+                db.WORK.id, db.AUTHOR_TR.DisplayName,
+                db.AUTHOR_TR.id, db.WORKTYPE.TypeName, quotecount,
+                left=(db.QUOTE_WORK.on(db.WORK.id==db.QUOTE_WORK.WorkID),
+                    db.WORKTYPE.on(db.WORK.Type==db.WORKTYPE._id)),
+                groupby=db.WORK.id, orderby=~quotecount)
+        init_query = init_query.find(lambda row: row['_extra']['COUNT(QUOTE_WORK.QuoteID)'] > 0 or row.WORK_TR.WorkName != 'Attributed')
+        init_query = init_query.find(lambda row: True,
+            limitby=(0, 30))
+        init_query = sanitize_JSON(init_query.as_list())
         return locals()
     w = db.WORK_TR(request.args(0))
     # if work is invalid, show all works and an error message

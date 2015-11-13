@@ -27,7 +27,8 @@ $(document).ready(function(){
   $('.show-works').searchify({
     type: 'works',
     isDefault: true,
-    searchFunction: defaultFunction
+    searchFunction: defaultFunction,
+    data: (typeof init_works !== 'undefined' ? init_works : null)
   });
 
   $('.quotes-by-work').searchify({

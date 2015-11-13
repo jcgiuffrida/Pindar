@@ -75,7 +75,9 @@ function parseQuotes(quotesObject, size){
     }*/
     object += '<div class="object" data-id="' + q.QUOTE.id +
       '" data-rating="' + q._extra['AVG(RATING.Rating)'] +
-      '" data-rating-count="' + q._extra['COUNT(RATING.Rating)'] +
+      '" data-rating-count="' + q._extra['COUNT(RATING.id)'] +
+      '" data-comments="' + q._extra['comments'] +
+      '" data-connections="' + q._extra['connections'] +
       '" data-creator="' + q.QUOTE.created_by + '">';
     object += '<div class="object-data panel panel-default">';
     object += '<div class="panel-body"><p class="text">';
@@ -260,14 +262,14 @@ function plural(num){
 
 function getDates(date1, date2, type){
   var str = '';
-  if (date1 && date1 < 0){
+  if (_validDate(date1) && date1 < 0){
     date1 = (0 - date1) + ' BC';
   }
-  if (date2 && date2 < 0){
+  if (_validDate(date2) && date2 < 0){
     date2 = (0 - date2) + ' BC';
   }
-  if (date1){
-    if (date2){
+  if (_validDate(date1)){
+    if (_validDate(date2)){
       // both dates
       if (type == 'author'){
         str = ' (' + date1 + ' - ' + date2 + ')';
@@ -275,7 +277,7 @@ function getDates(date1, date2, type){
         str = ' (' + date1 + ')';
       }
     } else {
-      // no date1
+      // no date2
       if (type == 'author'){
         str = ' (b. ' + date1 + ')';
       } else {
@@ -283,8 +285,8 @@ function getDates(date1, date2, type){
       }
     }
   } else {
-    if (date2){
-      // no date2
+    if (_validDate(date2)){
+      // no date1
       if (type == 'author'){
         str = ' (d. ' + date2 + ')';
       } else {
@@ -424,6 +426,11 @@ function reflectTypeChange(el, authorWork, type){
           .siblings('label').eq(1).hide();
     }
   }
+}
+
+// return true if date exists and is valid in both javascript and python
+function _validDate(d){
+  return (d && d !== 'None');
 }
 
 

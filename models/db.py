@@ -30,6 +30,20 @@ def sanitize(q):
     return XML(q.replace('\n', '<br/>').\
           replace('    ', '&nbsp;&nbsp;&nbsp;&nbsp;'), sanitize=True)
 
+def sanitize_JSON(q):
+    try:
+        if isinstance(q, dict):
+            for i in q.keys():
+                q[i] = sanitize_JSON(q[i])
+        elif isinstance(q, list):
+            for i in range(0, len(q)):
+                q[i] = sanitize_JSON(q[i])
+        elif isinstance(q, str):  # actual value
+            q = str(sanitize(q))
+    except:
+        pass
+    return q
+
 def get_dates(date1, date2, type):
     s = ''
     if date1 and date1 < 0:

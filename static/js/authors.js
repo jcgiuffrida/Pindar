@@ -27,6 +27,7 @@ $(document).ready(function(){
     type: 'authors',
     isDefault: true,
     searchFunction: defaultFunction,
+    data: (typeof init_authors !== 'undefined' ? init_authors : null)
   });
   $('.quotes-by-author').searchify({
     type: 'quotes',

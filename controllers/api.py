@@ -20,6 +20,7 @@ import re
 from gluon.tools import prettydate
 import random
 from datetime import datetime
+import time
 
 # these need to be the same as the API limits in searchify.js
 quote_limit = 30
@@ -110,27 +111,21 @@ def quote_query():
     #               default is rating
     #   anthology = anthology that contains the quote
     '''
+    t0 = time.clock()
 
     response = check_response(request.vars,
         {'lookup': 'length_2_128', 'quote': 'is_integer',
         'exclude': 'is_integer'})
     if response['status'] == 200:
-        #try:
-            # should disqualify query if it's just the '%' character
+        # try:
+            # FIXME: should disqualify query if it's just the '%' character
             # initial query: lookup
             # filter by: author, work, min/max rating, language, dates
             # finally: sort by rating, date, date submitted, magic
             # and then limit/offset
 
-            # base query
-            r = db.RATING.Rating.avg()
-            s = db.RATING.Rating.count()
-            query = (db.QUOTE._id==db.QUOTE_WORK.QuoteID) & \
-                (db.QUOTE_WORK.WorkID==db.WORK._id) & \
-                (db.WORK._id==db.WORK_TR.WorkID) & \
-                (db.WORK_AUTHOR.WorkID==db.WORK._id) & \
-                (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) & \
-                (db.AUTHOR._id==db.AUTHOR_TR.AuthorID)
+            # form query
+            query = True
             if request.vars.lookup:
                 request.vars.sort = 'rating' # no sort when there's a query
                 lookup = request.vars.lookup
@@ -140,26 +135,18 @@ def quote_query():
             if request.vars.anthology:
                 query &= ((db.SELECTION.QuoteID==db.QUOTE.id) &
                     (db.SELECTION.AnthologyID==request.vars.anthology))
-            init_query = db(query).select(
-                db.QUOTE.Text, db.QUOTE.QuoteLanguageID, db.QUOTE._id,
-                db.QUOTE.IsOriginalLanguage, db.QUOTE.created_on,
-                db.QUOTE.created_by,
-                db.AUTHOR_TR.DisplayName, db.AUTHOR_TR._id,
-                db.AUTHOR.YearBorn, db.AUTHOR.YearDied,
-                db.WORK_TR.WorkName, db.WORK_TR._id,
-                db.WORK.YearPublished, db.WORK.YearWritten,
-                r, s,
-                left=db.RATING.on(db.RATING.QuoteID==db.QUOTE._id),
-                groupby=db.QUOTE._id)
-            for h in init_query:
-                    h.QUOTE.created_on = str(h.QUOTE.created_on)
+            if request.vars.quote:
+                query &= (db.QUOTE.id==int(request.vars.quote))
+            if request.vars.exclude:
+                query &= (db.QUOTE.id!=int(request.vars.exclude))
+            init_query = _get_quotes(query)
 
             # filters
-            if request.vars.quote:
-                init_query = init_query.find(lambda row: row.QUOTE.id==int(request.vars.quote))
-            if request.vars.exclude:
-                init_query = init_query.find(lambda row:
-                    row.QUOTE.id != int(request.vars.exclude))
+            # if request.vars.quote:
+            #     init_query = init_query.find(lambda row: row.QUOTE.id==int(request.vars.quote))
+            # if request.vars.exclude:
+            #     init_query = init_query.find(lambda row:
+            #         row.QUOTE.id != int(request.vars.exclude))
             if request.vars.author:
                 author_list = (request.vars.author).split(',')
                 if isinstance(author_list, str):
@@ -207,14 +194,21 @@ def quote_query():
             # for i in init_query:
             #     print('id: ' + str(i.QUOTE.id) + ', rating: ' + str(i._extra['AVG(RATING.Rating)']) + ', magic: ' + str(float(i._extra['AVG(RATING.Rating)']) * random.uniform(0.5,1)))
 
+            # random seed for each session ensures pagination works,
+            # but quotes still sort differently on page refresh
+            if session.rand:
+                random.seed(session.rand)
+            else:
+                random.seed(datetime.now().hour * len(init_query))
+
             if request.vars.sort:
                 sort = request.vars.sort
             else:
                 sort = 'magic'
             if sort == 'rating':
-                init_query = init_query.sort(lambda row: row._extra['AVG(RATING.Rating)'], reverse=True)
+                init_query = init_query.sort(lambda row: float(row._extra['AVG(RATING.Rating)']) + random.uniform(0.0, 0.0009), reverse=True)
             elif sort == '~rating':
-                init_query = init_query.sort(lambda row: row._extra['AVG(RATING.Rating)'])
+                init_query = init_query.sort(lambda row: float(row._extra['AVG(RATING.Rating)']) + random.uniform(0.0, 0.0009))
             elif sort == 'dateSubmitted':
                 init_query = init_query.sort(lambda row: row.QUOTE.created_on, reverse=True)
             elif sort == '~dateSubmitted':
@@ -224,12 +218,6 @@ def quote_query():
                 for row in init_query:
                     if not row._extra['AVG(RATING.Rating)']:
                         row._extra['AVG(RATING.Rating)'] = 0.05
-                # random seed for each session ensures pagination works,
-                # but quotes still sort differently on page refresh
-                if session.rand:
-                    random.seed(session.rand)
-                else:
-                    random.seed(datetime.now().hour * len(init_query))
                 init_query = init_query.sort(lambda row: ((float(row._extra['AVG(RATING.Rating)']) * random.uniform(0.5, 1)) if float(row._extra['AVG(RATING.Rating)']) > 0.05 else (3 * random.uniform(0.5, 1))), reverse=True)
             else:
                 response.update({'msg': 'invalid sort parameter'})
@@ -245,10 +233,12 @@ def quote_query():
             display_quotes = init_query.as_list()
 
             response.update({'quotes': sanitize_JSON(display_quotes)})
-        #except:
-         #   response.update({'msg': 'oops', 'status': 503})
+        # except:
+        #    response.update({'msg': 'oops', 'status': 503})
     status = response['status']
     response.update({'status': 'hi'})
+    t1 = time.clock()
+    response.update({'time': str((t1 - t0) * 1000) + ' ms'})
     if not status == 200:
         raise HTTP(status, json.dumps(response))
     return json.dumps(response)
@@ -744,9 +734,9 @@ def get_edit_history():
 
 
 def recommend():
-    response = check_response(request.vars,
+    resp = check_response(request.vars,
         {'q': 'is_integer'})
-    if response['status'] == 200:
+    if resp['status'] == 200:
         try:
             # this does the following:
             #   find users who rated this quote 4 or 5
@@ -767,28 +757,7 @@ def recommend():
             for rec in filter_query:
                 recs[rec[0]] = rec[1]
 
-            r = db.RATING.Rating.avg()
-            s = db.RATING.Rating.count()
-            query = (db.QUOTE._id==db.QUOTE_WORK.QuoteID) & \
-                (db.QUOTE_WORK.WorkID==db.WORK._id) & \
-                (db.WORK._id==db.WORK_TR.WorkID) & \
-                (db.WORK_AUTHOR.WorkID==db.WORK._id) & \
-                (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) & \
-                (db.AUTHOR._id==db.AUTHOR_TR.AuthorID)
-
-            init_query = db(query).select(
-                db.QUOTE.Text, db.QUOTE.QuoteLanguageID, db.QUOTE._id,
-                db.QUOTE.IsOriginalLanguage, db.QUOTE.created_on,
-                db.QUOTE.created_by,
-                db.AUTHOR_TR.DisplayName, db.AUTHOR_TR._id,
-                db.AUTHOR.YearBorn, db.AUTHOR.YearDied,
-                db.WORK_TR.WorkName, db.WORK_TR._id,
-                db.WORK.YearPublished, db.WORK.YearWritten,
-                r, s,
-                left=db.RATING.on(db.RATING.QuoteID==db.QUOTE._id),
-                groupby=db.QUOTE._id)
-            for h in init_query:
-                    h.QUOTE.created_on = str(h.QUOTE.created_on)
+            init_query = _get_quotes()
 
             # filter by recommendations
             init_query = init_query.find(lambda row:
@@ -801,15 +770,15 @@ def recommend():
                 limitby=(0, 5))
 
             display_quotes = init_query.as_list()
-            response.update({'quotes': sanitize_JSON(display_quotes)})
+            resp.update({'quotes': sanitize_JSON(display_quotes)})
 
         except:
-            response.update({'msg': 'oops', 'status': 503})
-    status = response['status']
-    response.pop('status', None)
+            resp.update({'msg': 'oops', 'status': 503})
+    status = resp['status']
+    resp.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(resp))
+    return json.dumps(resp)
 
 
 def anthologies():
@@ -1019,28 +988,7 @@ def connections():
                         'score': obj['Strength']
                     }
 
-            r = db.RATING.Rating.avg()
-            s = db.RATING.Rating.count()
-            query = (db.QUOTE._id==db.QUOTE_WORK.QuoteID) & \
-                (db.QUOTE_WORK.WorkID==db.WORK._id) & \
-                (db.WORK._id==db.WORK_TR.WorkID) & \
-                (db.WORK_AUTHOR.WorkID==db.WORK._id) & \
-                (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) & \
-                (db.AUTHOR._id==db.AUTHOR_TR.AuthorID)
-
-            init_query = db(query).select(
-                db.QUOTE.Text, db.QUOTE.QuoteLanguageID, db.QUOTE._id,
-                db.QUOTE.IsOriginalLanguage, db.QUOTE.created_on,
-                db.QUOTE.created_by,
-                db.AUTHOR_TR.DisplayName, db.AUTHOR_TR._id,
-                db.AUTHOR.YearBorn, db.AUTHOR.YearDied,
-                db.WORK_TR.WorkName, db.WORK_TR._id,
-                db.WORK.YearPublished, db.WORK.YearWritten,
-                r, s,
-                left=db.RATING.on(db.RATING.QuoteID==db.QUOTE._id),
-                groupby=db.QUOTE._id)
-            for h in init_query:
-                    h.QUOTE.created_on = str(h.QUOTE.created_on)
+            init_query = _get_quotes()
 
             # filter by connections
             init_query = init_query.find(lambda row:
@@ -1117,19 +1065,34 @@ def rate_connection():
     return json.dumps(response)
 
 
+def _get_quotes(addl_query=True):
+    # base query
+    r = db.RATING.Rating.avg()
+    s = db.RATING.id.count()
+    base_query = (db.QUOTE._id==db.QUOTE_WORK.QuoteID) & \
+        (db.QUOTE_WORK.WorkID==db.WORK._id) & \
+        (db.WORK._id==db.WORK_TR.WorkID) & \
+        (db.WORK_AUTHOR.WorkID==db.WORK._id) & \
+        (db.WORK_AUTHOR.AuthorID==db.AUTHOR._id) & \
+        (db.AUTHOR._id==db.AUTHOR_TR.AuthorID)
+    if addl_query:
+        base_query &= addl_query
+    init_query = db(base_query).select(
+        db.QUOTE.Text, db.QUOTE.QuoteLanguageID, db.QUOTE._id,
+        db.QUOTE.IsOriginalLanguage, db.QUOTE.created_on,
+        db.QUOTE.created_by,
+        db.AUTHOR_TR.DisplayName, db.AUTHOR_TR._id,
+        db.AUTHOR.YearBorn, db.AUTHOR.YearDied,
+        db.WORK_TR.WorkName, db.WORK_TR._id,
+        db.WORK.YearPublished, db.WORK.YearWritten,
+        r, s, 
+        left=(db.RATING.on(db.RATING.QuoteID==db.QUOTE._id)),
+        groupby=db.QUOTE._id, cacheable=True, cache=(cache.ram, 60))
+    for h in init_query:
+            h.QUOTE.created_on = str(h.QUOTE.created_on)
 
-def sanitize_JSON(q):
-    try:
-        if isinstance(q, dict):
-            for i in q.keys():
-                q[i] = sanitize_JSON(q[i])
-        elif isinstance(q, list):
-            for i in range(0, len(q)):
-                q[i] = sanitize_JSON(q[i])
-        elif isinstance(q, str):  # actual value
-            q = str(sanitize(q))
-    except:
-        pass
-    return q
+    return init_query
+
+
 
 

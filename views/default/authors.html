@@ -1,5 +1,21 @@
 {{extend 'layout.html'}}
-{{block head}}{{end}}
+{{block head}}
+{{if not 'author' in locals():}}
+<script>
+// read in the initial authors
+var init_authors = [];
+{{for a in init_query:}}
+init_authors.push({
+	{{for b in a:}}
+	'{{=b}}': {
+		{{for c in a[b]:}}
+		'{{=c}}': '{{=a[b][c]}}',
+		{{pass}}
+	},
+	{{pass}}
+});
+{{pass}}
+</script>{{pass}}{{end}}
 
 <div class="row">
 	<div class="col-md-8 col-md-offset-2">

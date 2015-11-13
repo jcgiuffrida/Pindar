@@ -49,7 +49,8 @@ $.fn.searchify = function(options){
                         // with a search pending
     advancedSearchButton: $('.run-advanced-search'),
     clearAdvancedSearchButton: $('.clear-advanced-search'),
-    onReturn: null     // function callback to run on each object
+    onReturn: null,     // function callback to run on each object
+    data: null
   }, options);
 
   var searchDiv = $(this);
@@ -272,7 +273,7 @@ $.fn.searchify = function(options){
   // turn search on
   if (settings.isDefault){
     // the searchify object is not meant to be searched after page load
-    if (settings.searchOnLoad){
+    if (settings.searchOnLoad && !settings.data){
       // user has requested page to search upon loading
       searchDiv.trigger('search'); // load the default div with stuff
       searchDiv.html('<div class="text-center">' +
@@ -283,8 +284,21 @@ $.fn.searchify = function(options){
       //     console.log('triggering search because of 1500ms check');
       //   }
       // }, 1500);
+    } else if (settings.data){
+      // already have some data
+      var query = settings.searchFunction();
+      objectsQuery = query;
+      objectsOffset = 0;
+      objectsRetrieved = 0;
+      if (settings.type == 'quotes'){
+        useQuotes(settings.data);
+      } else if (settings.type == 'authors'){
+        useAuthors(settings.data);
+      } else if (settings.type == 'works'){
+        useWorks(settings.data);
+      }
     } else {
-      // not default; user sees default on page load, so delay this
+      // not default; user sees default on page load, so delay the search
       setTimeout(function(){
         searchDiv.trigger('search'); // load the default div with stuff
         // searchInterval = window.setInterval(function(){
@@ -310,56 +324,7 @@ $.fn.searchify = function(options){
     $.getJSON('/Pindar/api/quote_query?' + query,
       function(response) {
         if (query == settings.searchFunction()){ // if most recent search
-        // unless this is default AND there's text in the box,
-        // switch from default div to search div
-        if (!(settings.isDefault && settings.searchInput && cleanSearchInput(settings.searchInput.val()).length)){
-          console.log('showing quotes search div' + '\n\n\n');
-          defaultDiv.hide();
-          searchDiv.empty().show();
-        }
-        objectsStorage = []; // reset
-        if (response.quotes.length > 0){
-          var colWidth = parseInt(12 / settings.cols);
-          for (var i=0; i<settings.cols; i++){
-            searchDiv.append($('<div class="col-md-' + colWidth +
-              ' column"></div>'));
-          }
-          console.log(response.quotes.length + ' quotes received from server');
-          var quotesArray = parseQuotes(response.quotes);
-          // console.log(quotesArray.length + ' quotes');
-          if (quotesArray.length == quotesAPILimit){
-            quotesArray.pop();
-            moreObjectsExist = true;
-            objectsOffset += quotesAPILimit - 1;
-          } else {
-            moreObjectsExist = false;
-          }
-          $.each(quotesArray, function(index, value){
-            objectsStorage.push(value);
-            objectsRetrieved += 1;
-          });
-          appendQuotes();
-        } else {
-          searchDiv.html('<div class="col-md-12"><p>No quotes found.</p></div>');
-        }
-        // unless this is default AND there's text in the box,
-        // update count badge
-        if (!(settings.isDefault && settings.searchInput &&
-          cleanSearchInput(settings.searchInput.val()).length)){
-          updateCountBadge();
-        }
-        if (settings.searchInput){
-          settings.searchInput.siblings('.glyphicon-refresh').hide();
-        }
-        clearTimeout(showSpinner);
-
-        // highlight search terms
-        if (settings.highlightTerms && settings.searchInput &&
-          cleanSearchInput(settings.searchInput.val()).length){
-          myHilitor = new Hilitor(searchDiv[0].id);
-          myHilitor.setMatchType("open");
-          myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
-        }
+        useQuotes(response.quotes);
       }
     });
 
@@ -370,52 +335,7 @@ $.fn.searchify = function(options){
     $.getJSON('/Pindar/api/author_query?' + query,
       function(response) {
       if (query == settings.searchFunction()){
-      // show search div, but only if:
-      //   a) it's not visible,
-      //   b) this is not the default searchify, and
-      //   c) there is still text in the search box (user hasn't deleted it)
-      if (!(settings.isDefault && settings.searchInput &&
-        cleanSearchInput(settings.searchInput.val()).length)){
-        console.log('showing authors search div' + '\n\n\n');
-        defaultDiv.hide();
-        searchDiv.empty().show();
-      }
-      objectsStorage = []; // reset
-      if (response.authors.length > 0){
-        var authorsArray = parseAuthors(response.authors, true, authorsAPILimit);
-        if (authorsArray.length == authorsAPILimit){
-          authorsArray.pop();
-          moreObjectsExist = true;
-          objectsOffset += authorsAPILimit - 1;
-        } else {
-          moreObjectsExist = false;
-        }
-        $.each(authorsArray, function(index, value){
-          objectsStorage.push(value);
-          objectsRetrieved += 1;
-        });
-        searchDiv.append('<div class="col-md-12 list-group"></div>');
-        appendAuthors();
-      } else {
-        searchDiv.html('<div class="col-md-12"><p>No authors found.</p></div>');
-      }
-      // unless this is default AND there's text in the box,
-      // update count badge
-      if (!(settings.isDefault && settings.searchInput.val())){
-        updateCountBadge();
-      }
-      if (settings.searchInput){
-        settings.searchInput.siblings('.glyphicon-refresh').hide();
-      }
-      clearTimeout(showSpinner);
-
-      // highlight search terms
-      if (settings.highlightTerms && settings.searchInput &&
-        cleanSearchInput(settings.searchInput.val()).length){
-        myHilitor = new Hilitor(searchDiv[0].id);
-        myHilitor.setMatchType("open");
-        myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
-      }
+      useAuthors(response.authors);
       }
     });
   }
@@ -426,57 +346,162 @@ $.fn.searchify = function(options){
     $.getJSON('/Pindar/api/work_query?' + query,
       function(response) {
       if (query == settings.searchFunction()){
-      // unless this is default AND there's text in the box,
-      // update count badge
-      if (!(settings.isDefault && settings.searchInput &&
-        cleanSearchInput(settings.searchInput.val()).length)){
-        console.log('showing works search div' + '\n\n\n');
-        defaultDiv.hide();
-        searchDiv.empty().show();
-      }
-      objectsStorage = []; // reset
-      if (response.works.length > 0){
-        var worksArray = parseWorks(response.works, true, settings.showAuthor,
-          worksAPILimit);
-        if (worksArray.length == worksAPILimit){
-          worksArray.pop();
-          moreObjectsExist = true;
-          objectsOffset += worksAPILimit - 1;
-        } else {
-          moreObjectsExist = false;
-        }
-        $.each(worksArray, function(index, value){
-          objectsStorage.push(value);
-          objectsRetrieved += 1;
-        });
-        searchDiv.append('<div class="col-md-12 list-group"></div>');
-        appendWorks();
-      } else {
-        searchDiv.html('<div class="col-md-12"><p>No works found.</p></div>');
-      }
-      // unless this is default AND there's text in the box,
-      // update count badge
-      if (!(settings.isDefault && settings.searchInput &&
-        cleanSearchInput(settings.searchInput.val()).length)){
-        updateCountBadge();
-      }
-      if (settings.searchInput){
-        settings.searchInput.siblings('.glyphicon-refresh').hide();
-      }
-      clearTimeout(showSpinner);
-
-      // highlight search terms
-      if (settings.highlightTerms && settings.searchInput &&
-        cleanSearchInput(settings.searchInput.val()).length){
-        myHilitor = new Hilitor(searchDiv[0].id);
-        myHilitor.setMatchType("open");
-        myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
-      }
+      useWorks(response.works);
       }
     });
   }
 
 
+  function useQuotes(data){
+    // unless this is default AND there's text in the box,
+    // switch from default div to search div
+    if (!(settings.isDefault && settings.searchInput && cleanSearchInput(settings.searchInput.val()).length)){
+      console.log('showing quotes search div' + '\n\n\n');
+      defaultDiv.hide();
+      searchDiv.empty().show();
+    }
+    objectsStorage = []; // reset
+    if (data.length > 0){
+      var colWidth = parseInt(12 / settings.cols);
+      for (var i=0; i<settings.cols; i++){
+        searchDiv.append($('<div class="col-md-' + colWidth +
+          ' column"></div>'));
+      }
+      console.log(data.length + ' quotes received from server');
+      var quotesArray = parseQuotes(data);
+      // console.log(quotesArray.length + ' quotes');
+      if (quotesArray.length == quotesAPILimit){
+        quotesArray.pop();
+        moreObjectsExist = true;
+        objectsOffset += quotesAPILimit - 1;
+      } else {
+        moreObjectsExist = false;
+      }
+      $.each(quotesArray, function(index, value){
+        objectsStorage.push(value);
+        objectsRetrieved += 1;
+      });
+      appendQuotes();
+    } else {
+      searchDiv.html('<div class="col-md-12"><p>No quotes found.</p></div>');
+    }
+    // unless this is default AND there's text in the box,
+    // update count badge
+    if (!(settings.isDefault && settings.searchInput &&
+      cleanSearchInput(settings.searchInput.val()).length)){
+      updateCountBadge();
+    }
+    if (settings.searchInput){
+      settings.searchInput.siblings('.glyphicon-refresh').hide();
+    }
+    clearTimeout(showSpinner);
+
+    // highlight search terms
+    if (settings.highlightTerms && settings.searchInput &&
+      cleanSearchInput(settings.searchInput.val()).length){
+      myHilitor = new Hilitor(searchDiv[0].id);
+      myHilitor.setMatchType("open");
+      myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
+    }
+  }
+
+  function useAuthors(data){
+    // show search div, but only if:
+    //   a) it's not visible,
+    //   b) this is not the default searchify, and
+    //   c) there is still text in the search box (user hasn't deleted it)
+    if (!(settings.isDefault && settings.searchInput &&
+      cleanSearchInput(settings.searchInput.val()).length)){
+      console.log('showing this authors search div' + '\n\n\n');
+      defaultDiv.hide();
+      searchDiv.empty().show();
+    }
+    objectsStorage = []; // reset
+    if (data.length > 0){
+      var authorsArray = parseAuthors(data, true, authorsAPILimit);
+      if (authorsArray.length == authorsAPILimit){
+        authorsArray.pop();
+        moreObjectsExist = true;
+        objectsOffset += authorsAPILimit - 1;
+      } else {
+        moreObjectsExist = false;
+      }
+      $.each(authorsArray, function(index, value){
+        objectsStorage.push(value);
+        objectsRetrieved += 1;
+      });
+      searchDiv.append('<div class="col-md-12 list-group"></div>');
+      appendAuthors();
+    } else {
+      searchDiv.html('<div class="col-md-12"><p>No authors found.</p></div>');
+    }
+    // unless this is default AND there's text in the box,
+    // update count badge
+    if (!(settings.isDefault && settings.searchInput.val())){
+      updateCountBadge();
+    }
+    if (settings.searchInput){
+      settings.searchInput.siblings('.glyphicon-refresh').hide();
+    }
+    clearTimeout(showSpinner);
+
+    // highlight search terms
+    if (settings.highlightTerms && settings.searchInput &&
+      cleanSearchInput(settings.searchInput.val()).length){
+      myHilitor = new Hilitor(searchDiv[0].id);
+      myHilitor.setMatchType("open");
+      myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
+    }
+  }
+
+  function useWorks(data){
+    // unless this is default AND there's text in the box,
+    // update count badge
+    if (!(settings.isDefault && settings.searchInput &&
+      cleanSearchInput(settings.searchInput.val()).length)){
+      console.log('showing works search div' + '\n\n\n');
+      defaultDiv.hide();
+      searchDiv.empty().show();
+    }
+    objectsStorage = []; // reset
+    if (data.length > 0){
+      var worksArray = parseWorks(data, true, settings.showAuthor,
+        worksAPILimit);
+      if (worksArray.length == worksAPILimit){
+        worksArray.pop();
+        moreObjectsExist = true;
+        objectsOffset += worksAPILimit - 1;
+      } else {
+        moreObjectsExist = false;
+      }
+      $.each(worksArray, function(index, value){
+        objectsStorage.push(value);
+        objectsRetrieved += 1;
+      });
+      searchDiv.append('<div class="col-md-12 list-group"></div>');
+      appendWorks();
+    } else {
+      searchDiv.html('<div class="col-md-12"><p>No works found.</p></div>');
+    }
+    // unless this is default AND there's text in the box,
+    // update count badge
+    if (!(settings.isDefault && settings.searchInput &&
+      cleanSearchInput(settings.searchInput.val()).length)){
+      updateCountBadge();
+    }
+    if (settings.searchInput){
+      settings.searchInput.siblings('.glyphicon-refresh').hide();
+    }
+    clearTimeout(showSpinner);
+
+    // highlight search terms
+    if (settings.highlightTerms && settings.searchInput &&
+      cleanSearchInput(settings.searchInput.val()).length){
+      myHilitor = new Hilitor(searchDiv[0].id);
+      myHilitor.setMatchType("open");
+      myHilitor.apply(cleanSearchInput(settings.searchInput.val()));
+    }
+  }
 
   function appendQuotes(){
     var columns = searchDiv.find('.column');

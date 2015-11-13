@@ -2,6 +2,35 @@
 {{block head}}
 <link rel="stylesheet" href="{{=URL('static', 'css/select2.css')}}">
 <link rel="stylesheet" href="{{=URL('static', 'css/select2-bootstrap.css')}}">
+<script>
+// read in the initial data
+var init_authors = [];
+{{for a in init_authors:}}
+init_authors.push({
+	{{for b in a:}}
+	'{{=b}}': {
+		{{for c in a[b]:}}
+		'{{=c}}': '{{=a[b][c]}}',
+		{{pass}}
+	},
+	{{pass}}
+});
+{{pass}}
+
+var init_works = [];
+{{for a in init_works:}}
+init_works.push({
+	{{for b in a:}}
+	'{{=b}}': {
+		{{for c in a[b]:}}
+		'{{=c}}': '{{=a[b][c]}}',
+		{{pass}}
+	},
+	{{pass}}
+});
+{{pass}}
+
+</script>
 {{end}}
 
 <div class="row">
