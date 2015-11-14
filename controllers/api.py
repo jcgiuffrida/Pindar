@@ -248,8 +248,8 @@ def quote_query():
     t1 = time.clock()
     response.update({'time': str((t1 - t0) * 1000) + ' ms'})
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 def __check_dates(row, min=-10000, max=10000):
@@ -325,8 +325,8 @@ def author_query():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -354,8 +354,8 @@ def author_submit():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 
@@ -412,8 +412,8 @@ def work_query():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -439,8 +439,8 @@ def work_submit():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -463,8 +463,8 @@ def quote_submit():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 def language_query():
@@ -481,8 +481,8 @@ def language_query():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 # flag quote
@@ -498,8 +498,8 @@ def flag():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 # rate quote
@@ -527,8 +527,8 @@ def rate():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 # get comments
@@ -550,9 +550,9 @@ def get_comments():
     else:
         status = response['status']
         response.pop('status', None)
-        raise HTTP(status, json.dumps(response))
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
     response.pop('status', None)
-    return json.dumps(response)
+    return json.dumps(response, ensure_ascii=False)
 
 
 # add comment
@@ -573,8 +573,8 @@ def comment():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -597,8 +597,8 @@ def edit_quote():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -624,8 +624,8 @@ def edit_author():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -651,34 +651,30 @@ def edit_work():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
 def get_edit_history():
     response = check_response(request.vars, user=True)
     if response['status'] == 200:
-        try:
+        # try:
+            history = []
             if request.vars.QuoteID:
                 past = db((db.QUOTE_archive.current_record==\
                     request.vars.QuoteID) &
                     (db.QUOTE_archive.modified_by==db.auth_user.id)).select(
-                    db.QUOTE_archive.Text, db.QUOTE_archive.QuoteLanguageID,
-                    db.QUOTE_archive.Note, db.QUOTE_archive.IsOriginalLanguage,
+                    db.QUOTE_archive.Text, db.QUOTE_archive.Note,
                     db.QUOTE_archive.modified_on, db.auth_user.username,
-                    orderby=~db.QUOTE_archive.modified_on)
+                    orderby=~db.QUOTE_archive.modified_on).as_list()
                 current = db((db.QUOTE._id==request.vars.QuoteID) &
-                    (db.QUOTE.modified_by==db.auth_user.id)).select(
-                    db.QUOTE.Text, db.QUOTE.QuoteLanguageID,
-                    db.QUOTE.Note, db.QUOTE.IsOriginalLanguage,
-                    db.QUOTE.modified_on, db.auth_user.username)
-                for h in past:
-                    h.QUOTE_archive.modified_on = \
-                        str(h.QUOTE_archive.modified_on)
-                for h in current:
-                    h.QUOTE.modified_on = \
-                        str(h.QUOTE.modified_on)
+                    (db.QUOTE.modified_by==db.auth_user.id) & 
+                    (db.QUOTE.QuoteLanguageID==db.LANGUAGE.id)).select(
+                    db.QUOTE.Text, db.QUOTE.Note,
+                    db.QUOTE.modified_on, db.auth_user.username).as_list()
+                check_against = {'QUOTE': ['Text', 'Note']}
+
             elif request.vars.AuthorID:
                 past = db((db.AUTHOR_TR_archive.current_record==\
                     request.vars.AuthorID) &
@@ -687,6 +683,8 @@ def get_edit_history():
                     db.AUTHOR_TR_archive.FirstName,
                     db.AUTHOR_TR_archive.MiddleName,
                     db.AUTHOR_TR_archive.LastName,
+                    db.AUTHOR_TR_archive.Biography,
+                    db.AUTHOR_TR_archive.WikipediaLink,
                     db.AUTHOR_TR_archive.modified_on,
                     db.auth_user.username,
                     orderby=~db.AUTHOR_TR_archive.modified_on)
@@ -697,21 +695,23 @@ def get_edit_history():
                     db.AUTHOR_TR.FirstName,
                     db.AUTHOR_TR.MiddleName,
                     db.AUTHOR_TR.LastName,
+                    db.AUTHOR_TR.Biography,
+                    db.AUTHOR_TR.WikipediaLink,
                     db.AUTHOR_TR.modified_on,
                     db.auth_user.username,
                     orderby=~db.AUTHOR_TR.modified_on)
-                for h in past:
-                    h.AUTHOR_TR_archive.modified_on = \
-                        str(h.AUTHOR_TR_archive.modified_on)
-                for h in current:
-                    h.AUTHOR_TR.modified_on = \
-                        str(h.AUTHOR_TR.modified_on)
+                check_against = {'AUTHOR_TR': ['DisplayName', 'FirstName', 
+                    'MiddleName', 'LastName', 'Biography', 'WikipediaLink']}
+
             elif request.vars.WorkID:
                 past = db((db.WORK_TR_archive.current_record==\
                     request.vars.WorkID) &
                     (db.WORK_TR_archive.modified_by==db.auth_user.id)).select(
                     db.WORK_TR_archive.WorkName,
                     db.WORK_TR_archive.WorkSubtitle,
+                    db.WORK_TR_archive.WorkDescription,
+                    db.WORK_TR_archive.WikipediaLink,
+                    db.WORK_TR_archive.WorkNote,
                     db.WORK_TR_archive.modified_on, db.auth_user.username,
                     orderby=~db.WORK_TR_archive.modified_on)
                 current = db((db.WORK_TR._id==\
@@ -719,26 +719,159 @@ def get_edit_history():
                     (db.WORK_TR.modified_by==db.auth_user.id)).select(
                     db.WORK_TR.WorkName,
                     db.WORK_TR.WorkSubtitle,
+                    db.WORK_TR.WorkDescription,
+                    db.WORK_TR.WikipediaLink,
+                    db.WORK_TR.WorkNote,
                     db.WORK_TR.modified_on, db.auth_user.username,
                     orderby=~db.WORK_TR.modified_on)
-                for h in past:
-                    h.WORK_TR_archive.modified_on = \
-                        str(h.WORK_TR_archive.modified_on)
-                for h in current:
-                    h.WORK_TR.modified_on = \
-                        str(h.WORK_TR.modified_on)
-            else:
-                raise Exception('No ID supplied')
+                check_against = {'WORK_TR': ['WorkName', 'WorkSubtitle', 
+                    'WorkDescription', 'WikipediaLink', 'WorkNote']}
+
+            # compare each record in turn and note what changed
+            if len(past) > 0:
+                # compare current and past
+                new = current[0]
+                old = past[0]
+                for c in check_against:
+                    for d in check_against[c]:
+                        if not new[c][d] == old[c + '_archive'][d]:
+                            history.append({
+                                'change': d,
+                                'before': old[c + '_archive'][d],
+                                'after': new[c][d],
+                                'user': new['auth_user']['username'],
+                                'timestamp': new[c]['modified_on']
+                                })
+            if len(past) > 1:
+                for i in range(0, len(past) - 1):
+                    new = past[i]
+                    old = past[i + 1]
+                    for c in check_against:
+                        for d in check_against[c]:
+                            if not new[c + '_archive'][d] == old[c + '_archive'][d]:
+                                history.append({
+                                    'change': d,
+                                    'before': old[c + '_archive'][d],
+                                    'after': new[c + '_archive'][d],
+                                    'user': new['auth_user']['username'],
+                                    'timestamp': new[c + '_archive']['modified_on']
+                                    })
+
+            # repeat for WORK and AUTHOR tables
+            past = []
+            current = []
+            if request.vars.WorkID:
+                past = db((request.vars.WorkID==db.WORK_TR.id) & 
+                    (db.WORK_archive.current_record==db.WORK_TR.WorkID) & 
+                    (db.WORKTYPE.id==db.WORK_archive.Type) & 
+                    (db.WORK_archive.modified_by==db.auth_user.id)).select(
+                    db.WORK_archive.YearPublished,
+                    db.WORK_archive.YearWritten,
+                    db.WORK_archive.Type,
+                    db.WORKTYPE.TypeName,
+                    db.WORK_archive.modified_on, db.auth_user.username,
+                    orderby=~db.WORK_archive.modified_on)
+                current = db((request.vars.WorkID==db.WORK_TR.id) & 
+                    (db.WORK.id==db.WORK_TR.WorkID) & 
+                    (db.WORKTYPE.id==db.WORK.Type) & 
+                    (db.WORK.modified_by==db.auth_user.id)).select(
+                    db.WORK.YearPublished,
+                    db.WORK.YearWritten,
+                    db.WORK.Type,
+                    db.WORKTYPE.TypeName,
+                    db.WORK.modified_on, db.auth_user.username,
+                    orderby=~db.WORK.modified_on)
+                check_against = {'WORK': ['YearPublished', 'YearWritten', 
+                    'Type']}
+
+            elif request.vars.AuthorID:
+                past = db((request.vars.AuthorID==db.AUTHOR_TR.id) & 
+                    (db.AUTHOR_archive.current_record==db.AUTHOR_TR.AuthorID) & 
+                    (db.AUTHORTYPE.id==db.AUTHOR_archive.Type) & 
+                    (db.AUTHOR_archive.modified_by==db.auth_user.id)).select(
+                    db.AUTHOR_archive.YearBorn,
+                    db.AUTHOR_archive.YearDied,
+                    db.AUTHOR_archive.Type,
+                    db.AUTHORTYPE.TypeName,
+                    db.AUTHOR_archive.modified_on, db.auth_user.username,
+                    orderby=~db.AUTHOR_archive.modified_on)
+                current = db((request.vars.AuthorID==db.AUTHOR_TR.id) & 
+                    (db.AUTHOR.id==db.AUTHOR_TR.AuthorID) & 
+                    (db.AUTHORTYPE.id==db.AUTHOR.Type) & 
+                    (db.AUTHOR.modified_by==db.auth_user.id)).select(
+                    db.AUTHOR.YearBorn,
+                    db.AUTHOR.YearDied,
+                    db.AUTHOR.Type,
+                    db.AUTHORTYPE.TypeName,
+                    db.AUTHOR.modified_on, db.auth_user.username,
+                    orderby=~db.AUTHOR.modified_on)
+                check_against = {'AUTHOR': ['YearBorn', 'YearDied', 
+                    'Type']}
+
+            # compare each record in turn and note what changed
+            if len(past) > 0:
+                # compare current and past
+                new = current[0]
+                old = past[0]
+                for c in check_against:
+                    for d in check_against[c]:
+                        if not new[c][d] == old[c + '_archive'][d]:
+                            if d == 'Type':
+                                history.append({
+                                    'change': d,
+                                    'before': old[c + 'TYPE']['TypeName'],
+                                    'after': new[c + 'TYPE']['TypeName'],
+                                    'user': new['auth_user']['username'],
+                                    'timestamp': new[c]['modified_on']
+                                    })
+                            else:
+                                history.append({
+                                    'change': d,
+                                    'before': old[c + '_archive'][d],
+                                    'after': new[c][d],
+                                    'user': new['auth_user']['username'],
+                                    'timestamp': new[c]['modified_on']
+                                    })
+            if len(past) > 1:
+                for i in range(0, len(past) - 1):
+                    new = past[i]
+                    old = past[i + 1]
+                    for c in check_against:
+                        for d in check_against[c]:
+                            if not new[c + '_archive'][d] == old[c + '_archive'][d]:
+                                if d == 'Type':
+                                    history.append({
+                                        'change': d,
+                                        'before': old[c + 'TYPE']['TypeName'],
+                                        'after': new[c + 'TYPE']['TypeName'],
+                                        'user': new['auth_user']['username'],
+                                        'timestamp': new[c + '_archive']['modified_on']
+                                        })
+                                else:
+                                    history.append({
+                                        'change': d,
+                                        'before': old[c + '_archive'][d],
+                                        'after': new[c + '_archive'][d],
+                                        'user': new['auth_user']['username'],
+                                        'timestamp': new[c + '_archive']['modified_on']
+                                        })
+            
+            # sort by most recent
+            history = sorted(history, key=lambda x: x['timestamp'], reverse=True)
+
+            # clean up timestamps
+            for h in history:
+                h['timestamp'] = str(h['timestamp'])
+
             response.update({'msg': 'yey',
-                'past': sanitize_JSON(past.as_list()),
-                'current': sanitize_JSON(current.as_list())})
-        except:
-            response.update({'msg': 'oops', 'status': 503})
+                'history': sanitize_JSON(history)})
+        # except:
+        #     response.update({'msg': 'oops', 'status': 503})
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 def recommend():
@@ -785,8 +918,8 @@ def recommend():
     status = resp['status']
     resp.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(resp))
-    return json.dumps(resp)
+        raise HTTP(status, json.dumps(resp, ensure_ascii=False))
+    return json.dumps(resp, ensure_ascii=False)
 
 
 def anthologies():
@@ -816,8 +949,8 @@ def anthologies():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -840,8 +973,8 @@ def selections():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -858,8 +991,8 @@ def create_anthology():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -896,8 +1029,8 @@ def anthologize():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -934,8 +1067,8 @@ def follow_anthology():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -958,8 +1091,8 @@ def delete_anthology():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 def connections():
@@ -1019,8 +1152,8 @@ def connections():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 @auth.requires_login()
@@ -1047,8 +1180,8 @@ def connect():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 def rate_connection():
@@ -1069,8 +1202,8 @@ def rate_connection():
     status = response['status']
     response.pop('status', None)
     if not status == 200:
-        raise HTTP(status, json.dumps(response))
-    return json.dumps(response)
+        raise HTTP(status, json.dumps(response, ensure_ascii=False))
+    return json.dumps(response, ensure_ascii=False)
 
 
 def _get_quotes(addl_query=True):

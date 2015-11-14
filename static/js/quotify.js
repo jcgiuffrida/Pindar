@@ -19,14 +19,18 @@ $.fn.quotify = function(options){
           ELEMENT CONSTRUCTORS
   ********************/
 
-  var constructBtnEditElement = function(){
+  var constructBtnEditElement = function(editCount){
     var element = '<div class="btn-group">' +
       '<button class="btn btn-default btn-edit">Edit</button>' +
       '<button type="button" class="btn btn-default dropdown-toggle"' +
       'data-toggle="dropdown"><span class="caret"></span></button>' +
       '<ul class="dropdown-menu" role="menu">' +
       '<li><a href="#" class="btn-edit-history">' +
-      'See past versions</a></li></ul></div>';
+      'See past changes';
+      if (editCount > 0){
+        element += ' <span class="badge">' + editCount + '</span>';
+      }
+      element += '</a></li></ul></div>';
     return $(element); };
 
   var constructBtnFlagElement = function(type, size){
@@ -193,7 +197,7 @@ $.fn.quotify = function(options){
       }
     }
     if (settings.auth && settings.size == 'large'){
-      objectActions.append(constructBtnEditElement());
+      objectActions.append(constructBtnEditElement(object.data('edits')));
       objectResults.append(constructEditHistoryElement());
     }
     objectActions.append(constructBtnFlagElement(settings.objectType,
@@ -363,68 +367,47 @@ $.fn.quotify = function(options){
         settings.objectType.capitalize() + 'ID=' + object.data('id'),
         function(response){
           var table = '<table>';
-          table += '<thead><tr><th>';
-          if (settings.objectType == 'quote'){
-            table += 'Text</th><th>Context</th>';
-          } else if (settings.objectType == 'author'){
-            table += 'Name</th><th>Full Name</th>';
-          } else if (settings.objectType == 'work'){
-            table += 'Title</th><th>Subtitle</th>';
-          }
-          table += '<th>User</th><th>Modified</th></tr></thead>';
+          table += '<thead><tr><th>Field</th><th>Prior Value</th><th></th>' + 
+            '<th>New Value</th><th>User</th><th>Modified</th></tr></thead>';
           var row = '';
-          // the current record
-          for (c in response.current){
-            h = response.current[c];
-            row = '<tr class="current"><td>';
-            if (settings.objectType == 'quote'){
-              row += h.QUOTE.Text + '</td><td>' + h.QUOTE.Note;
-            } else if (settings.objectType == 'author'){
-              row += h.AUTHOR_TR.DisplayName + '</td><td>' +
-                h.AUTHOR_TR.FirstName + ' ' +
-                h.AUTHOR_TR.MiddleName + ' ' +
-                h.AUTHOR_TR.LastName;
-            } else if (settings.objectType == 'work'){
-              row += h.WORK_TR.WorkName + '</td><td>' +
-                h.WORK_TR.WorkSubtitle;
+          var newFieldNames = {
+            'DisplayName': 'Display Name',
+            'FirstName': 'First Name',
+            'MiddleName': 'Middle Name',
+            'LastName': 'Last Name',
+            'WikipediaLink': 'Wikipedia',
+            'WorkName': 'Name',
+            'WorkSubtitle': 'Subtitle',
+            'WorkDescription': 'Description',
+            'WorkNote': 'Note',
+            'YearBorn': 'Born',
+            'YearDied': 'Died',
+            'YearPublished': 'Published',
+            'YearWritten': 'Written'
+          };
+          response.history.forEach(function(h){
+            // fix values
+            if (h.before === '' || h.before === 'null'){
+              h.before = '<em>(blank)</em>';
             }
-            row += '</td><td><a href="/Pindar/default/users/' +
-              h.auth_user.username + '">' + h.auth_user.username + '</td><td>';
-            if (settings.objectType == 'quote'){
-              row += h.QUOTE.modified_on + '</td></tr>';
-            } else if (settings.objectType == 'author'){
-              row += h.AUTHOR_TR.modified_on + '</td></tr>';
-            } else if (settings.objectType == 'work'){
-              row += h.WORK_TR.modified_on + '</td></tr>';
+            if (h.after === '' || h.after === 'null'){
+              h.after = '<em>(blank)</em>';
             }
+            if (h.change in newFieldNames){
+              h.change = newFieldNames[h.change];
+            }
+            row = '<tr>';
+            row += '<td><strong>' + h.change + '</strong></td>';
+            row += '<td>' + h.before + '</td>';
+            row += '<td><i class="fa fa-arrow-right"></i></td>';
+            row += '<td>' + h.after + '</td>';
+            row += '<td><a href="/Pindar/default/users/' + h.user + '">' + 
+              h.user + '</a></td>';
+            row += '<td>' + h.timestamp + '</td>';
+            row += '</tr>';
             table += row;
-          }
-          // all past edits
-          for (c in response.past){
-            h = response.past[c];
-            row = '<tr><td>';
-            if (settings.objectType == 'quote'){
-              row += h.QUOTE_archive.Text + '</td><td>' + h.QUOTE_archive.Note;
-            } else if (settings.objectType == 'author'){
-              row += h.AUTHOR_TR_archive.DisplayName + '</td><td>' +
-                h.AUTHOR_TR_archive.FirstName + ' ' +
-                h.AUTHOR_TR_archive.MiddleName + ' ' +
-                h.AUTHOR_TR_archive.LastName;
-            } else if (settings.objectType == 'work'){
-              row += h.WORK_TR_archive.WorkName + '</td><td>' +
-                h.WORK_TR_archive.WorkSubtitle;
-            }
-            row += '</td><td><a href="/Pindar/default/users/' +
-              h.auth_user.username + '">' + h.auth_user.username + '</td><td>';
-            if (settings.objectType == 'quote'){
-              row += h.QUOTE_archive.modified_on + '</td></tr>';
-            } else if (settings.objectType == 'author'){
-              row += h.AUTHOR_TR_archive.modified_on + '</td></tr>';
-            } else if (settings.objectType == 'work'){
-              row += h.WORK_TR_archive.modified_on + '</td></tr>';
-            }
-            table += row;
-          }
+          });
+
           table += '</tbody></table>';
           table += '<div class="form-group col-md-2">' +
             '<button class="btn btn-default cancel" type="button">' +
@@ -433,7 +416,11 @@ $.fn.quotify = function(options){
           $('.edit-history table').DataTable({
             "dom": '<t>ip',
             "ordering": false,
-            "iDisplayLength": 5
+            "iDisplayLength": 5,
+            "language": {
+              "emptyTable": "This " + settings.objectType + 
+                " has never been changed."
+            }
           });
           editHistoryDivDiv.find('table').addClass('stripe row-border');
       }).error(function(e){

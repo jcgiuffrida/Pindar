@@ -58,6 +58,7 @@ var requestComments = {{=request_comments}};
 	<div class="col-md-7 col-md-offset-1">
 		<div class="object quote" data-id="{{=q.QUOTE.id}}"
 		data-comments="{{=comment_count}}" data-connections="{{=connection_count}}"
+    data-edits="{{=edit_count}}" 
 		data-rating="{{if not rating == None:}}{{=rating}}{{else:}}0{{pass}}"
 		data-rating-count="{{if not rating_count == None:}}{{=rating_count}}{{else:}}0{{pass}}"
 		data-rating-user="{{=rating_user}}"
@@ -71,9 +72,10 @@ var requestComments = {{=request_comments}};
 					<p class="lead">
 						{{=sanitize(q.QUOTE.Text)}}
 					</p>
-					<p class="text-right small">
+					<p class="pull-right small">
 						Submitted by <a href="/Pindar/default/users/{{=q.auth_user.username}}">{{=q.auth_user.username}}</a>
 					</p>
+          <p>{{if q.QUOTE.Note:}}<strong>Note:</strong>{{pass}}&nbsp;{{=sanitize(q.QUOTE.Note)}}</p>
 					<p class="text-center">
 						<a class="btn btn-primary"
 						href="/Pindar/default/authors/{{=q.AUTHOR_TR.id}}">
@@ -84,6 +86,7 @@ var requestComments = {{=request_comments}};
 							{{=sanitize(q.WORK_TR.WorkName)}}
 						</a>
 					</p>
+
 
 					<div class="object-actions">
 					</div>

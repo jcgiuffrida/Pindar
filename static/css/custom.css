@@ -203,7 +203,7 @@ hi {
   padding-right: 5px;
 }
 
-.object-actions .btn-goto-comments:hover,
+.object-actions .btn-goto-comments>a:hover,
 .object-actions .btn-goto-flag>a:hover,
 .object-actions .btn-anthologies>a:hover,
 .object-actions .btn-goto-connections>a:hover {

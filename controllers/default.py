@@ -206,6 +206,8 @@ def quotes():
         lang = 1  # default is english
     # get comments
     comment_count = db((db.COMMENT.QuoteID==request.args(0))).count()
+    # get edits
+    edit_count = db((db.QUOTE_archive.current_record==request.args(0))).count()
     # get connections
     connection_count = db((db.CONNECTION.Quote1==request.args(0)) | 
         (db.CONNECTION.Quote2==request.args(0))).count()
@@ -394,6 +396,7 @@ def works():
     worktypes = db((db.WORKTYPE._id > 0)).select(
         db.WORKTYPE._id, db.WORKTYPE.TypeName,
         orderby=db.WORKTYPE._id).as_list()
+
     return locals()
 
 
