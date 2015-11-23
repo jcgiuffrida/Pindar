@@ -47,6 +47,7 @@ $(document).ready(function(){
       }
     });
   } else {
+    recommendationsDiv.find('.spinner').remove();
     recommendationsDiv.append('<div class="col-md-12"><p>No quotes found. Rate more quotes to start getting recommendations!</p></div>');
   }
 
