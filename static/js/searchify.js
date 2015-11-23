@@ -48,7 +48,6 @@ $.fn.searchify = function(options){
     searchOnLoad: true, // make this false for default divs when page loads
                         // with a search pending
     advancedSearchButton: $('.run-advanced-search'),
-    clearAdvancedSearchButton: $('.clear-advanced-search'),
     onReturn: null,     // function callback to run on each object
     data: null
   }, options);
@@ -151,17 +150,6 @@ $.fn.searchify = function(options){
             lastSearched = query;
             runSearch(query);
           }
-        });
-        settings.clearAdvancedSearchButton.on('click', function(e){
-          e.preventDefault;
-          if (searchDiv.is(':visible')){
-            searchDiv.hide().empty();
-            defaultDiv.show();
-          }
-          settings.searchInput.closest('.search-bar').find('input').val('');
-          settings.searchInput.closest('.search-bar').find('input').
-            select2("val", "");
-
         });
       };
     }

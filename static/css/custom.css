@@ -1,4 +1,35 @@
 
+
+/**************
+      colors
+**************/
+
+.color-primary-0 { color: #0CA0A0 } /* Main (teal) */
+.color-primary-1 { color: #4CBABA }
+.color-primary-2 { color: #2BA8A8 }
+.color-primary-3 { color: #008484 }
+.color-primary-4 { color: #006A6A }
+
+.color-secondary-1-0 { color: #FFFF13 } /* Yellow */
+.color-secondary-1-1 { color: #FFFF69 }
+.color-secondary-1-2 { color: #FFFF41 }
+.color-secondary-1-3 { color: #DCDC00 }
+.color-secondary-1-4 { color: #B1B100 }
+
+.color-secondary-2-0 { color: #7916B0 } /* Purple */
+.color-secondary-2-1 { color: #9E57C5 }
+.color-secondary-2-2 { color: #8936B7 }
+.color-secondary-2-3 { color: #610793 }
+.color-secondary-2-4 { color: #4E0576 }
+
+.color-complement-0 { color: #FF7E13 }  /* Orange (accent) */
+.color-complement-1 { color: #FFAD69 }
+.color-complement-2 { color: #FF9741 }
+.color-complement-3 { color: #DC6300 }
+.color-complement-4 { color: #B15000 }
+
+
+
 /*****
 /*  ~general
 /*****/
@@ -10,7 +41,7 @@ body {
 }
 
 body>.container {
-  margin-top: 120px;
+  margin-top: 60px;
 }
 
 pre {
@@ -40,8 +71,8 @@ pre {
   top: 70px;
   left: 5px;
   padding: 10px 30px;
-  background-color: lightpink;
-  border: 1px solid red;
+  background-color: #FFFF13;
+  border: 1px solid #DCDC00;
   border-radius: 10px;
   color: #333;
   cursor: pointer;
@@ -53,8 +84,25 @@ pre {
 /*  ~navbar
 /*****/
 
+
+/* thinner navbar */
+nav .navbar-nav>li>a {
+  padding: 6px 10px;
+  margin: 5px 2px;
+}
+
+.navbar {
+  min-height: 40px;
+  height: 50px;
+}
+
 .navbar-brand {
 	font-size: 24px;
+  padding-top: 10px;
+}
+
+.navbar-form {
+  margin: 4px;
 }
 
 .nav .add-quote {
@@ -64,10 +112,14 @@ pre {
 	z-index: 10;
 }
 
+
+
 /* fix an incompatibility with bootstrap 3  */
 ul.nav li.dropdown:hover ul.dropdown-menu {
    display: block;
 }
+
+
 
 .search-box {
   position:relative;
@@ -114,7 +166,7 @@ svg {
 
 /* search highlighting */
 hi {
-  background-color: #a0ffff;
+  background-color: #4CBABA;
   color: #000;
   padding: 0px 2px;
 }
@@ -130,7 +182,7 @@ hi {
 }
 
 .jumbotron .main-page-search-button {
-  min-height: 150px;
+  min-height: 110px;
 }
 
 .main-page-search .search-box input {
@@ -176,8 +228,6 @@ hi {
   text-decoration: none;
 }
 
-
-
 /* object panels */
 .object .panel {
   border-radius: 6px;
@@ -207,7 +257,7 @@ hi {
 .object-actions .btn-goto-flag>a:hover,
 .object-actions .btn-anthologies>a:hover,
 .object-actions .btn-goto-connections>a:hover {
-  color: #175fdd;
+  color: #0CA0A0;
   text-decoration: none;
 }
 .object-actions .btn-goto-flag>a:hover,
@@ -276,19 +326,19 @@ span.star:before {
   position: relative;
 }
 
-.star-ratings-top span.star:before {
+.star-ratings-current span.star:before {
   content: "\f005";
-  color: #175fdd;
+  color: #0CA0A0;
 }
 
-.star-ratings-top {
+.star-ratings-current {
   padding: 0;
   position: absolute;
   z-index: 1;
   display: block;
   overflow: hidden;
 }
-.star-ratings-bottom {
+.star-ratings-base {
   z-index: 0;
   padding: 0;
 }
@@ -324,13 +374,13 @@ span.star:before {
 }
 
 .star-ratings-user span.star.starred:before {
-  text-shadow: 3px 3px 5px #175fdd;
+  text-shadow: 3px 3px 5px #0CA0A0;
 }
 
 .star-ratings-user span.star:hover:before,
 .star-ratings-user span.star:hover ~ span.star:before {
   content: "\f005";
-  color: #175fdd;
+  color: #0CA0A0;
 }
 
 
@@ -351,16 +401,16 @@ span.star:before {
 }
 
 .btn-anthologies ul li .anthology-check {
-  color: #3fad46;
+  color: #7916B0;
   margin-left: -18px;
 }
 
 .btn-anthologies a.already-anthologized {
-  color: #3fad46;
+  color: #7916B0;
 }
 
 .btn-anthologies button.already-anthologized {
-  color: #3fad46;
+  color: #7916B0;
 }
 
 
@@ -424,7 +474,7 @@ span.star:before {
 .anthology>a:active,
 .anthology>a:focus {
   text-decoration:none;
-  color: #4582ec;
+  color: #9E57C5;
 }
 
 .anthology .badge {
@@ -483,7 +533,7 @@ span.star:before {
   line-height: 1.4em;
 }
 .error {
-  color: #AC1F24;
+  color: #FF7E13;
 }
 .author-results a {
   cursor: pointer;

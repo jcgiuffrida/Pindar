@@ -223,10 +223,7 @@ def quote_query():
                 init_query = init_query.sort(lambda row: row._extra['selections'] + random.uniform(0.0, 1), reverse=True)
             elif sort == 'magic':
                 # introduce randomness
-                for row in init_query:
-                    if row._extra['AVG(RATING.Rating)'] == 0.05:
-                        row._extra['AVG(RATING.Rating)'] = 3
-                init_query = init_query.sort(lambda row: float(row._extra['AVG(RATING.Rating)']) * random.uniform(0.5, 1), reverse=True)
+                init_query = init_query.sort(lambda row: ((float(row._extra['AVG(RATING.Rating)']) * random.uniform(0.5, 1)) if float(row._extra['AVG(RATING.Rating)']) > 0.05 else (3 * random.uniform(0.5, 1))), reverse=True)
             else:
                 response.update({'msg': 'invalid sort parameter'})
 

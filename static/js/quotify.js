@@ -68,13 +68,13 @@ $.fn.quotify = function(options){
     } else {
       element += 'pull-right ' + size + '"><div class="ratings-box">';
     }
-    element += '<div class="star-ratings-top">' +
+    element += '<div class="star-ratings-current">' +
       '<span class="star"></span>' +
       '<span class="star"></span>' +
       '<span class="star"></span>' +
       '<span class="star"></span>' +
       '<span class="star"></span></div>' +
-      '<div class="star-ratings-bottom">' +
+      '<div class="star-ratings-base">' +
       '<span class="star"></span>' +
       '<span class="star"></span>' +
       '<span class="star"></span>' +
@@ -240,9 +240,9 @@ $.fn.quotify = function(options){
         objectActions.children('div').show();
       });
       object.on('mouseleave', function(){
-        objectActions.children('div').not(objectActions.find('.positive, a.already-anthologized').closest('div')).hide();
+        // objectActions.children('div').not(objectActions.find('.positive, a.already-anthologized').closest('div')).hide();
       });
-      objectActions.children('div').not(objectActions.find('.positive, a.already-anthologized').closest('div')).hide();
+      // objectActions.children('div').not(objectActions.find('.positive, a.already-anthologized').closest('div')).hide();
     }
 
 
@@ -606,7 +606,7 @@ $.fn.quotify = function(options){
     // show current rating
     var updateSumRating = function(newRating, newCount){
       var ratingAsWidth = newRating / 0.05;
-      objectActions.find('.star-ratings-top').css('width', ratingAsWidth + '%');
+      objectActions.find('.star-ratings-current').css('width', ratingAsWidth + '%');
       if (settings.objectType == 'author' | settings.objectType == 'work'){
         objectActions.find('.sum-ratings').attr('title', 'Average rating: ' +
           parseFloat(newRating).toFixed(3) + ', based on ' + newCount +

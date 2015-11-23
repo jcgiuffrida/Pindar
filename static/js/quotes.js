@@ -27,117 +27,128 @@ $(document).ready(function(){
   // this is a good method for just appending quotes from an arbitrary
   //   API query
   var recommendationsDiv = $('.recommendations');
-  $.getJSON('/Pindar/api/recommend?q=' + $('.quote').data('id'),
-    function(response) {
-      recommendationsDiv.find('.spinner').remove();
-    if (response.quotes.length > 0){
-      for (var i=0; i<1; i++){
-        recommendationsDiv.append($('<div class="col-md-12 column"></div>'));
-      }
-      var quotesArray = parseQuotes(response.quotes);
-      $.each(quotesArray, function(index, value){
-        var q = value;
-        q.quotify({size: 'small'});
-        q.appendTo(recommendationsDiv.find('.column'));
-      });
-    } else {
-      recommendationsDiv.append('<div class="col-md-12"><p>No quotes found. Rate more quotes to start getting recommendations!</p></div>');
-    }
-  });
-
-  var connectionsDiv = $('.show-connections');
-  var getConnections = function(){
-    $.getJSON('/Pindar/api/connections?q=' + $('.quote').data('id'),
+  // don't load recs if we already know there are none
+  if ($('.quote').data('rating-count')){
+    $.getJSON('/Pindar/api/recommend?q=' + $('.quote').data('id'),
       function(response) {
-      connectionsDiv.empty();
+        recommendationsDiv.find('.spinner').remove();
       if (response.quotes.length > 0){
+        for (var i=0; i<1; i++){
+          recommendationsDiv.append($('<div class="col-md-12 column"></div>'));
+        }
         var quotesArray = parseQuotes(response.quotes);
         $.each(quotesArray, function(index, value){
-          var row = $('<div class="row"><div class="col-md-1"></div>' +
-            '<div class="col-md-11"></div></div>');
-          var size = Math.min(response.quotes[index]['score'], 24) / 20.0 + 0.75;
-          var c = $('<div class="quote-connections">' +
-            '<p class="text-right"><i class="fa fa-link" ' +
-            'style="font-size: ' + size + 'em"></i></p></div>');
-          c.appendTo(row.find('.col-md-1'));
           var q = value;
-          q.quotify({
-            size: 'small'
-          });
-          q.appendTo(row.find('.col-md-11'));
-          var connectionsDetail = $('<div class="col-md-11 ' +
-            'col-md-offset-1"></div>');
-          connectionsDetail.append('<button type="button" ' +
-            'class="btn btn-block btn-show-connections">' +
-            'Show connections (' +
-            response.quotes[index]['connections'].length + ')</button>');
-          var connectionsDetailList = $('<ul class="list group ' +
-            'connections-detail"  style="display: none;"></ul>');
-          response.quotes[index]['connections'].forEach(function(connection){
-            var listItem = $('<li class="list-group-item" data-id="' +
-              + connection['id'] + '">' +
-              '<div class="btn-group pull-right" role="group">' +
-              '<button type="button" class="btn btn-success btn-sm" ' +
-              'data-toggle="tooltip" data-placement="top" ' +
-              'title="Agree with this connection">' +
-              '<i class="fa fa-check"></i></button>' +
-              '<button type="button" class="btn btn-warning btn-sm" ' +
-              'data-toggle="tooltip" data-placement="top" ' +
-              'title="Disagree with this connection">' +
-              '<i class="fa fa-times"></i></button>' +
-              '</div><h5>' + connection['Summary'] + '</h5>' + '<p>' +
-              (connection['Description'] ? connection['Description'] : "") +
-              '</p>' + '<p class="small text-right">Added ' +
-              connection['AddedOn'] + ' by <a href="/Pindar/default/users/' +
-              connection['AddedBy'] + '"</a>' + connection['AddedBy'] + '</p>');
-            connectionsDetailList.append(listItem);
-          });
-          connectionsDetail.append(connectionsDetailList);
-          connectionsDiv.append(row);
-          connectionsDiv.append(connectionsDetail);
-        });
-        // initialize tooltips
-        $(function() {
-          $('[data-toggle="tooltip"]').tooltip({ container: 'body' });
-        });
-
-        // initialize rating buttons
-        $('.connections-detail .btn-group').on('click', 'button', function(){
-          if ($(this).hasClass('btn-success')){
-            var vote = 1;
-            var classToAdd = 'list-group-item-success';
-          } else {
-            var vote = -1;
-            var classToAdd = 'list-group-item-warning';
-          }
-          $(this).closest('li').addClass(classToAdd);
-          $(this).closest('.btn-group').fadeOut();
-          if ($(this).hasClass('btn-warning')){
-            $(this).closest('li').delay(500).fadeOut();
-          }
-          $.getJSON('/Pindar/api/rate_connection?id=' +
-            $(this).closest('li').data('id') + '&change=' +
-            vote, function(response){
-            // don't need to return anything to user
-          });
+          q.quotify({size: 'small'});
+          q.appendTo(recommendationsDiv.find('.column'));
         });
       } else {
-        connectionsDiv.append('<div class="col-md-12"><br/><p>' +
-          'No connected quotes found. Link some yourself! ' +
-          'Does this quote remind you of anything else?</p></div>');
+        recommendationsDiv.append('<div class="col-md-12"><p>No quotes found. Rate more quotes to start getting recommendations!</p></div>');
       }
     });
-  };
-  getConnections();
+  } else {
+    recommendationsDiv.append('<div class="col-md-12"><p>No quotes found. Rate more quotes to start getting recommendations!</p></div>');
+  }
 
-  // on click show connections button, show connections for that quote
-  $('.show-connections').on('click', '.btn-show-connections', function(){
-    $(this).siblings('.connections-detail').fadeIn();
-    $(this).hide();
-  });
+  // // on click show connections button, show connections for that quote
+  // $('.show-connections').on('click', '.btn-show-connections', function(){
+  //   $(this).siblings('.connections-detail').fadeIn();
+  //   $(this).hide();
+  // });
+
+  var connectionsDiv = $('.show-connections');
+  // don't load connections if we already know there are none
+  if ($('.quote').data('connections')){
+    var getConnections = function(){
+      $.getJSON('/Pindar/api/connections?q=' + $('.quote').data('id'),
+        function(response) {
+        connectionsDiv.find('.spinner').remove();
+        if (response.quotes.length > 0){
+          var quotesArray = parseQuotes(response.quotes);
+          $.each(quotesArray, function(index, value){
+            var row = $('<div class="row"><div class="col-md-1"></div>' +
+              '<div class="col-md-11"></div></div>');
+            var size = Math.min(response.quotes[index]['score'], 24) / 20.0 + 0.75;
+            var c = $('<div class="quote-connections">' +
+              '<p class="text-right"><i class="fa fa-link" ' +
+              'style="font-size: ' + size + 'em"></i></p></div>');
+            c.appendTo(row.find('.col-md-1'));
+            var q = value;
+            q.quotify({
+              size: 'small'
+            });
+            q.appendTo(row.find('.col-md-11'));
+            var connectionsDetail = $('<div class="col-md-11 ' +
+              'col-md-offset-1"></div>');
+            connectionsDetail.append('<button type="button" ' +
+              'class="btn btn-block btn-show-connections">' +
+              'Show connections (' +
+              response.quotes[index]['connections'].length + ')</button>');
+            var connectionsDetailList = $('<ul class="list group ' +
+              'connections-detail"  style="display: none;"></ul>');
+            response.quotes[index]['connections'].forEach(function(connection){
+              var listItem = $('<li class="list-group-item" data-id="' +
+                + connection['id'] + '">' +
+                '<div class="btn-group pull-right" role="group">' +
+                '<button type="button" class="btn btn-success btn-sm" ' +
+                'data-toggle="tooltip" data-placement="top" ' +
+                'title="Agree with this connection">' +
+                '<i class="fa fa-check"></i></button>' +
+                '<button type="button" class="btn btn-warning btn-sm" ' +
+                'data-toggle="tooltip" data-placement="top" ' +
+                'title="Disagree with this connection">' +
+                '<i class="fa fa-times"></i></button>' +
+                '</div><h5>' + connection['Summary'] + '</h5>' + '<p>' +
+                (connection['Description'] ? connection['Description'] : "") +
+                '</p>' + '<p class="small text-right">Added ' +
+                connection['AddedOn'] + ' by <a href="/Pindar/default/users/' +
+                connection['AddedBy'] + '"</a>' + connection['AddedBy'] + '</p>');
+              connectionsDetailList.append(listItem);
+            });
+            connectionsDetail.append(connectionsDetailList);
+            connectionsDiv.append(row);
+            connectionsDiv.append(connectionsDetail);
+          });
+          // initialize tooltips
+          $(function() {
+            $('[data-toggle="tooltip"]').tooltip({ container: 'body' });
+          });
+
+          // initialize rating buttons
+          $('.connections-detail .btn-group').on('click', 'button', function(){
+            if ($(this).hasClass('btn-success')){
+              var vote = 1;
+              var classToAdd = 'list-group-item-success';
+            } else {
+              var vote = -1;
+              var classToAdd = 'list-group-item-warning';
+            }
+            $(this).closest('li').addClass(classToAdd);
+            $(this).closest('.btn-group').fadeOut();
+            if ($(this).hasClass('btn-warning')){
+              $(this).closest('li').delay(500).fadeOut();
+            }
+            $.getJSON('/Pindar/api/rate_connection?id=' +
+              $(this).closest('li').data('id') + '&change=' +
+              vote, function(response){
+              // don't need to return anything to user
+            });
+          });
+        }
+      });
+    };
+    getConnections();
+  } else {
+    connectionsDiv.find('.spinner').remove();
+    connectionsDiv.append('<div class="col-md-12"><br/><p>' +
+            'No connected quotes found.<br><br>Link some yourself! ' +
+            'Does this quote remind you of anything else? Click &ldquo;Connect a Quote&rdquo; above to start connecting quotes.</p></div>');
+  }
 
   // search for quotes to connect
   $('.btn-connections').on('click', function(){
+    // clicking this button will toggle between showing connections
+    // and showing the search box to add more connections
     $(this).toggleClass('search');
     $('.connections .search-box').toggle();
     $('.connections .description-search').toggle();

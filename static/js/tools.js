@@ -87,7 +87,7 @@ function parseQuotes(quotesObject, size){
     } else {
       object += q.QUOTE.Text;
     }
-    object += '</p><div><a class="btn btn-default btn-sm" ';
+    object += '</p><div class="sources"><a class="btn btn-default btn-sm" ';
     object += 'href="/Pindar/default/authors/' + q.AUTHOR_TR.id + '">';
     object += q.AUTHOR_TR.DisplayName + '</a> ';
     object += '<a class="btn btn-default btn-sm" ';
@@ -466,5 +466,13 @@ $(document).ready(function(){
       trigger('input').trigger('keyup');
   });
 
+  // navbar scrolling
+  $(window).on('scroll', function() {
+    if (Math.round($(window).scrollTop()) > 100) {
+      $('.navbar').addClass('scrolled');
+    } else {
+      $('.navbar').removeClass('scrolled');
+    }
+  });
 });
 
