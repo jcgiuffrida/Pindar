@@ -617,13 +617,13 @@ $.fn.quotify = function(options){
       // show count if it's a large object
       if (settings.size == 'large'){
         if (object.data('rating-user')){
-          objectActions.find('.ratings-count').html('Avg: ' + parseFloat(rating).toFixed(1) + ' (' + count + ')');
+          objectActions.find('.ratings-count').html('Avg: ' + parseFloat(object.data('rating')).toFixed(1) + ' (' + count + ')');
         } else {
           objectActions.find('.ratings-count').html(count);
         }
       } else {
         if (object.data('rating-user')){
-          objectActions.find('.ratings-count').html('Avg: ' + parseFloat(rating).toFixed(1));
+          objectActions.find('.ratings-count').html('Avg: ' + parseFloat(object.data('rating')).toFixed(1));
         }
       }
 
