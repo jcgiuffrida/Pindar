@@ -6,7 +6,7 @@ if REQUIRE_HTTPS:
 
 ## connect to db
 db = DAL(DB_LOGIN, pool_size=1, check_reserved=['mysql', 'postgres'],
-    driver_args=DB_ARGS)
+    driver_args=DB_ARGS, migrate=False)
 
 
 ## by default give a view/generic.extension to all actions from localhost
