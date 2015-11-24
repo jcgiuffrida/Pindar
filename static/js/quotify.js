@@ -688,6 +688,8 @@ $.fn.quotify = function(options){
             var newRatingCount = object.data('rating-count')+1;
             object.data('rating-count', newRatingCount);
             object.data('rating', newRating);
+            objectActions.find('.star-ratings-current').addClass('rated')
+              .closest('.sum-ratings').show();
           }
 
           // show this rating and turn functionality back on
