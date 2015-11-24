@@ -6,7 +6,7 @@ var advancedVisible = false;
 
 $(document).ready(function(){
   var quotesFunction = function(){
-    return 'lookup=' + $('#textQuery').val() + '&sort=' + $('#sortOrder').val();
+    return 'lookup=' + cleanSearchInput($('#textQuery').val()) + '&sort=' + $('#sortOrder').val();
   };
   var defaultFunction = function(){ return 'sort=' + $('#sortOrder').val(); };
   var advancedQuotesFunction = function(){

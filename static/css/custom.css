@@ -331,6 +331,10 @@ span.star:before {
   color: #0CA0A0;
 }
 
+.star-ratings-current.rated span.star:before {
+  color: #7916B0;
+}
+
 .star-ratings-current {
   padding: 0;
   position: absolute;
@@ -350,16 +354,30 @@ span.star:before {
   color: #777;
 }
 
+.sum-ratings.small .ratings-count {
+  margin-top: 2px;
+}
+
 /* user ratings */
 .star-ratings-user {
-  z-index: -1;
+  z-index: 2;
   padding: 0;
   position: absolute;
   display: block;
   cursor: pointer;
   width: 101%;
+  height: 34px;
+  opacity: 0;
   margin-left: -1px;
   background-color: #fff;
+}
+
+.sum-ratings.small .star-ratings-user {
+  height: 24px;
+}
+
+.star-ratings-user:hover {
+  opacity: 1;
 }
 
 .star-ratings-user span.star {
@@ -371,10 +389,6 @@ span.star:before {
 .star-ratings-user span.star:first-child {
   padding-left: 4px;
   left: 0px;
-}
-
-.star-ratings-user span.star.starred:before {
-  text-shadow: 3px 3px 5px #0CA0A0;
 }
 
 .star-ratings-user span.star:hover:before,

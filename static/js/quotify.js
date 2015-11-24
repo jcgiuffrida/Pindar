@@ -56,6 +56,9 @@ $.fn.quotify = function(options){
     return $(element); };
 
   var constructRateElement = function(type, size){
+    // star-ratings-base = empty gray stars
+    // star-ratings-current = colored-in stars to reflect current rating (user or average)
+    // star-ratings-user = when user mouses over to change the rating
     var element = '<div class="sum-ratings ';
     if (type == 'quote'){
       element += 'pull-left ' + size + '"><div class="ratings-box">' +
@@ -236,13 +239,14 @@ $.fn.quotify = function(options){
 
     // show object actions on mouseover (for small objects)
     if (settings.size == 'small' & settings.objectType == 'quote'){
-      object.on('mouseover', function(){
+      object.hover(function(){
         objectActions.children('div').show();
+      }, function(){
+        objectActions.children('div').not(objectActions.find('.positive, a.already-anthologized').closest('div'))
+        .not(objectActions.find('.rated').closest('.sum-ratings')).hide();
       });
-      object.on('mouseleave', function(){
-        // objectActions.children('div').not(objectActions.find('.positive, a.already-anthologized').closest('div')).hide();
-      });
-      // objectActions.children('div').not(objectActions.find('.positive, a.already-anthologized').closest('div')).hide();
+      objectActions.children('div').not(objectActions.find('.positive, a.already-anthologized').closest('div'))
+        .not(objectActions.find('.rated').closest('.sum-ratings')).hide();
     }
 
 
@@ -596,82 +600,108 @@ $.fn.quotify = function(options){
           RATING
     ********************/
 
-    objectActions.find('.ratings-box').on('mouseenter', function(){
-      $(this).find('.star-ratings-user').css('z-index', '2');
-    });
-    objectActions.find('.ratings-box').on('mouseleave', function(){
-      $(this).find('.star-ratings-user').css('z-index', '-1');
-    });
-
-    // show current rating
-    var updateSumRating = function(newRating, newCount){
-      var ratingAsWidth = newRating / 0.05;
-      objectActions.find('.star-ratings-current').css('width', ratingAsWidth + '%');
+    // function to show rating
+    var showRating = function(rating, count){
+      // convert rating to width by multiplying by 20 pixels
+      var ratingAsWidth = rating / 0.05;
+      objectActions.find('.star-ratings-current')
+        .css('width', ratingAsWidth + '%');
+      
+      // for works and authors, add title text to explain
       if (settings.objectType == 'author' | settings.objectType == 'work'){
         objectActions.find('.sum-ratings').attr('title', 'Average rating: ' +
-          parseFloat(newRating).toFixed(3) + ', based on ' + newCount +
-          ' rating' + plural(newCount));
+          parseFloat(rating).toFixed(3) + ', based on ' + count +
+          ' rating' + plural(count));
       }
+
+      // show count if it's a large object
       if (settings.size == 'large'){
-        objectActions.find('.ratings-count').html(newCount);
-      }
-      if (settings.objectType == 'quote'){
         if (object.data('rating-user')){
-          // pass
+          objectActions.find('.ratings-count').html('Avg: ' + parseFloat(rating).toFixed(1) + ' (' + count + ')');
+        } else {
+          objectActions.find('.ratings-count').html(count);
+        }
+      } else {
+        if (object.data('rating-user')){
+          objectActions.find('.ratings-count').html('Avg: ' + parseFloat(rating).toFixed(1));
         }
       }
-    };
-    updateSumRating(object.data('rating'), object.data('rating-count'));
 
-    // update user rating
-    var updateUserRating = function(rating){
-      objectActions.find('.star-ratings-user span.star').
-        removeClass('starred');
-      for (i = 1; i <= rating; i++){
-        objectActions.find('.star-ratings-user span.star[data-star=' + i +
-          ']').addClass('starred');
-      }
     };
-    updateUserRating(object.data('rating-user'));
+
+    if (object.data('rating-user')){
+      // if user has rated, show that rating
+      showRating(object.data('rating-user'), object.data('rating-count'));
+      // and add class to show this
+      objectActions.find('.star-ratings-current').addClass('rated')
+        .closest('.sum-ratings').show();
+      // and show avg rating next to it
+      // pass
+    } else {
+      // just show the average rating
+      showRating(object.data('rating'), object.data('rating-count'));
+    }
+    
+    // as user hovers, show and hide stars
+    // objectActions.find('.ratings-box').hover(function(){
+    //   $(this).find('.star-ratings-user').css('z-index', '2');
+    // }, function(){
+    //   $(this).find('.star-ratings-user').css('z-index', '-1');
+    // });
+
 
     // rate
     var submitRating = function(e){
       e.preventDefault();
+
+      // can only rate if signed in
       if (!settings.auth){
-        if (confirm("You must log in to do that!")){
+        if (confirm("Please log in to start rating quotes, or register (it's quick!)")){
           var current = window.location;
           window.location.href = "/Pindar/default/user/login?_next=" + current;
         }
       } else {
+
+        // reset current rating info
         var rating = 5 - $(this).index();
-        objectActions.find('.star-ratings-user').off('.rating').
-          css('cursor', 'default');
+
+        // turn off functionality for now
+        objectActions.find('.star-ratings-user').off('.rating');
+
+        // make request to server
         $.getJSON('/Pindar/api/rate?Rating=' + rating +
           '&QuoteID=' + object.data('id'), function(response) {
-          updateUserRating(rating);
+
+          object.data('rating-user', rating);
+
+          // is this an update to an existing rating?
           if (response.update){
             var newRating = (object.data('rating-count') *
               object.data('rating') - response.update + rating) /
               object.data('rating-count');
             object.data('rating', newRating);
-            object.data('rating-user', rating);
           } else {
-            object.data('rating-user', rating);
+
+            // or a new rating? calculate the new average
             var newRating = (object.data('rating-count') *
               object.data('rating') + rating) / (object.data('rating-count')+1);
             var newRatingCount = object.data('rating-count')+1;
             object.data('rating-count', newRatingCount);
             object.data('rating', newRating);
           }
-          updateSumRating(object.data('rating'), object.data('rating-count'));
+
+          // show this rating and turn functionality back on
+          showRating(rating, object.data('rating-count'));
           objectActions.find('.star-ratings-user').on('click.rating',
-            'span.star', submitRating).css('cursor', 'pointer');
+            'span.star', submitRating);
+
         }).error(function(e){
           console.log(e.responseText);
         });
       }
     };
 
+    // when user clicks a star, submit that rating
     objectActions.find('.star-ratings-user').on('click.rating', 'span.star',
       submitRating);
 

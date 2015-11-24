@@ -46,10 +46,16 @@ if (user !== 0){
 
 // clean search input
 function cleanSearchInput(input){
-  var inputs = input.split(' ');
+  var inputs = input
+    // no wildcard characters, they screw things up
+    .replace('%','')
+    .replace('&', ' and ')
+    // or HTML tags
+    .replace(/<[^>]*>/gi, '')
+    .split(' ');
   var cleanedInputs = [];
   inputs.forEach(function(i){
-    if (i.length > 1){
+    if (i.length > 1 && i.indexOf('%') === -1){
       cleanedInputs.push(i);
     }
   });
@@ -76,6 +82,7 @@ function parseQuotes(quotesObject, size){
     object += '<div class="object" data-id="' + q.QUOTE.id +
       '" data-rating="' + q._extra['AVG(RATING.Rating)'] +
       '" data-rating-count="' + q._extra['COUNT(RATING.id)'] +
+      '" data-rating-user="' + q._extra['user_rating'] +
       '" data-comments="' + q._extra['comments'] +
       '" data-connections="' + q._extra['connections'] +
       '" data-creator="' + q.QUOTE.created_by + '">';

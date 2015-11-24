@@ -43,7 +43,7 @@ $.fn.searchify = function(options){
                        // searches when sort order is changed
     isAdvanced: false, // advanced search, with filters etc.
                        // advanced search objects MUST have a search box
-    showAuthor: true,  // show the author of the quotes?
+    showAuthor: true,  // show the author of the works?
     highlightTerms: false,  // highlight search terms in results?
     searchOnLoad: true, // make this false for default divs when page loads
                         // with a search pending
