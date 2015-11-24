@@ -1249,7 +1249,7 @@ def _get_quotes(addl_query=True):
         db.QUOTE._id, v, 
         left=(db.SELECTION.on(db.SELECTION.QuoteID==db.QUOTE._id)),
         groupby=db.QUOTE._id, cacheable=True, cache=(cache.ram, 60)).as_list()
-    
+
     # extract user rating info
     if auth.user:
         user_ratings = db(db.RATING.created_by==auth.user).select(
@@ -1258,7 +1258,7 @@ def _get_quotes(addl_query=True):
         for u in user_ratings:
             user_ratings_dict[u['QuoteID']] = u['Rating']
     else:
-        user_ratings = None
+        user_ratings_dict = {}
 
     # by default, all Rows items are in the same order: fill in extra info
     for i in range(0, len(init_query)):
